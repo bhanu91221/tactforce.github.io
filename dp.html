@@ -144,6 +144,7 @@
                     <p><strong>No Duplicates:</strong> Ensure you don't create duplicate Dynamic Path Value Config records for the same picklist value within the same Path Config.</p>
                     <p><strong>Key Fields Usage:</strong> Use the "Key Fields" feature strategically to prompt users for critical information at specific stages.</p>
                     <p><strong>Guidance Rich Text:</strong> The "Guidance Body" field supports Salesforce Rich Text markup for formatting.</p>
+                    <p><strong>Apex Class Permission:</strong> If the package was initially installed for 'Admins Only' and later reinstalled for 'All Users', you might encounter an issue where the necessary Apex classes are not automatically added to non-admin profiles; therefore, manually add "DynamicPathController" and "DynamicPathConfigsList" to Apex Class Access in profile or a permission set (thanks to Jimmy Martin) </p>
                 </div>
             </section>
         </main>
