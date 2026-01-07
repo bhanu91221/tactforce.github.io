@@ -43,7 +43,8 @@ window.siteContent = {
             ],
             "image": "images/dp.png",
             "appExchangeLink": "https://appexchange.salesforce.com/appxListingDetail?listingId=4255e60a-5080-4ec2-8461-01b7275a99b4",
-            "guideLink": "guides.html?id=dynamic-path"
+            "guideLink": "guides.html?id=dynamic-path",
+            "featured": true
         },
         {
             "id": "rocket-reports",
@@ -56,7 +57,8 @@ window.siteContent = {
             ],
             "image": "images/rr.png",
             "appExchangeLink": "https://appexchange.salesforce.com/appxListingDetail?listingId=4f304763-c601-4a00-823f-2a3d697fdce6",
-            "guideLink": "guides.html?id=rocket-reports"
+            "guideLink": "guides.html?id=rocket-reports",
+            "featured": false
         },
         {
             "id": "perm-vision",
@@ -68,9 +70,34 @@ window.siteContent = {
             ],
             "image": "images/placeholder.png",
             "appExchangeLink": "#",
-            "guideLink": "guides.html?id=Perm-Vision"
+            "guideLink": "guides.html?id=Perm-Vision",
+            "featured": false
         }
     ],
+    "features": {
+        "title": "Why Choose Us",
+        "heading": "Built for Success",
+        "items": [
+            {
+                "icon": "zap",
+                "iconColor": "blue",
+                "title": "Lightning Fast",
+                "description": "Built with performance in mind, our solutions deliver lightning-fast results without compromising functionality."
+            },
+            {
+                "icon": "shield-check",
+                "iconColor": "teal",
+                "title": "Secure & Reliable",
+                "description": "Enterprise-grade security built into every solution. Your data stays safe within Salesforce."
+            },
+            {
+                "icon": "smile",
+                "iconColor": "purple",
+                "title": "Easy to Use",
+                "description": "Intuitive interfaces designed for users of all technical levels. Get started in minutes, not hours."
+            }
+        ]
+    },
     "contact": {
         "title": "Get In Touch",
         "subtitle": "Have questions about our solutions, need support, or interested in custom development? Contact us!",
