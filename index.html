@@ -1,311 +1,766 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title x-data="site" x-text="content.meta.title">TactForce</title>
-    <meta name="description" content="Showcasing AppExchange Solutions Dynamic Path and Rocket Reports by TactForce">
-
-    <!-- Fonts -->
+    <title>TactForce - Expert Salesforce Solutions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <!-- Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Tailwind (Dev Mode CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
+    <style>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
                     colors: {
-                        primary: '#007bff',
-                        secondary: '#6c757d',
-                        dark: '#111827' // slate-900
+                        primary: { DEFAULT: '#007bff', dark: '#0056b3', light: '#4da3ff' },
+                        secondary: { DEFAULT: '#6c757d', dark: '#5a6268' },
+                        accent: { DEFAULT: '#16a085', dark: '#117a65' },
+                        highlight: '#f8f9fa',
+                        salesforce: '#00A1E0'
                     }
                 }
             }
         }
-    </script>
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css">
+        /* Modern animations and effects */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    <!-- Libraries -->
-    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
 
-    <!-- App Logic -->
-    <script src="js/content.js"></script>
-    <script src="js/app.js"></script>
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(-45deg, #007bff, #00A1E0, #16a085, #4da3ff);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #007bff, #00A1E0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        section[id] {
+            scroll-margin-top: 80px;
+        }
+
+        /* Parallax effect */
+        .parallax {
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #007bff;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0056b3;
+        }
+
+        /* Feature cards hover effect */
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 123, 255, 0.2);
+        }
+
+        /* Stats counter animation */
+        .stat-number {
+            font-feature-settings: 'tnum';
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+
+    <meta name="description" content="Showcasing AppExchange Solutions Dynamic Path and Rocket Reports by TactForce, a Salesforce Partner.">
+    <META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=UTF-8">
 </head>
+<body class="bg-gray-50 font-sans text-gray-800 overflow-x-hidden">
 
-<body class="bg-gray-50 text-gray-900 font-sans antialiased selection:bg-primary selection:text-white" x-data="site">
+    <!-- Modern Navigation -->
+    <header id="main-header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-gradient-to-b from-black/30 to-transparent backdrop-blur-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <a href="#hero" class="flex items-center space-x-3 group">
+                    <img src="images/logo.png" alt="TactForce Logo" class="w-14 h-14 object-contain transition-transform group-hover:scale-110 drop-shadow-lg">
+                    <span class="text-xl font-bold text-white hidden sm:inline drop-shadow-lg">TactForce</span>
+                </a>
 
-    <!-- Header -->
-    <header class="fixed top-0 w-full z-50 transition-all duration-300 glass-panel">
-        <nav class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <a href="#" class="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
-                <img src="images/logo.png" alt="TactForce" class="h-10 w-auto" onerror="this.hidden=true">
-                <span x-show="!$el.previousElementSibling.src">TactForce</span>
-            </a>
+                <ul class="hidden md:flex space-x-8">
+                    <li><a href="#hero" class="text-white hover:text-blue-200 transition duration-300 font-medium">Home</a></li>
+                    <li><a href="#about" class="text-white hover:text-blue-200 transition duration-300 font-medium">About</a></li>
+                    <li><a href="#solutions" class="text-white hover:text-blue-200 transition duration-300 font-medium">Solutions</a></li>
+                    <li><a href="#features" class="text-white hover:text-blue-200 transition duration-300 font-medium">Features</a></li>
+                    <li><a href="#contact" class="text-white hover:text-blue-200 transition duration-300 font-medium">Contact</a></li>
+                </ul>
 
-            <!-- Desktop Nav -->
-            <ul class="hidden md:flex space-x-8 items-center">
-                <template x-for="link in content.navigation">
-                    <div>
-                        <!-- Regular Links -->
-                        <template x-if="link.label !== 'Solutions'">
-                            <li><a :href="link.href"
-                                    class="text-gray-600 hover:text-primary transition font-medium text-sm tracking-wide"
-                                    x-text="link.label"></a></li>
-                        </template>
-
-                        <!-- Solutions Dropdown -->
-                        <template x-if="link.label === 'Solutions'">
-                            <li x-data="{ open: false }" class="relative group" @mouseenter="open = true"
-                                @mouseleave="open = false">
-                                <button
-                                    class="text-gray-600 group-hover:text-primary transition font-medium text-sm tracking-wide flex items-center gap-1 py-2 outline-none">
-                                    <span x-text="link.label"></span>
-                                    <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200"
-                                        :class="open ? 'rotate-180' : ''"></i>
-                                </button>
-
-                                <!-- Dropdown Menu -->
-                                <div x-show="open" x-transition:enter="transition ease-out duration-200"
-                                    x-transition:enter-start="opacity-0 translate-y-2"
-                                    x-transition:enter-end="opacity-100 translate-y-0"
-                                    x-transition:leave="transition ease-in duration-150"
-                                    x-transition:leave-start="opacity-100 translate-y-0"
-                                    x-transition:leave-end="opacity-0 translate-y-2"
-                                    class="absolute top-full -left-4 mt-0 w-64 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 overflow-hidden py-2 z-50 ring-1 ring-black/5"
-                                    style="display: none;">
-
-                                    <template x-for="product in content.products">
-                                        <a :href="'#' + product.id"
-                                            class="block px-4 py-3 group/item hover:bg-gray-50 transition">
-                                            <div class="font-medium text-gray-900 group-hover/item:text-primary transition"
-                                                x-text="product.name"></div>
-                                            <div class="text-xs text-gray-500 mt-0.5 line-clamp-2"
-                                                x-text="product.description"></div>
-                                        </a>
-                                    </template>
-                                </div>
-                            </li>
-                        </template>
-                    </div>
-                </template>
-            </ul>
-
-            <!-- Mobile Menu Button -->
-            <button @click="toggleMenu()" class="md:hidden text-gray-900 focus:outline-none">
-                <i data-lucide="menu" class="w-6 h-6"></i>
-            </button>
+                <button id="mobile-menu-button" class="md:hidden text-white hover:text-blue-200 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+            </div>
         </nav>
 
-        <!-- Mobile Nav -->
-        <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-            class="md:hidden absolute top-20 left-0 w-full bg-white border-b shadow-lg p-6">
-            <ul class="space-y-4 text-center">
-                <template x-for="link in content.navigation">
-                    <li class="block">
-                        <!-- Regular Links -->
-                        <template x-if="link.label !== 'Solutions'">
-                            <a :href="link.href" @click="toggleMenu()" class="block text-gray-800 font-medium"
-                                x-text="link.label"></a>
-                        </template>
-
-                        <!-- Solutions Accordion -->
-                        <template x-if="link.label === 'Solutions'">
-                            <div x-data="{ expanded: false }" class="flex flex-col items-center">
-                                <button @click="expanded = !expanded"
-                                    class="text-gray-800 font-medium flex items-center justify-center gap-2 w-full py-1">
-                                    <span x-text="link.label"></span>
-                                    <i data-lucide="chevron-down" class="w-4 h-4 transition-transform"
-                                        :class="expanded ? 'rotate-180' : ''"></i>
-                                </button>
-
-                                <div x-show="expanded" class="space-y-3 mt-3 w-full bg-gray-50 rounded-xl p-4">
-                                    <template x-for="product in content.products">
-                                        <a :href="'#' + product.id" @click="toggleMenu()"
-                                            class="block text-gray-600 text-sm hover:text-primary transition font-medium"
-                                            x-text="product.name"></a>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
-                    </li>
-                </template>
+        <div id="mobile-menu" class="hidden md:hidden glass-effect">
+            <ul class="flex flex-col items-center py-4 space-y-2">
+                <li><a href="#hero" class="block px-4 py-2 text-white hover:text-blue-200 transition duration-300">Home</a></li>
+                <li><a href="#about" class="block px-4 py-2 text-white hover:text-blue-200 transition duration-300">About</a></li>
+                <li><a href="#solutions" class="block px-4 py-2 text-white hover:text-blue-200 transition duration-300">Solutions</a></li>
+                <li><a href="#features" class="block px-4 py-2 text-white hover:text-blue-200 transition duration-300">Features</a></li>
+                <li><a href="#contact" class="block px-4 py-2 text-white hover:text-blue-200 transition duration-300">Contact</a></li>
             </ul>
         </div>
     </header>
 
-    <!-- Hero -->
-    <section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden hero-gradient">
-        <div class="max-w-5xl mx-auto px-6 text-center reveal">
-            <h1 class="text-6xl md:text-8xl font-bold tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600"
-                x-text="content.hero.title"></h1>
-            <p class="text-xl md:text-2xl text-gray-500 max-w-2xl mx-auto mb-12 leading-relaxed font-light"
-                x-text="content.hero.subtitle"></p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a :href="content.hero.ctaLink"
-                    class="px-8 py-4 bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-800 transition shadow-lg transform hover:-translate-y-1"
-                    x-text="content.hero.cta"></a>
+    <main>
+        <!-- Hero Section with Gradient Background -->
+        <section id="hero" class="relative min-h-screen flex items-center justify-center text-white overflow-hidden gradient-bg">
+            <div class="absolute inset-0 opacity-20">
+                <div class="absolute top-20 left-10 w-72 h-72 bg-white rounded-full filter blur-3xl animate-float"></div>
+                <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-300 rounded-full filter blur-3xl animate-float" style="animation-delay: 1s;"></div>
             </div>
-        </div>
 
-        <!-- Background Elements -->
-        <div
-            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -z-10 animate-blob">
-        </div>
-    </section>
-
-    <!-- Products -->
-    <section id="solutions" class="py-32 px-6">
-        <div class="max-w-7xl mx-auto space-y-32"
-            x-init="$nextTick(() => { if(window.initScrollReveal) window.initScrollReveal(); })">
-
-            <template x-for="(product, index) in content.products">
-                <div :id="product.id" class="grid md:grid-cols-2 gap-16 items-center reveal group cursor-default">
-                    <div :class="{'md:order-2': index % 2 !== 0}"
-                        class="transform transition duration-700 md:group-hover:scale-105">
-                        <div class="relative rounded-3xl overflow-hidden shadow-2xl bg-gray-100">
-                            <img :src="product.image" :alt="product.name" loading="lazy"
-                                class="w-full h-auto object-cover">
-                        </div>
+            <div class="relative z-10 max-w-6xl mx-auto px-4 text-center pb-24">
+                <div class="animate-fade-in-up">
+                    <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight drop-shadow-2xl">
+                        Expert Salesforce<br/>
+                        <span class="text-blue-100">Solutions</span>
+                    </h1>
+                    <p class="text-xl md:text-2xl mb-12 font-light max-w-3xl mx-auto text-blue-50 drop-shadow-lg">
+                        Elevate your Salesforce experience with powerful AppExchange apps developed by TactForce, a proud Salesforce Partner.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center relative z-10">
+                        <a href="#solutions" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-full overflow-hidden transition-all hover:scale-105 hover:shadow-2xl">
+                            <span class="relative z-10">Explore Solutions</span>
+                            <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                        <a href="#contact" class="px-8 py-4 text-lg font-semibold text-white border-2 border-white rounded-full hover:bg-white hover:text-blue-600 transition-all hover:scale-105">
+                            Get In Touch
+                        </a>
                     </div>
-                    <div :class="{'md:order-1': index % 2 !== 0}" class="transform transition duration-700">
-                        <h2 class="text-4xl md:text-5xl font-bold mb-6 tracking-tight text-gray-900"
-                            x-text="product.name"></h2>
-                        <p class="text-lg text-gray-500 mb-8 leading-relaxed" x-text="product.description"></p>
+                </div>
 
-                        <ul class="space-y-4 mb-10">
-                            <template x-for="feature in product.features">
-                                <li class="flex items-start text-gray-600">
-                                    <i data-lucide="check-circle" class="w-5 h-5 text-primary mr-3 mt-1 shrink-0"></i>
-                                    <span x-text="feature"></span>
+                <!-- Scroll Indicator -->
+                <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-20">
+                    <a href="#stats" class="block p-2 hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="py-16 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div id="stats-container" class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                    <!-- Stats will be loaded dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-24 bg-gradient-to-br from-blue-50 to-white">
+            <div class="max-w-5xl mx-auto px-4 text-center">
+                <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold mb-6">About Us</span>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
+                    Innovation Meets <span class="text-gradient">Excellence</span>
+                </h2>
+                <p class="text-xl text-gray-600 mb-6 leading-relaxed">
+                    We are dedicated Salesforce professionals focused on creating innovative solutions that solve real business challenges within the Salesforce ecosystem.
+                </p>
+                <p class="text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto">
+                    As a registered Salesforce Partner, we adhere to the highest standards of development and customer success. Our mission is to empower businesses with tools that streamline workflows and drive results.
+                </p>
+
+                <!-- Partner Badge -->
+                <div class="mt-12 flex justify-center">
+                    <img src="images/partner.png" alt="Salesforce Partner" class="h-20 object-contain opacity-80 hover:opacity-100 transition-opacity" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </section>
+
+        <!-- Solutions Overview -->
+        <section id="solutions" class="py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <span id="solutions-tag" class="inline-block px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold mb-6">Our Solutions</span>
+                    <h2 id="solutions-title" class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                        Powerful Apps for <span class="text-gradient">Salesforce</span>
+                    </h2>
+                    <p id="solutions-description" class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Discover our suite of innovative AppExchange solutions designed to enhance your Salesforce experience
+                    </p>
+                </div>
+
+                <!-- Solutions Container - Loaded Dynamically -->
+                <div id="solutions-container">
+                    <!-- Solutions will be loaded dynamically from data/solutions.json -->
+                </div>
+
+                <!-- Keep old structure for fallback - Hidden by default -->
+                <div id="solution1" class="mb-24 hidden">
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="order-2 md:order-1">
+                            <div class="inline-flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-full mb-6">
+                                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+                                </svg>
+                                <span class="text-blue-600 font-semibold">Featured Solution</span>
+                            </div>
+                            <h3 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Dynamic Path</h3>
+                            <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                                The Dynamic Path component enhances standard Path functionality and offers greater customizability for your Salesforce processes.
+                            </p>
+
+                            <h4 class="text-xl font-semibold text-gray-800 mb-4">Key Features:</h4>
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-start">
+                                    <svg class="w-6 h-6 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-gray-700">Highly Customizable for both Standard and Custom Objects</span>
                                 </li>
-                            </template>
-                        </ul>
+                                <li class="flex items-start">
+                                    <svg class="w-6 h-6 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-gray-700">Group multiple picklist values in Path</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-6 h-6 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-gray-700">Display Key Fields on record update</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-6 h-6 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-gray-700">Remove check mark on completed & Customisable Guidance</span>
+                                </li>
+                            </ul>
 
-                        <div class="flex flex-wrap gap-4">
-                            <a :href="product.appExchangeLink" target="_blank"
-                                class="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition flex items-center gap-2 transform hover:scale-105">
-                                <i data-lucide="download-cloud" class="w-4 h-4"></i>
-                                AppExchange
-                            </a>
-                            <a :href="product.guideLink"
-                                class="px-6 py-3 bg-gray-100 text-gray-900 rounded-lg font-medium hover:bg-gray-200 transition flex items-center gap-2 transform hover:scale-105">
-                                <i data-lucide="book-open" class="w-4 h-4"></i>
-                                Use Guide
-                            </a>
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <a href="https://appexchange.salesforce.com/appxListingDetail?listingId=4255e60a-5080-4ec2-8461-01b7275a99b4" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 hover:shadow-xl transition-all hover:scale-105">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"></path>
+                                        <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"></path>
+                                    </svg>
+                                    View on AppExchange
+                                </a>
+                                <a href="dp.html" class="inline-flex items-center justify-center px-6 py-3 bg-teal-500 text-white font-semibold rounded-lg shadow-lg hover:bg-teal-600 hover:shadow-xl transition-all hover:scale-105">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                    </svg>
+                                    Setup & User Guide
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="order-1 md:order-2">
+                            <div class="relative group">
+                                <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-teal-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-300"></div>
+                                <img src="images/dp.png" alt="Dynamic Path Screenshot" class="relative rounded-2xl shadow-2xl w-full transform group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/600x400/cccccc/ffffff?text=Dynamic+Path'">
+                            </div>
                         </div>
                     </div>
                 </div>
-            </template>
 
-        </div>
-    </section>
+                <!-- Rocket Reports -->
+                <div id="solution2" class="mb-12">
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="relative group">
+                            <div class="absolute -inset-1 bg-gradient-to-r from-teal-600 to-blue-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-300"></div>
+                            <img src="images/rr.png" alt="Rocket Reports Screenshot" class="relative rounded-2xl shadow-2xl w-full transform group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/600x400/cccccc/ffffff?text=Rocket+Reports'">
+                        </div>
 
-    <!-- About -->
-    <section class="py-32 bg-gray-900 text-white reveal">
-        <div class="max-w-4xl mx-auto px-6 text-center">
-            <h2 class="text-3xl font-bold mb-8" x-text="content.about.title"></h2>
-            <div class="space-y-6 text-xl text-gray-300 font-light leading-relaxed">
-                <template x-for="para in content.about.text">
-                    <p x-text="para"></p>
-                </template>
-            </div>
-        </div>
-    </section>
+                        <div>
+                            <div class="inline-flex items-center space-x-2 bg-teal-50 px-4 py-2 rounded-full mb-6">
+                                <svg class="w-5 h-5 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span class="text-teal-600 font-semibold">Popular Choice</span>
+                            </div>
+                            <h3 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Rocket Reports</h3>
+                            <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                                Effortlessly schedule and send your vital Salesforce reports to any email address.
+                            </p>
 
-    <!-- Contact -->
-    <section id="contact" class="py-32 px-6 bg-gray-50">
-        <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl p-8 md:p-12 reveal border border-gray-100">
-            <div class="text-center mb-10">
-                <h2 class="text-3xl font-bold mb-4" x-text="content.contact.title"></h2>
-                <p class="text-gray-500" x-text="content.contact.subtitle"></p>
-            </div>
+                            <h4 class="text-xl font-semibold text-gray-800 mb-4">Key Features:</h4>
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-start">
+                                    <svg class="w-6 h-6 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-gray-700">Built entirely on the Salesforce platform using Apex and LWC</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-6 h-6 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-gray-700">Simple and Easy interface to Manage Subscriptions</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="w-6 h-6 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-gray-700">No External API calls - 100% Secure</span>
+                                </li>
+                            </ul>
 
-            <form :action="content.contact.formAction" method="POST" class="space-y-6">
-                <!-- Hidden Fields -->
-                <input type="hidden" name="orgid" :value="content.contact.orgId">
-                <input type="hidden" name="retURL" :value="content.contact.retURL">
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                        <input name="name" type="text" maxlength="80" required
-                            class="w-full px-4 py-3 rounded-lg bg-gray-50 border-transparent focus:border-primary focus:bg-white focus:ring-0 transition">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                        <input name="company" type="text" maxlength="80"
-                            class="w-full px-4 py-3 rounded-lg bg-gray-50 border-transparent focus:border-primary focus:bg-white focus:ring-0 transition">
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <a href="https://appexchange.salesforce.com/appxListingDetail?listingId=4f304763-c601-4a00-823f-2a3d697fdce6" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 hover:shadow-xl transition-all hover:scale-105">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"></path>
+                                        <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"></path>
+                                    </svg>
+                                    View on AppExchange
+                                </a>
+                                <a href="rr.html" class="inline-flex items-center justify-center px-6 py-3 bg-teal-500 text-white font-semibold rounded-lg shadow-lg hover:bg-teal-600 hover:shadow-xl transition-all hover:scale-105">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                    </svg>
+                                    Setup & User Guide
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input name="email" type="email" maxlength="80" required
-                            class="w-full px-4 py-3 rounded-lg bg-gray-50 border-transparent focus:border-primary focus:bg-white focus:ring-0 transition">
+        <!-- Features Section -->
+        <section id="features" class="py-24 bg-gradient-to-br from-gray-50 to-blue-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold mb-6">Why Choose Us</span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                        Built for <span class="text-gradient">Success</span>
+                    </h2>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="feature-card bg-white p-8 rounded-2xl shadow-lg">
+                        <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Lightning Fast</h3>
+                        <p class="text-gray-600">Built with performance in mind, our solutions deliver lightning-fast results without compromising functionality.</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                        <input name="phone" type="tel" maxlength="40"
-                            class="w-full px-4 py-3 rounded-lg bg-gray-50 border-transparent focus:border-primary focus:bg-white focus:ring-0 transition">
+
+                    <div class="feature-card bg-white p-8 rounded-2xl shadow-lg">
+                        <div class="w-14 h-14 bg-teal-100 rounded-xl flex items-center justify-center mb-6">
+                            <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Secure & Reliable</h3>
+                        <p class="text-gray-600">Enterprise-grade security built into every solution. Your data stays safe within Salesforce.</p>
                     </div>
+
+                    <div class="feature-card bg-white p-8 rounded-2xl shadow-lg">
+                        <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Easy to Use</h3>
+                        <p class="text-gray-600">Intuitive interfaces designed for users of all technical levels. Get started in minutes, not hours.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-24 bg-white">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="text-center mb-12">
+                    <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold mb-6">Get In Touch</span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                        Let's <span class="text-gradient">Connect</span>
+                    </h2>
+                    <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                        Have questions about our solutions, need support, or interested in custom development? Contact us!
+                    </p>
+                </div>
+
+                <form id="contact-form" action="https://webto.salesforce.com/servlet/servlet.WebToCase?encoding=UTF-8&orgId=00Dau000004vwBR" method="POST" class="max-w-2xl mx-auto bg-gradient-to-br from-gray-50 to-blue-50 p-8 md:p-12 rounded-2xl shadow-xl space-y-6">
+                    <input type="hidden" name="orgid" value="00Dau000004vwBR">
+                    <input type="hidden" name="retURL" value="tactforce.ca">
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">Contact Name *</label>
+                            <input id="name" maxlength="80" name="name" size="20" type="text" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" />
+                        </div>
+
+                        <div>
+                            <label for="company" class="block text-sm font-semibold text-gray-700 mb-2">Company</label>
+                            <input id="company" maxlength="80" name="company" size="20" type="text" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" />
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                            <input id="email" maxlength="80" name="email" size="20" type="email" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" />
+                        </div>
+
+                        <div>
+                            <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
+                            <input id="phone" maxlength="40" name="phone" size="20" type="tel" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="subject" class="block text-sm font-semibold text-gray-700 mb-2">Subject *</label>
+                        <input id="subject" maxlength="80" name="subject" size="20" type="text" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" />
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
+                        <textarea id="description" name="description" rows="5" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none resize-none"></textarea>
+                    </div>
+
+                    <div class="text-center pt-4">
+                        <button type="submit" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-full overflow-hidden transition-all hover:shadow-xl hover:scale-105">
+                            <span class="relative z-10">Send Message</span>
+                            <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+
+                <p class="mt-8 text-center text-gray-600">
+                    Or email us directly at:
+                    <a href="mailto:support@tactforce.ca" class="text-blue-600 hover:text-blue-700 font-semibold hover:underline">support@tactforce.ca</a>
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modern Footer -->
+    <footer class="bg-gradient-to-r from-gray-900 to-gray-800 text-gray-300 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="images/logo.png" alt="TactForce Logo" class="w-12 h-12 object-contain">
+                        <span class="text-xl font-bold text-white">TactForce</span>
+                    </div>
+                    <p class="text-gray-400">Building innovative Salesforce solutions for tomorrow's challenges.</p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                    <input name="subject" type="text" maxlength="80" required
-                        class="w-full px-4 py-3 rounded-lg bg-gray-50 border-transparent focus:border-primary focus:bg-white focus:ring-0 transition">
+                    <h3 class="text-white font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#about" class="hover:text-white transition duration-300">About</a></li>
+                        <li><a href="#solutions" class="hover:text-white transition duration-300">Solutions</a></li>
+                        <li><a href="#contact" class="hover:text-white transition duration-300">Contact</a></li>
+                    </ul>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea name="description" rows="4" required
-                        class="w-full px-4 py-3 rounded-lg bg-gray-50 border-transparent focus:border-primary focus:bg-white focus:ring-0 transition"></textarea>
+                    <h3 class="text-white font-semibold mb-4">Support Us</h3>
+                    <a href="https://www.buymeacoffee.com/BhanuVakati" target="_blank" class="inline-block transition-transform hover:scale-105">
+                        <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 50px !important;width: 180px !important;">
+                    </a>
                 </div>
+            </div>
 
-                <button type="submit" name="submit"
-                    class="w-full bg-primary text-white font-bold py-4 rounded-lg hover:bg-blue-600 transition shadow-lg transform hover:-translate-y-0.5">Submit
-                    Request</button>
-            </form>
-
-            <p class="mt-8 text-center text-sm text-gray-500">
-                Or email us at <a :href="'mailto:' + content.contact.supportEmail"
-                    class="text-primary font-medium hover:underline" x-text="content.contact.supportEmail"></a>
-            </p>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-white border-t py-12">
-        <div class="max-w-6xl mx-auto px-6 flex flex-col items-center justify-center space-y-6">
-            <a :href="content.footer.buyMeCoffeeLink" target="_blank" class="transform hover:scale-105 transition">
-                <img :src="content.footer.buyMeCoffeeImage" alt="Buy Me A Coffee" class="h-12">
-            </a>
-            <p class="text-gray-400 text-sm" x-text="content.footer.copyright"></p>
+            <div class="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">
+                    &copy; 2025 TactForce. All Rights Reserved.
+                    <span class="mx-2">•</span>
+                    <a href="admin.html" class="text-gray-500 hover:text-gray-300 text-xs transition-colors">Admin</a>
+                </p>
+                <a href="#hero" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                    </svg>
+                    Back to Top
+                </a>
+            </div>
         </div>
     </footer>
 
-    <!-- Init Icons -->
+    <script src="script.js"></script>
     <script>
-        document.addEventListener('alpine:initialized', () => {
-            setTimeout(() => {
-                lucide.createIcons();
-            }, 100); // Wait for Alpine x-for to render
+        // ============================================
+        // DYNAMIC CONTENT LOADING SYSTEM
+        // ============================================
+
+        let siteContent = null;
+        let solutions = null;
+
+        // Load all content on page load
+        async function loadAllContent() {
+            try {
+                // Load site content
+                const contentResponse = await fetch('data/site-content.json');
+                siteContent = await contentResponse.json();
+
+                // Load solutions
+                const solutionsResponse = await fetch('data/solutions.json');
+                const solutionsData = await solutionsResponse.json();
+                solutions = solutionsData.solutions.filter(s => s.active).sort((a, b) => a.order - b.order);
+
+                // Populate all sections
+                populateStats();
+                populateSolutions();
+                updateStatsCount();
+
+            } catch (error) {
+                console.warn('Could not load JSON files, using fallback to hardcoded content:', error);
+                // Fallback to hardcoded content (works when opening file locally)
+                document.getElementById('solutions-container').innerHTML = '';
+                document.getElementById('solution1').classList.remove('hidden');
+                const solution2 = document.getElementById('solution2');
+                if (solution2) solution2.classList.remove('hidden');
+            }
+        }
+
+        // Populate stats section
+        function populateStats() {
+            if (!siteContent || !siteContent.stats) return;
+
+            const statsContainer = document.getElementById('stats-container');
+            statsContainer.innerHTML = siteContent.stats.map(stat => `
+                <div class="p-6">
+                    <div class="text-4xl md:text-5xl font-bold text-gradient mb-2 stat-number">${stat.value}</div>
+                    <div class="text-gray-600 font-medium">${stat.label}</div>
+                </div>
+            `).join('');
+        }
+
+        // Update stats count based on active solutions
+        function updateStatsCount() {
+            if (solutions && solutions.length > 0) {
+                const appsStat = document.querySelector('.stat-number');
+                if (appsStat && appsStat.textContent === '2') {
+                    appsStat.textContent = solutions.length;
+                }
+            }
+        }
+
+        // Populate solutions section
+        function populateSolutions() {
+            if (!solutions || solutions.length === 0) return;
+
+            const container = document.getElementById('solutions-container');
+
+            container.innerHTML = solutions.map((solution, index) => {
+                const isEven = index % 2 === 0;
+                const colorClass = solution.color === 'teal' ? 'teal' : 'blue';
+
+                return `
+                    <div id="solution${index + 1}" class="mb-24">
+                        <div class="grid md:grid-cols-2 gap-12 items-center">
+                            ${isEven ? `
+                                <!-- Text First for Even Index -->
+                                <div class="order-2 md:order-1">
+                                    ${renderSolutionTag(solution)}
+                                    ${renderSolutionContent(solution, colorClass)}
+                                </div>
+                                <div class="order-1 md:order-2">
+                                    ${renderSolutionImage(solution, colorClass)}
+                                </div>
+                            ` : `
+                                <!-- Image First for Odd Index -->
+                                <div>
+                                    ${renderSolutionImage(solution, colorClass)}
+                                </div>
+                                <div>
+                                    ${renderSolutionTag(solution)}
+                                    ${renderSolutionContent(solution, colorClass)}
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderSolutionTag(solution) {
+            const color = solution.color || 'blue';
+            return `
+                <div class="inline-flex items-center space-x-2 bg-${color}-50 px-4 py-2 rounded-full mb-6">
+                    ${getIconSVG(solution.tagIcon, color)}
+                    <span class="text-${color}-600 font-semibold">${solution.tagline}</span>
+                </div>
+            `;
+        }
+
+        function renderSolutionContent(solution, colorClass) {
+            return `
+                <h3 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">${solution.name}</h3>
+                <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                    ${solution.description}
+                </p>
+
+                <h4 class="text-xl font-semibold text-gray-800 mb-4">Key Features:</h4>
+                <ul class="space-y-3 mb-8">
+                    ${solution.features.map(feature => `
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-gray-700">${feature}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="${solution.appExchangeUrl}" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 hover:shadow-xl transition-all hover:scale-105">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"></path>
+                            <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"></path>
+                        </svg>
+                        View on AppExchange
+                    </a>
+                    <a href="${solution.guideUrl}"
+                       class="inline-flex items-center justify-center px-6 py-3 bg-teal-500 text-white font-semibold rounded-lg shadow-lg hover:bg-teal-600 hover:shadow-xl transition-all hover:scale-105">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                        Setup & User Guide
+                    </a>
+                </div>
+            `;
+        }
+
+        function renderSolutionImage(solution, colorClass) {
+            const gradientFrom = colorClass === 'teal' ? 'teal-600' : 'blue-600';
+            const gradientTo = colorClass === 'teal' ? 'blue-600' : 'teal-600';
+
+            return `
+                <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-${gradientFrom} to-${gradientTo} rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-300"></div>
+                    <img src="${solution.image}" alt="${solution.name} Screenshot"
+                         class="relative rounded-2xl shadow-2xl w-full transform group-hover:scale-105 transition-transform duration-300"
+                         onerror="this.src='https://placehold.co/600x400/cccccc/ffffff?text=${encodeURIComponent(solution.name)}'">
+                </div>
+            `;
+        }
+
+        function getIconSVG(iconType, color) {
+            const colorClass = `text-${color}-600`;
+
+            const icons = {
+                'path': `<svg class="w-5 h-5 ${colorClass}" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+                </svg>`,
+                'rocket': `<svg class="w-5 h-5 ${colorClass}" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"></path>
+                </svg>`,
+                'star': `<svg class="w-5 h-5 ${colorClass}" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                </svg>`
+            };
+
+            return icons[iconType] || icons['star'];
+        }
+
+        // Load content on page load
+        document.addEventListener('DOMContentLoaded', loadAllContent);
+
+        // Enhanced scroll effects
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('main-header');
+            if (window.scrollY > 50) {
+                header.classList.add('bg-white/90', 'backdrop-blur-md', 'shadow-lg');
+                header.querySelectorAll('a').forEach(link => {
+                    link.classList.remove('text-white', 'hover:text-blue-200');
+                    link.classList.add('text-gray-800', 'hover:text-blue-600');
+                });
+            } else {
+                header.classList.remove('bg-white/90', 'backdrop-blur-md', 'shadow-lg');
+                header.querySelectorAll('a').forEach(link => {
+                    link.classList.remove('text-gray-800', 'hover:text-blue-600');
+                    link.classList.add('text-white', 'hover:text-blue-200');
+                });
+            }
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            section.style.transition = 'all 0.8s ease-out';
+            observer.observe(section);
         });
     </script>
 </body>
-
 </html>
