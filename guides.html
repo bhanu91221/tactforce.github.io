@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title x-data="guideApp" x-text="currentGuide ? currentGuide.title : 'Guide Not Found'">TactForce Guide</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { primary: '#007bff', secondary: '#6c757d' }
+                }
+            }
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Logic -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="js/content.js"></script>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('guideApp', () => ({
+                id: new URLSearchParams(window.location.search).get('id'),
+                content: window.siteContent,
+                get currentGuide() {
+                    return this.content.guides[this.id];
+                },
+                init() {
+                    if (!this.currentGuide && this.id) {
+                        // Default fallback or error
+                        console.error("Guide not found");
+                    }
+                }
+            }));
+        });
+    </script>
+
+    <style>
+        /* Prose-like styling for content */
+        .prose h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .prose p {
+            margin-bottom: 1rem;
+            line-height: 1.75;
+            color: #4b5563;
+        }
+
+        .prose ul,
+        .prose ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            color: #4b5563;
+        }
+
+        .prose li {
+            margin-bottom: 0.25rem;
+        }
+
+        .prose code {
+            background-color: #f3f4f6;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            color: #1f2937;
+        }
+
+        .prose pre {
+            background-color: #1f2937;
+            color: #fff;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        .active-link {
+            color: #007bff;
+            font-weight: 500;
+            border-left: 2px solid #007bff;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 font-sans" x-data="guideApp">
+
+    <div x-show="!currentGuide" class="min-h-screen flex items-center justify-center">
+        <div class="text-center">
+            <h1 class="text-2xl font-bold mb-4">Guide Not Found</h1>
+            <a href="index.html" class="text-primary hover:underline">Return Home</a>
+        </div>
+    </div>
+
+    <div x-show="currentGuide" class="min-h-screen flex flex-col">
+
+        <!-- Navbar -->
+        <nav class="bg-white border-b sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+                <a href="index.html" class="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    <span class="font-medium">Back to Site</span>
+                </a>
+                <span class="font-semibold text-gray-900" x-text="currentGuide?.title"></span>
+            </div>
+        </nav>
+
+        <div class="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 py-10 flex flex-col md:flex-row gap-12">
+
+            <!-- Sidebar -->
+            <aside class="w-full md:w-64 shrink-0">
+                <div class="sticky top-24 space-y-8">
+
+                    <div>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">On this page</h3>
+                        <ul class="space-y-2 border-l border-gray-200">
+                            <template x-for="section in currentGuide?.sections">
+                                <li>
+                                    <a :href="'#' + section.id"
+                                        class="block pl-4 py-1 text-sm text-gray-600 hover:text-gray-900 border-l-2 border-transparent hover:border-gray-300 transition"
+                                        x-text="section.title"></a>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+
+                    <!-- Version History Widget -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="flex items-center gap-2 font-semibold text-sm text-gray-900 mb-3">
+                            <i data-lucide="clock" class="w-4 h-4 text-primary"></i>
+                            Version History
+                        </h3>
+                        <div class="space-y-4 relative">
+                            <!-- Timeline line -->
+                            <div class="absolute left-1.5 top-2 bottom-2 w-0.5 bg-gray-100"></div>
+
+                            <template x-for="ver in currentGuide?.versions">
+                                <div class="relative pl-6">
+                                    <div
+                                        class="absolute left-0 top-1.5 w-3.5 h-3.5 bg-white border-2 border-primary rounded-full">
+                                    </div>
+                                    <div class="text-sm font-medium text-gray-900" x-text="'v' + ver.version"></div>
+                                    <div class="text-xs text-gray-500 mb-1" x-text="ver.date"></div>
+                                    <p class="text-xs text-gray-600 leading-snug" x-text="ver.description"></p>
+                                </div>
+                            </template>
+                            <div x-show="!currentGuide?.versions?.length" class="text-xs text-gray-400 pl-2">No updates
+                                recorded.</div>
+                        </div>
+                    </div>
+
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 min-w-0">
+                <div class="mb-12">
+                    <h1 class="text-4xl font-bold tracking-tight text-gray-900 mb-4" x-text="currentGuide?.title"></h1>
+                    <p class="text-lg text-gray-500">Official Documentation & Setup Guide</p>
+                </div>
+
+                <div class="space-y-16">
+                    <template x-for="section in currentGuide?.sections">
+                        <section :id="section.id" class="scroll-mt-24">
+                            <h2 class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b" x-text="section.title"></h2>
+                            <div class="prose max-w-none" x-html="section.content"></div>
+                        </section>
+                    </template>
+                </div>
+            </main>
+
+        </div>
+    </div>
+
+    <script>
+        // Init Icons after Alpine loads content
+        document.addEventListener('alpine:initialized', () => {
+            // Slight delay to allow x-for to render
+            setTimeout(() => lucide.createIcons(), 100);
+        });
+    </script>
+</body>
+
+</html>

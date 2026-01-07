@@ -1,0 +1,31 @@
+/* style.css (Optional - Most styling is done via Tailwind classes in HTML) */
+
+/* You can add custom CSS here if needed, for things Tailwind doesn't easily handle */
+
+/* Example: Custom animation */
+/*
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 1s ease-in-out;
+}
+*/
+
+/* Example: Adjusting prose styles if needed */
+/*
+.prose h4 {
+  color: #your-custom-color;
+}
+*/
+
+/* Note: The primary styling mechanism is Tailwind utility classes applied directly
+   in the index.html file. This file is for overrides or complex styles only. */
+
+/* Ensure scroll-margin-top is applied if not handled by Tailwind config */
+/* section[id] {
+    scroll-margin-top: 70px; /* Adjust this value based on your fixed header's height */
+/* } */
+

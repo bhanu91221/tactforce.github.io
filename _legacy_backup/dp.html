@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Path Component User Guide - Tactforce</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* Tailwind Configuration - Copied from index.html for consistency */
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              primary: { DEFAULT: '#007bff', dark: '#0056b3' },
+              secondary: { DEFAULT: '#6c757d', dark: '#5a6268' },
+              accent: { DEFAULT: '#16a085', dark: '#117a65' },
+              highlight: '#f8f9fa',
+              salesforce: '#00A1E0'
+            }
+          }
+        }
+      }
+      /* Offset for internal links */
+      section[id] {
+        scroll-margin-top: 20px; /* Adjust as needed */
+      }
+      /* Basic code block styling */
+      pre {
+          background-color: #eef4ff; /* Light blue background */
+          padding: 1rem;
+          border-radius: 0.375rem; /* rounded-md */
+          overflow-x: auto;
+          margin-bottom: 1rem;
+          font-family: monospace;
+          font-size: 0.9em;
+      }
+      code {
+          font-family: monospace;
+      }
+    </style>
+    <meta name="description" content="User and setup guide for the Dynamic Path Salesforce component by Tactforce.">
+    <META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=UTF-8">
+</head>
+<body class="bg-gray-100 font-sans text-gray-800">
+
+    <div class="container mx-auto flex flex-col md:flex-row py-8 px-4 gap-8">
+
+        <nav class="w-full md:w-1/4 lg:w-1/5 bg-white p-6 rounded-lg shadow-md h-fit sticky top-8">
+            <h3 class="text-lg font-semibold mb-4 text-primary border-b pb-2">Navigation</h3>
+            <ul class="space-y-2">
+                <li><a href="index.html" class="text-gray-600 hover:text-primary transition duration-300 block">Home</a></li>
+                <li><a href="#introduction" class="text-gray-600 hover:text-primary transition duration-300 block">Introduction</a></li>
+                <li><a href="#step-by-step-setup" class="text-gray-600 hover:text-primary transition duration-300 block">Step-by-Step Setup</a></li>
+                <li><a href="#add-component" class="text-gray-600 hover:text-primary transition duration-300 block">Add Component to Page</a></li>
+                <li><a href="#configure-component" class="text-gray-600 hover:text-primary transition duration-300 block">Configure Component</a></li>
+                <li><a href="#important-tips" class="text-gray-600 hover:text-primary transition duration-300 block">Important Tips</a></li>
+            </ul>
+        </nav>
+
+        <main class="w-full md:w-3/4 lg:w-4/5 bg-white p-8 rounded-lg shadow-md">
+            <section id="introduction" class="mb-10 pb-6 border-b">
+                <h1 class="text-3xl font-bold mb-4 text-primary">User Guide: Dynamic Path Component</h1>
+                <h2 class="text-2xl font-semibold mb-3 text-gray-700">What is the Dynamic Path Component?</h2>
+                <p class="text-gray-600 leading-relaxed">The Dynamic Path component enhances standard Salesforce Path functionality and offers greater customizability for your business processes. It allows for grouping path values, displaying key fields dynamically, and providing tailored guidance.</p>
+            </section>
+
+            <section id="step-by-step-setup" class="mb-10 pb-6 border-b">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Step-by-Step Setup</h2>
+                <p class="text-gray-600 mb-6">The Dynamic Path Package comes with preconfigured paths for Opportunity and Lead objects. You can also easily customize paths for any Standard or Custom object following these steps.</p>
+
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">1. Create Dynamic Path Config Records (Required)</h3>
+                <ol class="list-decimal list-inside space-y-2 text-gray-600 mb-4">
+                    <li>Navigate to <code class="text-sm">Setup > Custom Metadata Types</code>.</li>
+                    <li>Click <code class="text-sm">Manage Records</code> next to "Dynamic Path Config".</li>
+                    <li>Click <code class="text-sm">New</code>.</li>
+                    <li>Fill in the required fields:
+                        <ul class="list-disc list-inside ml-6 mt-2 space-y-1">
+                            <li><strong>Label (Required):</strong> Provide a unique name (e.g., Opportunity Path).</li>
+                            <li><strong>Field API Name (Required):</strong> Enter the API name of the picklist field used for the path (e.g., <code class="text-sm">StageName</code>).</li>
+                            <li><strong>Object API Name (Required):</strong> Specify the API name of the Salesforce object (e.g., <code class="text-sm">Opportunity</code>).</li>
+                        </ul>
+                    </li>
+                    <li>Click <code class="text-sm">Save</code>.</li>
+                </ol>
+
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">2. Create Dynamic Path Value Config Records (Optional)</h3>
+                <p class="text-gray-600 mb-4">Creating these configurations is optional. Only create them if you need to customize the behavior or appearance of specific values within your path (e.g., grouping, key fields, guidance).</p>
+                <ol class="list-decimal list-inside space-y-2 text-gray-600">
+                    <li>Navigate to <code class="text-sm">Setup > Custom Metadata Types</code>.</li>
+                     <li>Click <code class="text-sm">Manage Records</code> next to "Dynamic Path Value Config".</li>
+                    <li>Click <code class="text-sm">New</code>.</li>
+                    <li>Fill in the fields as needed:
+                        <ul class="list-disc list-inside ml-6 mt-2 space-y-1">
+                            <li><strong>Label (Required):</strong> Enter the exact API name of the picklist value (e.g., <code class="text-sm">Prospecting</code>).</li>
+                            <li><strong>Dynamic Path Config (Required):</strong> Select the corresponding Dynamic Path Config record created in step 1 using the lookup.</li>
+                            <li><strong>Group Label (Optional):</strong> Enter a label to group this value with others under a common heading in the path.</li>
+                            <li><strong>Key Fields (Optional):</strong> Provide a semi-colon separated list of field API names (up to five) to display when this path value is active (e.g., <code class="text-sm">Amount;CloseDate</code>).</li>
+                            <li><strong>Guidance Body (Optional):</strong> Enter rich text guidance to display for this path value.</li>
+                            <li><strong>Is Closed (Optional):</strong> Check this box if this value represents a "Closed Won" or equivalent terminal success state.</li>
+                            <li><strong>Is Lost (Optional):</strong> Check this box if this value represents a "Closed Lost" or equivalent terminal failure state.</li>
+                        </ul>
+                    </li>
+                    <li>Click <code class="text-sm">Save</code>. Repeat for other values needing customization.</li>
+                </ol>
+            </section>
+
+            <section id="add-component" class="mb-10 pb-6 border-b">
+                <h3 class="text-2xl font-semibold mb-4 text-gray-700">3. Add the Dynamic Path Component to a Record Page</h3>
+                <ol class="list-decimal list-inside space-y-2 text-gray-600">
+                    <li>Navigate to a record page of the object you configured (e.g., an Opportunity record).</li>
+                    <li>Click the <code class="text-sm">Setup</code> gear icon in the top right and select <code class="text-sm">Edit Page</code>.</li>
+                    <li>In the Lightning App Builder, find the <code class="text-sm">Dynamic Path</code> component under the "Custom" components section on the left panel.</li>
+                    <li>Drag the <code class="text-sm">Dynamic Path</code> component onto the desired location on your page layout (often near the top).</li>
+                </ol>
+            </section>
+
+            <section id="configure-component" class="mb-10 pb-6 border-b">
+                <h3 class="text-2xl font-semibold mb-4 text-gray-700">4. Configure the Component Properties</h3>
+                <p class="text-gray-600 mb-4">Once the component is placed on the page, click on it to configure its properties in the right-hand panel:</p>
+                <ul class="list-disc list-inside space-y-2 text-gray-600">
+                    <li><strong>Dynamic Path Configuration (Required):</strong> Select the specific "Dynamic Path Config" record you created in Step 1 from the dropdown list. This tells the component which path to display.</li>
+                    <li><strong>Path Type:</strong> Choose "Linear" (standard progression) or "Non-Linear" (allows moving back and forth more freely, appearance might differ slightly).</li>
+                    <li><strong>Hide Path Button:</strong> Check this box if you want to hide the "Mark Stage as Complete" (or similar) button.</li>
+                    <li><strong>Path Button Custom Text:</strong> If the button is not hidden, you can enter custom text for it here (e.g., "Update Status").</li>
+                    <li><strong>Has Guidance:</strong> Check this box to enable the display of guidance text defined in the "Dynamic Path Value Config" records.</li>
+                    <li><strong>Remove Check Mark on Completed:</strong> By default (unchecked), completed stages show a checkmark. Check this box to remove the checkmark icon from completed stages.</li>
+                </ul>
+                 <p class="text-gray-600 mt-4">After configuring, click <code class="text-sm">Save</code> in the Lightning App Builder. You may also need to click <code class="text-sm">Activate</code> to assign the updated page layout to the relevant profiles or apps.</p>
+            </section>
+
+            <section id="important-tips" class="mb-10">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Important Tips</h2>
+                <div class="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg space-y-2">
+                    <p><strong>Save and Activate:</strong> Always remember to Save your changes in the Lightning App Builder and Activate the page if necessary.</p>
+                    <p><strong>Testing:</strong> Test thoroughly in a Salesforce Sandbox environment before deploying to Production.</p>
+                    <p><strong>Picklist Fields:</strong> The component is primarily designed to work with picklist fields.</p>
+                    <p><strong>Value Configs:</strong> Dynamic Path Value Config records are only needed if you want to customize specific path values (grouping, key fields, guidance, closed/lost status).</p>
+                    <p><strong>No Duplicates:</strong> Ensure you don't create duplicate Dynamic Path Value Config records for the same picklist value within the same Path Config.</p>
+                    <p><strong>Key Fields Usage:</strong> Use the "Key Fields" feature strategically to prompt users for critical information at specific stages.</p>
+                    <p><strong>Guidance Rich Text:</strong> The "Guidance Body" field supports Salesforce Rich Text markup for formatting.</p>
+                    <p><strong>Apex Class Permission:</strong> If the package was initially installed for 'Admins Only' and later reinstalled for 'All Users', you might encounter an issue where the necessary Apex classes are not automatically added to non-admin profiles; therefore, manually add "DynamicPathController" and "DynamicPathConfigsList" to Apex Class Access in profile or a permission set (thanks to Jimmy Martin) </p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+     <footer class="bg-gray-800 text-gray-400 py-6 mt-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 TactForce. All Rights Reserved.</p>
+            <p><a href="index.html" class="hover:text-white transition duration-300">Back to Main Site</a></p>
+        </div>
+    </footer>
+
+</body>
+</html>
