@@ -345,8 +345,8 @@
                             <!-- Content (alternating order) -->
                             <div :class="index % 2 === 0 ? 'order-2 md:order-1' : ''">
                                 <div x-show="product.featured" class="inline-flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-full mb-6">
-                                    <i data-lucide="zap" class="w-5 h-5 text-blue-600"></i>
-                                    <span class="text-blue-600 font-semibold">Featured Solution</span>
+                                    <i :data-lucide="product.featuredIcon" x-init="lucide.createIcons({ root: $el })" class="w-5 h-5 text-blue-600"></i>
+                                    <span class="text-blue-600 font-semibold" x-text="product.featuredName"></span>
                                 </div>
                                 <h3 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6" x-text="product.name"></h3>
                                 <p class="text-lg text-gray-600 mb-6 leading-relaxed" x-text="product.description"></p>
