@@ -151,7 +151,7 @@ window.siteContent = {
                 {
                     "version": "2.0",
                     "date": "2026-01-23",
-                    "description": "Feature Release: Option to Send Multiple Reports in a Scheduled."
+                    "description": "Feature Release: Supports Multiple Reports in a Scheduled; Improved error logging"
                 },
                 {
                     "version": "1.6",
@@ -211,6 +211,6 @@ window.siteContent = {
                     "content": "<p><strong>Permissions:</strong>&nbsp;We highly recommend while Installing select \"Install for Admins Only\". Assign the permissions set \"Rocket Reports Admin\" for designated users responsible for managing report subscriptions if needed.</p><p><br></p><p><strong>Platform Limits:</strong>&nbsp;Rocket Reports utilizes Schedulable Apex classes. Standard Salesforce governor limits for Apex execution, email sending, and asynchronous processing apply. Please familiarize yourself with these limits.</p><p><br></p><p><strong>Custom Object:</strong>&nbsp;The subscription details are stored in a custom object named&nbsp;<code style=\"background-color: rgb(238, 244, 255);\">Rocket Report Subscription</code>&nbsp;(or similar - check package details). You can access this object directly via the App Launcher or Object Manager if needed.</p><p><br></p><p><strong>Joined Reports:</strong>&nbsp;Subscription to Joined Reports is supported but, make sure to select&nbsp;<code style=\"background-color: rgb(238, 244, 255);\">Formatted (XLSX)</code>&nbsp;as the report attachment type.</p>"
                 }
             ]
-        },
+        }
     }
 };
