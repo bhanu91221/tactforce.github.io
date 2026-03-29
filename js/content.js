@@ -19,14 +19,14 @@ window.siteContent = {
     ],
     "hero": {
         "title": "Expert Salesforce Solutions",
-        "subtitle": "Elevate your Salesforce experience with powerful AppExchange apps built by Bobby, a proud Salesforce Partner.",
+        "subtitle": "Elevate your Salesforce experience with powerful AppExchange apps developed by TactForce, a proud Salesforce Partner.",
         "cta": "Explore the Apps",
         "ctaLink": "#solutions"
     },
     "about": {
         "title": "About",
         "text": [
-            "Hi, I'm Bobby — a Salesforce Architect with a passion for building tools that make life easier for admins and developers.",
+            "I'm a Salesforce Architect & Developer with a passion for building tools that make life easier for admins and developers.",
             "TactForce is my way of giving back to the Salesforce community. Every app I publish on the AppExchange is free, built with care, and backed by my commitment as a registered Salesforce Partner."
         ]
     },
@@ -100,7 +100,8 @@ window.siteContent = {
     "footer": {
         "copyright": "© 2025 TactForce. All Rights Reserved.",
         "buyMeCoffeeLink": "https://www.buymeacoffee.com/BhanuVakati",
-        "buyMeCoffeeImage": "https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+        "buyMeCoffeeImage": "https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png",
+        "linkedInLink": "https://www.linkedin.com/in/bhanuprakashvakati/"
     },
     "guides": {
         "dynamic-path": {
