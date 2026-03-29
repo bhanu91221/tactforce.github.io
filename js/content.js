@@ -19,15 +19,15 @@ window.siteContent = {
     ],
     "hero": {
         "title": "Expert Salesforce Solutions",
-        "subtitle": "Elevate your Salesforce experience with powerful AppExchange apps developed by TactForce, a proud Salesforce Partner.",
-        "cta": "Explore Our Solutions",
+        "subtitle": "Elevate your Salesforce experience with powerful AppExchange apps built by Bobby, a proud Salesforce Partner.",
+        "cta": "Explore the Apps",
         "ctaLink": "#solutions"
     },
     "about": {
-        "title": "About Us",
+        "title": "About",
         "text": [
-            "We are dedicated Salesforce professionals focused on creating innovative solutions that solve real business challenges within the Salesforce ecosystem.",
-            "As a registered Salesforce Partner, we adhere to the highest standards of development and customer success."
+            "Hi, I'm Bobby — a Salesforce Architect with a passion for building tools that make life easier for admins and developers.",
+            "TactForce is my way of giving back to the Salesforce community. Every app I publish on the AppExchange is free, built with care, and backed by my commitment as a registered Salesforce Partner."
         ]
     },
     "products": [
@@ -66,14 +66,14 @@ window.siteContent = {
         }
     ],
     "features": {
-        "title": "Why Choose Us",
+        "title": "Why TactForce",
         "heading": "Built for Success",
         "items": [
             {
                 "icon": "zap",
                 "iconColor": "blue",
                 "title": "Lightning Fast",
-                "description": "Built with performance in mind, our solutions deliver lightning-fast results without compromising functionality."
+                "description": "Built with performance in mind, every app delivers lightning-fast results without compromising functionality."
             },
             {
                 "icon": "shield-check",
@@ -91,7 +91,7 @@ window.siteContent = {
     },
     "contact": {
         "title": "Get In Touch",
-        "subtitle": "Have questions about our solutions, need support, or interested in custom development? Contact us!",
+        "subtitle": "Have questions about an app, need support, or just want to say hi? I'd love to hear from you.",
         "formAction": "https://webto.salesforce.com/servlet/servlet.WebToCase?encoding=UTF-8&orgId=00Dau000004vwBR",
         "orgId": "00Dau000004vwBR",
         "retURL": "tactforce.ca",
