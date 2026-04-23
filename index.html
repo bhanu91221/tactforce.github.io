@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title x-data="site" x-text="content.meta.title">TactForce - Expert Salesforce Solutions</title>
+    <meta name="description" content="TactForce builds innovative Salesforce products and solutions — Rocket Reports, free admin/dev tools, and expert guides.">
+    <link rel="icon" type="image/png" href="images/logo.png">
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:title" content="TactForce - Expert Salesforce Solutions">
+    <meta property="og:description" content="TactForce builds innovative Salesforce products and solutions — Rocket Reports, free admin/dev tools, and expert guides.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tactforce.ca/">
+    <meta property="og:image" content="https://tactforce.ca/images/TactForce.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="TactForce - Expert Salesforce Solutions">
+    <meta name="twitter:description" content="TactForce builds innovative Salesforce products and solutions.">
+    <meta name="twitter:image" content="https://tactforce.ca/images/TactForce.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +27,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
@@ -37,26 +51,8 @@
 
     <!-- Content -->
     <script src="js/content.js"></script>
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('site', () => ({
-                content: window.siteContent,
-                mobileMenuOpen: false,
-                solutionsDropdownOpen: false,
-                toggleMenu() {
-                    this.mobileMenuOpen = !this.mobileMenuOpen;
-                },
-                scrollToProduct(productId) {
-                    const element = document.getElementById(productId);
-                    if (element) {
-                        element.scrollIntoView({ behavior: 'smooth' });
-                    }
-                    this.solutionsDropdownOpen = false;
-                    this.mobileMenuOpen = false;
-                }
-            }));
-        });
-    </script>
+    <!-- Custom Scripts -->
+    <script src="js/app.js"></script>
 
     <style>
         /* Modern animations */
@@ -177,11 +173,24 @@
             color: white;
             transform: translateX(4px);
         }
+
+        .dark .dropdown-content, .dark .dropdown-links {
+            background: rgba(31, 41, 55, 0.98);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+        }
+        
+        .dark .dropdown-link-item {
+            color: #d1d5db;
+        }
+        
+        .dark .dropdown-link-item:hover {
+            color: white;
+        }
     </style>
 
     <meta name="description" x-data="site" x-text="content.meta.description" content="Showcasing AppExchange Solutions by TactForce">
 </head>
-<body class="bg-gray-50 font-sans text-gray-800 overflow-x-hidden" x-data="site">
+<body class="bg-gray-50 dark:bg-gray-900 font-sans text-gray-800 dark:text-gray-100 overflow-x-hidden transition-colors duration-300" x-data="site">
 
     <!-- Modern Navigation -->
     <header id="main-header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-gradient-to-b from-black/30 to-transparent backdrop-blur-sm">
@@ -193,6 +202,13 @@
                 </a>
 
                 <ul class="hidden md:flex space-x-8 items-center">
+                    <!-- Theme Toggle -->
+                    <li>
+                        <button @click="toggleTheme()" class="p-2 rounded-full hover:bg-white/10 text-white transition-colors duration-200" :title="darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+                            <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5"></i>
+                            <i x-show="darkMode" data-lucide="sun" class="w-5 h-5" style="display: none;"></i>
+                        </button>
+                    </li>
                     <template x-for="link in content.navigation">
                         <li :class="link.label === 'Solutions' ? 'dropdown' : ''">
                             <template x-if="link.label === 'Solutions'">
@@ -209,7 +225,7 @@
                                          style="display: none;">
                                         <template x-for="product in content.products">
                                             <div class="dropdown-item">
-                                                <button @click="scrollToProduct(product.id)" class="w-full text-left px-4 py-3 text-gray-800 hover:bg-blue-50 transition duration-200 font-medium flex items-center justify-between group">
+                                                <button @click="scrollToProduct(product.id)" class="w-full text-left px-4 py-3 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 transition duration-200 font-medium flex items-center justify-between group">
                                                     <span x-text="product.name"></span>
                                                     <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 group-hover:text-blue-600"></i>
                                                 </button>
@@ -235,6 +251,10 @@
                     </template>
                 </ul>
 
+                <button @click="toggleTheme()" class="md:hidden text-white hover:text-blue-200 focus:outline-none p-2 mr-2">
+                    <i x-show="!darkMode" data-lucide="moon" class="w-6 h-6"></i>
+                    <i x-show="darkMode" data-lucide="sun" class="w-6 h-6" style="display: none;"></i>
+                </button>
                 <button @click="toggleMenu()" class="md:hidden text-white hover:text-blue-200 focus:outline-none">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
@@ -313,27 +333,27 @@
         </section>
 
         <!-- About Section -->
-        <section id="about" class="py-24 bg-gradient-to-br from-blue-50 to-white">
+        <section id="about" class="py-24 bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900">
             <div class="max-w-5xl mx-auto px-4 text-center">
                 <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold mb-6" x-text="content.about.title"></span>
                 <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
                     Passion Meets <span class="text-gradient">Purpose</span>
                 </h2>
                 <template x-for="para in content.about.text">
-                    <p class="text-xl text-gray-600 mb-6 leading-relaxed" x-text="para"></p>
+                    <p class="text-xl text-gray-600 dark:text-gray-300 mb-6 leading-relaxed" x-text="para"></p>
                 </template>
             </div>
         </section>
 
         <!-- Solutions Section -->
-        <section id="solutions" class="py-24 bg-white">
+        <section id="solutions" class="py-24 bg-white dark:bg-gray-900">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold mb-6">AppExchange Apps</span>
-                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                    <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-sm font-semibold mb-6">AppExchange Apps</span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                         Powerful Apps for <span class="text-gradient">Salesforce</span>
                     </h2>
-                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
                         Free, innovative AppExchange apps designed to enhance your Salesforce experience
                     </p>
                 </div>
@@ -344,19 +364,19 @@
                         <div class="grid md:grid-cols-2 gap-12 items-center">
                             <!-- Content (alternating order) -->
                             <div :class="index % 2 === 0 ? 'order-2 md:order-1' : ''">
-                                <div x-show="product.featured" class="inline-flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-full mb-6">
-                                    <i :data-lucide="product.featuredIcon" x-init="lucide.createIcons({ root: $el })" class="w-5 h-5 text-blue-600"></i>
-                                    <span class="text-blue-600 font-semibold" x-text="product.featuredName"></span>
+                                <div x-show="product.featured" class="inline-flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-full mb-6">
+                                    <i :data-lucide="product.featuredIcon" x-init="lucide.createIcons({ root: $el })" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                                    <span class="text-blue-600 dark:text-blue-400 font-semibold" x-text="product.featuredName"></span>
                                 </div>
-                                <h3 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6" x-text="product.name"></h3>
-                                <p class="text-lg text-gray-600 mb-6 leading-relaxed" x-text="product.description"></p>
+                                <h3 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6" x-text="product.name"></h3>
+                                <p class="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed" x-text="product.description"></p>
 
-                                <h4 class="text-xl font-semibold text-gray-800 mb-4">Key Features:</h4>
+                                <h4 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Key Features:</h4>
                                 <ul class="space-y-3 mb-8">
                                     <template x-for="feature in product.features">
                                         <li class="flex items-start">
                                             <i data-lucide="check-circle" class="w-6 h-6 text-green-500 mr-3 flex-shrink-0 mt-0.5"></i>
-                                            <span class="text-gray-700" x-text="feature"></span>
+                                            <span class="text-gray-700 dark:text-gray-300" x-text="feature"></span>
                                         </li>
                                     </template>
                                 </ul>
@@ -387,33 +407,33 @@
         </section>
 
         <!-- Features Section -->
-        <section id="features" class="py-24 bg-gradient-to-br from-gray-50 to-blue-50">
+        <section id="features" class="py-24 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold mb-6" x-text="content.features.title"></span>
-                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                    <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-sm font-semibold mb-6" x-text="content.features.title"></span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                         <span x-text="content.features.heading.split(' ')[0]"></span> <span class="text-gradient" x-text="content.features.heading.split(' ').slice(1).join(' ')"></span>
                     </h2>
                 </div>
 
                 <div class="grid md:grid-cols-3 gap-8">
                     <template x-for="feature in content.features.items">
-                        <div class="feature-card bg-white p-8 rounded-2xl shadow-lg">
+                        <div class="feature-card bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-transparent dark:border-gray-700">
                             <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-6"
                                  :class="{
-                                     'bg-blue-100': feature.iconColor === 'blue',
-                                     'bg-teal-100': feature.iconColor === 'teal',
-                                     'bg-purple-100': feature.iconColor === 'purple'
+                                     'bg-blue-100 dark:bg-blue-900/30': feature.iconColor === 'blue',
+                                     'bg-teal-100 dark:bg-teal-900/30': feature.iconColor === 'teal',
+                                     'bg-purple-100 dark:bg-purple-900/30': feature.iconColor === 'purple'
                                  }">
                                 <i :data-lucide="feature.icon" class="w-8 h-8"
                                    :class="{
-                                       'text-blue-600': feature.iconColor === 'blue',
-                                       'text-teal-600': feature.iconColor === 'teal',
-                                       'text-purple-600': feature.iconColor === 'purple'
+                                       'text-blue-600 dark:text-blue-400': feature.iconColor === 'blue',
+                                       'text-teal-600 dark:text-teal-400': feature.iconColor === 'teal',
+                                       'text-purple-600 dark:text-purple-400': feature.iconColor === 'purple'
                                    }"></i>
                             </div>
-                            <h3 class="text-xl font-bold text-gray-900 mb-3" x-text="feature.title"></h3>
-                            <p class="text-gray-600" x-text="feature.description"></p>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3" x-text="feature.title"></h3>
+                            <p class="text-gray-600 dark:text-gray-400" x-text="feature.description"></p>
                         </div>
                     </template>
                 </div>
@@ -421,50 +441,50 @@
         </section>
 
         <!-- Contact Section -->
-        <section id="contact" class="py-24 bg-white">
+        <section id="contact" class="py-24 bg-white dark:bg-gray-900">
             <div class="max-w-4xl mx-auto px-4">
                 <div class="text-center mb-12">
-                    <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold mb-6" x-text="content.contact.title"></span>
-                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                    <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-sm font-semibold mb-6" x-text="content.contact.title"></span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                         Let's <span class="text-gradient">Connect</span>
                     </h2>
-                    <p class="text-xl text-gray-600 mb-8 leading-relaxed" x-text="content.contact.subtitle"></p>
+                    <p class="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed" x-text="content.contact.subtitle"></p>
                 </div>
 
-                <form :action="content.contact.formAction" method="POST" class="max-w-2xl mx-auto bg-gradient-to-br from-gray-50 to-blue-50 p-8 md:p-12 rounded-2xl shadow-xl space-y-6">
+                <form :action="content.contact.formAction" method="POST" class="max-w-2xl mx-auto bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 p-8 md:p-12 rounded-2xl shadow-xl space-y-6">
                     <input type="hidden" name="orgid" :value="content.contact.orgId">
                     <input type="hidden" name="retURL" :value="content.contact.retURL">
 
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Contact Name *</label>
-                            <input name="name" type="text" maxlength="80" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" />
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Contact Name *</label>
+                            <input name="name" type="text" maxlength="80" required class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 bg-opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:text-white transition-all outline-none" />
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Company</label>
-                            <input name="company" type="text" maxlength="80" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" />
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Company</label>
+                            <input name="company" type="text" maxlength="80" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 bg-opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:text-white transition-all outline-none" />
                         </div>
                     </div>
 
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
-                            <input name="email" type="email" maxlength="80" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" />
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Email *</label>
+                            <input name="email" type="email" maxlength="80" required class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 bg-opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:text-white transition-all outline-none" />
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
-                            <input name="phone" type="tel" maxlength="40" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" />
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone</label>
+                            <input name="phone" type="tel" maxlength="40" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 bg-opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:text-white transition-all outline-none" />
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Subject *</label>
-                        <input name="subject" type="text" maxlength="80" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" />
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Subject *</label>
+                        <input name="subject" type="text" maxlength="80" required class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 bg-opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:text-white transition-all outline-none" />
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
-                        <textarea name="description" rows="5" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none resize-none"></textarea>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Description *</label>
+                        <textarea name="description" rows="5" required class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 bg-opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:text-white transition-all outline-none resize-none"></textarea>
                     </div>
 
                     <div class="text-center pt-4">
@@ -475,7 +495,7 @@
                     </div>
                 </form>
 
-                <p class="mt-8 text-center text-gray-600">
+                <p class="mt-8 text-center text-gray-600 dark:text-gray-400">
                     Or email directly at:
                     <a :href="'mailto:' + content.contact.supportEmail" class="text-blue-600 hover:text-blue-700 font-semibold hover:underline" x-text="content.contact.supportEmail"></a>
                 </p>
@@ -539,16 +559,20 @@
         window.addEventListener('scroll', () => {
             const header = document.getElementById('main-header');
             if (window.scrollY > 50) {
-                header.classList.add('bg-white/90', 'backdrop-blur-md', 'shadow-lg');
+                header.classList.add('bg-white/90', 'dark:bg-gray-900/90', 'backdrop-blur-md', 'shadow-lg');
                 header.querySelectorAll('a, button').forEach(el => {
-                    el.classList.remove('text-white', 'hover:text-blue-200');
-                    el.classList.add('text-gray-800', 'hover:text-blue-600');
+                    if (!el.querySelector('i')) { // Exclude icon-only buttons
+                         el.classList.remove('text-white', 'hover:text-blue-200');
+                         el.classList.add('text-gray-800', 'dark:text-white', 'hover:text-blue-600', 'dark:hover:text-blue-400');
+                    }
                 });
             } else {
-                header.classList.remove('bg-white/90', 'backdrop-blur-md', 'shadow-lg');
+                header.classList.remove('bg-white/90', 'dark:bg-gray-900/90', 'backdrop-blur-md', 'shadow-lg');
                 header.querySelectorAll('a, button').forEach(el => {
-                    el.classList.remove('text-gray-800', 'hover:text-blue-600');
-                    el.classList.add('text-white', 'hover:text-blue-200');
+                     if (!el.querySelector('i')) { 
+                        el.classList.remove('text-gray-800', 'dark:text-white', 'hover:text-blue-600', 'dark:hover:text-blue-400');
+                        el.classList.add('text-white', 'hover:text-blue-200');
+                     }
                 });
             }
         });

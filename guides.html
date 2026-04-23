@@ -5,6 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title x-data="guideApp" x-text="currentGuide ? currentGuide.title : 'Guide Not Found'">TactForce Guide</title>
+    <meta name="description" content="In-depth Salesforce guides from TactForce — Dynamic Path, Rocket Reports, Experience Cloud, and more.">
+    <link rel="icon" type="image/png" href="images/logo.png">
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:title" content="TactForce Guides">
+    <meta property="og:description" content="In-depth Salesforce guides from TactForce.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://tactforce.ca/guides.html">
+    <meta property="og:image" content="https://tactforce.ca/images/TactForce.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="TactForce Guides">
+    <meta name="twitter:description" content="In-depth Salesforce guides from TactForce.">
+    <meta name="twitter:image" content="https://tactforce.ca/images/TactForce.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +28,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
@@ -36,32 +50,8 @@
 
     <!-- Content -->
     <script src="js/content.js"></script>
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('guideApp', () => ({
-                id: new URLSearchParams(window.location.search).get('id'),
-                content: window.siteContent,
-                guideDropdownOpen: false,
-                get currentGuide() {
-                    return this.content.guides[this.id];
-                },
-                get availableGuides() {
-                    return Object.entries(this.content.guides).map(([key, guide]) => ({
-                        id: key,
-                        title: guide.title
-                    }));
-                },
-                navigateToGuide(guideId) {
-                    window.location.href = `guides.html?id=${guideId}`;
-                },
-                init() {
-                    if (!this.currentGuide && this.id) {
-                        console.error("Guide not found");
-                    }
-                }
-            }));
-        });
-    </script>
+    <!-- Custom Scripts -->
+    <script src="js/app.js"></script>
 
     <style>
         /* Prose styling for content */
@@ -75,6 +65,29 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+        
+        .dark .prose h3 {
+             color: #e5e7eb;
+             -webkit-text-fill-color: #e5e7eb; /* Override gradient for better readability in dark mode */
+             background: none;
+        }
+
+        .dark .prose h4, .dark .prose strong, .dark .prose li, .dark .prose p, .dark .prose ul, .dark .prose ol {
+             color: #d1d5db;
+        }
+
+        .dark .prose code {
+            background-color: #374151;
+            color: #93c5fd;
+        }
+
+        .dark .prose a {
+            color: #60a5fa;
+        }
+        
+        .dark .prose a:hover {
+             color: #93c5fd;
         }
 
         .prose h4 {
@@ -203,6 +216,11 @@
             overflow: hidden;
             border: 1px solid #e5e7eb;
         }
+        
+        .dark .guide-dropdown-content {
+            background: #1f2937;
+            border-color: #374151;
+        }
 
         .guide-dropdown-item {
             display: block;
@@ -211,13 +229,21 @@
             transition: all 0.2s;
             border-bottom: 1px solid #f3f4f6;
         }
+        
+        .dark .guide-dropdown-item {
+             color: #d1d5db;
+             border-bottom: 1px solid #374151;
+        }
 
         .guide-dropdown-item:last-child {
             border-bottom: none;
         }
 
         .guide-dropdown-item:hover {
-            background: linear-gradient(135deg, #007bff, #00A1E0);
+            color: white;
+        }
+        
+        .dark .guide-dropdown-item:hover {
             color: white;
         }
 
@@ -229,14 +255,14 @@
     </style>
 </head>
 
-<body class="bg-gray-50 text-gray-900 font-sans antialiased" x-data="guideApp">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans antialiased transition-colors duration-300" x-data="guideApp">
 
     <!-- 404 Message -->
     <div x-show="!currentGuide" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50">
         <div class="text-center p-12 bg-white rounded-2xl shadow-xl max-w-md animate-fade-in">
             <i data-lucide="alert-circle" class="w-20 h-20 mx-auto mb-6 text-red-500"></i>
-            <h1 class="text-3xl font-bold mb-4 text-gray-900">Guide Not Found</h1>
-            <p class="text-gray-600 mb-8">The guide you're looking for doesn't exist or has been removed.</p>
+            <h1 class="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Guide Not Found</h1>
+            <p class="text-gray-600 dark:text-gray-300 mb-8">The guide you're looking for doesn't exist or has been removed.</p>
             <a href="index.html" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-xl transition-all transform hover:scale-105">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
                 Return Home
@@ -248,10 +274,10 @@
     <div x-show="currentGuide" class="min-h-screen flex flex-col" style="display: none;">
 
         <!-- Navbar -->
-        <nav class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <nav class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 shadow-sm transition-colors duration-300">
             <div class="max-w-7xl mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <a href="index.html" class="flex items-center gap-3 text-gray-600 hover:text-gray-900 transition-all group">
+                    <a href="index.html" class="flex items-center gap-3 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-all group">
                         <div class="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-white shadow-md transform group-hover:scale-110 transition-transform">
                             <i data-lucide="arrow-left" class="w-5 h-5"></i>
                         </div>
@@ -262,7 +288,7 @@
                 <!-- Guide Title Dropdown -->
                 <div class="guide-dropdown hidden md:block">
                     <button @click="guideDropdownOpen = !guideDropdownOpen" @click.away="guideDropdownOpen = false"
-                            class="flex items-center gap-2 font-bold text-xl text-gray-900 hover:text-primary transition-colors">
+                            class="flex items-center gap-2 font-bold text-xl text-gray-900 dark:text-white hover:text-primary dark:hover:text-blue-400 transition-colors">
                         <span x-text="currentGuide?.title"></span>
                         <i data-lucide="chevron-down" class="w-5 h-5"></i>
                     </button>
@@ -281,8 +307,13 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <span class="text-xs text-gray-500 hidden sm:inline">Documentation</span>
+                <div class="flex items-center gap-4">
+                     <!-- Theme Toggle -->
+                    <button @click="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors duration-200" :title="darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+                        <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5"></i>
+                        <i x-show="darkMode" data-lucide="sun" class="w-5 h-5" style="display: none;"></i>
+                    </button>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Documentation</span>
                 </div>
             </div>
         </nav>
@@ -294,8 +325,8 @@
                 <div class="lg:sticky lg:top-28 space-y-6 animate-fade-in">
 
                     <!-- Table of Contents -->
-                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
-                        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 hover:shadow-xl transition-shadow">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider mb-4 flex items-center gap-2">
                             <i data-lucide="list" class="w-4 h-4 text-primary"></i>
                             On this page
                         </h3>
@@ -303,7 +334,7 @@
                             <template x-for="section in currentGuide?.sections">
                                 <li>
                                     <a :href="'#' + section.id"
-                                        class="block pl-4 py-2 text-sm text-gray-600 hover:text-primary border-l-3 border-transparent hover:border-primary transition-all rounded-r-lg hover:bg-blue-50"
+                                        class="block pl-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-blue-400 border-l-3 border-transparent hover:border-primary transition-all rounded-r-lg hover:bg-blue-50 dark:hover:bg-gray-700"
                                         x-text="section.title"></a>
                                 </li>
                             </template>
@@ -311,8 +342,8 @@
                     </div>
 
                     <!-- Version History Widget -->
-                    <div class="bg-gradient-to-br from-white to-blue-50/30 rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
-                        <h3 class="flex items-center gap-2 font-bold text-base text-gray-900 mb-4">
+                    <div class="bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 hover:shadow-xl transition-shadow">
+                        <h3 class="flex items-center gap-2 font-bold text-base text-gray-900 dark:text-gray-100 mb-4">
                             <i data-lucide="clock" class="w-5 h-5 text-primary"></i>
                             Version History
                         </h3>
@@ -323,11 +354,11 @@
                             <template x-for="ver in currentGuide?.versions">
                                 <div class="relative pl-7">
                                     <div class="absolute left-0 top-2 w-4 h-4 bg-white border-2 border-primary rounded-full shadow-sm"></div>
-                                    <div class="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                                        <span class="bg-primary/10 text-primary px-2 py-0.5 rounded-md text-xs font-bold" x-text="'v' + ver.version"></span>
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-200 flex items-center gap-2">
+                                        <span class="bg-primary/10 dark:bg-blue-900/30 text-primary dark:text-blue-400 px-2 py-0.5 rounded-md text-xs font-bold" x-text="'v' + ver.version"></span>
                                     </div>
-                                    <div class="text-xs text-gray-500 mb-1 mt-1" x-text="ver.date"></div>
-                                    <p class="text-xs text-gray-700 leading-relaxed bg-white/50 p-2 rounded-lg" x-text="ver.description"></p>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 mt-1" x-text="ver.date"></div>
+                                    <p class="text-xs text-gray-700 dark:text-gray-300 leading-relaxed bg-white/50 dark:bg-gray-700/50 p-2 rounded-lg" x-text="ver.description"></p>
                                 </div>
                             </template>
 
@@ -342,11 +373,11 @@
 
             <!-- Main Content -->
             <main class="flex-1 min-w-0 animate-fade-in">
-                <div class="mb-12 bg-gradient-to-r from-white to-blue-50/30 rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-shadow">
+                <div class="mb-12 bg-gradient-to-r from-white to-blue-50/30 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-8 hover:shadow-xl transition-shadow">
                     <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">
                         <span class="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent" x-text="currentGuide?.title"></span>
                     </h1>
-                    <p class="text-lg text-gray-600 flex items-center gap-2">
+                    <p class="text-lg text-gray-600 dark:text-gray-300 flex items-center gap-2">
                         <i data-lucide="book-open" class="w-5 h-5 text-primary"></i>
                         Official Documentation & Setup Guide
                     </p>
@@ -354,8 +385,8 @@
 
                 <div class="space-y-12">
                     <template x-for="section in currentGuide?.sections">
-                        <section :id="section.id" class="scroll-mt-24 bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-shadow">
-                            <h2 class="text-3xl font-bold mb-6 pb-4 border-b-2 border-gray-200 flex items-center gap-3">
+                        <section :id="section.id" class="scroll-mt-24 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-8 hover:shadow-xl transition-shadow">
+                            <h2 class="text-3xl font-bold mb-6 pb-4 border-b-2 border-gray-200 dark:border-gray-700 flex items-center gap-3 text-gray-900 dark:text-white">
                                 <i data-lucide="file-text" class="w-7 h-7 text-primary"></i>
                                 <span x-text="section.title"></span>
                             </h2>
@@ -365,7 +396,7 @@
 
                     <!-- No sections placeholder -->
                     <div x-show="!currentGuide?.sections || currentGuide.sections.length === 0"
-                        class="text-center text-gray-400 py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+                        class="text-center text-gray-400 py-16 bg-white dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
                         <i data-lucide="file-question" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
                         <p class="text-lg">No documentation sections available yet.</p>
                     </div>
@@ -383,16 +414,16 @@
         </div>
 
         <!-- Footer -->
-        <footer class="bg-white border-t border-gray-200 py-8 mt-12">
+        <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-8 mt-12 transition-colors duration-300">
             <div class="max-w-7xl mx-auto px-4 md:px-8">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p class="text-sm text-gray-500">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
                         © 2025 TactForce. All Rights Reserved.
                     </p>
                     <div class="flex items-center gap-4">
-                        <a href="index.html" class="text-sm text-gray-600 hover:text-primary transition-colors">Home</a>
-                        <span class="text-gray-300">•</span>
-                        <a href="admin.html" class="text-sm text-gray-600 hover:text-primary transition-colors">Admin</a>
+                        <a href="index.html" class="text-sm text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 transition-colors">Home</a>
+                        <span class="text-gray-300 dark:text-gray-600">•</span>
+                        <a href="admin.html" class="text-sm text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 transition-colors">Admin</a>
                     </div>
                 </div>
             </div>

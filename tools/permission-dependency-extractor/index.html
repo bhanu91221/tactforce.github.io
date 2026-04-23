@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permission Dependency Extractor | TactForce Tools</title>
+    <meta name="description" content="Generate the PermDepMap.json static resource for the Permission Dependency Resolver managed package, from your org's Tooling API response.">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="icon" type="image/png" href="../../images/logo.png">
+
+    <!-- Theme bridge: must run early to prevent flash -->
+    <script src="../../js/tools-theme-bridge.js"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind (for the site header/footer chrome) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    <!-- Content & app -->
+    <script src="../../js/content.js"></script>
+    <script src="../../js/app.js"></script>
+
+    <style>
+        /* === Tool's original design system, hybrid-themed === */
+        :root {
+            color-scheme: light;
+            --bg: #f9fafb;               /* hybrid: matches site bg-gray-50 */
+            --surface: #ffffff;
+            --surface-muted: #f0f3f8;
+            --border: #e5e7eb;           /* hybrid: matches site border-gray-200 */
+            --border-strong: #c0c7d2;
+            --fg: #1f2937;               /* hybrid: matches site text-gray-800 */
+            --fg-muted: #52607a;
+            --fg-subtle: #7b8699;
+            --accent: #0176d3;
+            --accent-hover: #014f8c;
+            --accent-fg: #ffffff;
+            --code-bg: #f0f3f8;
+            --code-fg: #2a3446;
+            --danger-bg: #fdecea;
+            --danger-border: #f3b8b1;
+            --danger-fg: #8a1f14;
+            --warn-bg: #fef6e0;
+            --warn-border: #f0d47a;
+            --warn-fg: #7a5a10;
+            --success-bg: #e5f4ec;
+            --success-border: #9fd4b4;
+            --success-fg: #175d36;
+            --focus-ring: #3a9cff;
+            --shadow-sm: 0 1px 2px rgba(10, 20, 40, 0.06);
+            --shadow-md: 0 4px 14px rgba(10, 20, 40, 0.08);
+            --radius: 10px;
+            --radius-sm: 6px;
+            --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #111827;               /* hybrid: matches site bg-gray-900 */
+            --surface: #1f2937;          /* hybrid: matches site bg-gray-800 */
+            --surface-muted: #1e2639;
+            --border: #374151;           /* hybrid: matches site border-gray-700 */
+            --border-strong: #3a445d;
+            --fg: #f3f4f6;               /* hybrid: matches site text-gray-100 */
+            --fg-muted: #a0acc2;
+            --fg-subtle: #6f7b93;
+            --accent: #4ba7ee;
+            --accent-hover: #7cc1f5;
+            --accent-fg: #06111f;
+            --code-bg: #0a1020;
+            --code-fg: #cfd7e8;
+            --danger-bg: #3a1a17;
+            --danger-border: #6a2a23;
+            --danger-fg: #ffb3a8;
+            --warn-bg: #3a2d10;
+            --warn-border: #6a521f;
+            --warn-fg: #f5d48a;
+            --success-bg: #16311f;
+            --success-border: #2e5a3d;
+            --success-fg: #9fd4b4;
+            --focus-ring: #6cbcff;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: var(--font-ui);
+            font-size: 15px;
+            line-height: 1.55;
+            transition: background-color 200ms ease, color 200ms ease;
+        }
+
+        body { min-height: 100vh; }
+
+        .tool-shell { padding: 6rem 1rem 2.5rem; max-width: 820px; margin: 0 auto; }
+
+        .tool-title-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
+        .tool-title-bar h1 { font-size: 1.75rem; font-weight: 800; color: var(--fg); margin: 0; display: flex; align-items: center; gap: 0.6rem; letter-spacing: -0.01em; }
+        .tool-title-bar .accent-icon { color: var(--accent); }
+        .tool-title-bar .back-link { font-size: 0.875rem; color: var(--fg-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; }
+        .tool-title-bar .back-link:hover { color: var(--accent); }
+        .tool-subtitle { color: var(--fg-muted); margin: -0.5rem 0 1rem; font-size: 0.95rem; }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+            transition: background-color 200ms ease, border-color 200ms ease;
+        }
+
+        .card h2 {
+            margin: 0 0 14px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            text-transform: uppercase;
+            color: var(--fg-muted);
+        }
+
+        ol.steps { margin: 0; padding-left: 22px; }
+        ol.steps li { margin-bottom: 10px; color: var(--fg); }
+        ol.steps li:last-child { margin-bottom: 0; }
+
+        .code-block {
+            position: relative;
+            background: var(--code-bg);
+            color: var(--code-fg);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            margin: 10px 0;
+        }
+        .code-block .code-scroll {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            padding: 12px 14px;
+            padding-right: 72px;
+            overflow-x: auto;
+            white-space: pre;
+            border-radius: var(--radius-sm);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--surface);
+            color: var(--fg-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 4px 10px;
+            font-size: 12px;
+            font-family: var(--font-ui);
+            cursor: pointer;
+            transition: background-color 120ms, color 120ms, border-color 120ms;
+        }
+        .copy-btn:hover { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+        .copy-btn.copied { background: var(--success-bg); color: var(--success-fg); border-color: var(--success-border); }
+
+        kbd, code.inline {
+            background: var(--code-bg);
+            color: var(--code-fg);
+            font-family: var(--font-mono);
+            font-size: 0.88em;
+            padding: 1px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        label.field-label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--fg);
+        }
+
+        textarea#input {
+            width: 100%;
+            min-height: 360px;
+            resize: vertical;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.5;
+            padding: 12px 14px;
+            background: var(--surface-muted);
+            color: var(--fg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            transition: border-color 150ms, box-shadow 150ms, background-color 200ms;
+        }
+        textarea#input::placeholder { color: var(--fg-subtle); }
+        textarea#input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(75, 167, 238, 0.2);
+        }
+
+        .input-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--fg-subtle);
+        }
+
+        .actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+        button.btn {
+            font-family: var(--font-ui);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background-color 150ms, border-color 150ms, color 150ms, transform 100ms;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        button.btn:active:not(:disabled) { transform: translateY(1px); }
+
+        button.btn-primary { background: var(--accent); color: var(--accent-fg); }
+        button.btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+        button.btn-primary:disabled { background: var(--border); color: var(--fg-subtle); cursor: not-allowed; }
+
+        button.btn-secondary {
+            background: var(--surface);
+            color: var(--fg);
+            border-color: var(--border-strong);
+        }
+        button.btn-secondary:hover:not(:disabled) { background: var(--surface-muted); border-color: var(--accent); }
+        button.btn-secondary:disabled { color: var(--fg-subtle); cursor: not-allowed; }
+
+        button.btn-ghost {
+            background: transparent;
+            color: var(--fg-muted);
+            border-color: transparent;
+            padding: 6px 10px;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        button.btn-ghost:hover { color: var(--fg); background: var(--surface-muted); }
+
+        :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-sm); }
+
+        .alert {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid;
+            font-size: 14px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .alert.error { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-fg); }
+        .alert.warn { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-fg); }
+        .alert strong { font-weight: 700; }
+        .alert ul { margin: 6px 0 0; padding-left: 20px; }
+        .alert svg { flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; }
+
+        .hidden { display: none !important; }
+
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .chip {
+            background: var(--surface-muted);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 13px;
+            color: var(--fg);
+        }
+        .chip strong { color: var(--accent); font-variant-numeric: tabular-nums; }
+
+        details.preview {
+            margin-top: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--code-bg);
+        }
+        details.preview summary {
+            cursor: pointer;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--fg-muted);
+            user-select: none;
+        }
+        details.preview[open] summary { border-bottom: 1px solid var(--border); }
+        details.preview pre {
+            margin: 0;
+            padding: 12px 14px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--code-fg);
+            overflow-x: auto;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        footer.tool-footer {
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--fg-subtle);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        footer.tool-footer .disclosure {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            line-height: 1.6;
+        }
+        footer.tool-footer .disclosure svg {
+            flex-shrink: 0;
+            width: 16px;
+            height: 16px;
+            margin-top: 2px;
+            color: var(--fg-muted);
+        }
+        footer.tool-footer .disclosure strong { color: var(--fg-muted); font-weight: 600; }
+        footer.tool-footer .meta-row {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border);
+        }
+
+        @media (max-width: 560px) {
+            .tool-shell { padding: 5rem 1rem 2rem; }
+            .card { padding: 18px 16px; }
+            .tool-title-bar h1 { font-size: 1.4rem; }
+            .actions { flex-direction: column; align-items: stretch; }
+            button.btn { justify-content: center; }
+        }
+    </style>
+</head>
+<body x-data="toolsApp">
+
+    <!-- Site header -->
+    <header id="main-header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-gradient-to-b from-black/30 to-transparent backdrop-blur-sm"
+            x-init="$el.innerHTML = window.renderHeader({ basePath: '../../' }); $nextTick(() => lucide.createIcons({ root: $el }))">
+    </header>
+
+    <main class="tool-shell">
+
+        <div class="tool-title-bar">
+            <h1>
+                <svg class="accent-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                Permission Dependency Extractor
+            </h1>
+            <a href="../../tools.html" class="back-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                All Tools
+            </a>
+        </div>
+        <p class="tool-subtitle">Generate the <code class="inline">PermDepMap.json</code> static resource for your org.</p>
+
+        <section class="card">
+            <h2>How it works</h2>
+            <ol class="steps">
+                <li>Open <strong>Workbench</strong>, <strong>Salesforce Inspector</strong>, or any REST client authenticated to your org.</li>
+                <li>
+                    Call this Tooling API endpoint with a <code class="inline">GET</code> request:
+                    <div class="code-block">
+                        <div class="code-scroll" id="endpointText">/services/data/v66.0/tooling/query/?q=SELECT+Permission,PermissionType,RequiredPermission,RequiredPermissionType+FROM+PermissionDependency</div>
+                        <button type="button" class="copy-btn" data-copy-target="endpointText">Copy</button>
+                    </div>
+                </li>
+                <li>Copy the <strong>entire raw JSON response</strong> and paste it into the text area below.</li>
+                <li>Click <strong>Generate JSON</strong>.</li>
+                <li>Click <strong>Download</strong>, then upload the file as a static resource named <code class="inline">PermDepMap</code> in your org.</li>
+            </ol>
+        </section>
+
+        <section class="card">
+            <label for="input" class="field-label">Paste raw Tooling API response</label>
+            <textarea id="input" spellcheck="false" autocomplete="off" placeholder='{ "size": 1872, "totalSize": 1872, "done": true, "records": [ ... ] }'></textarea>
+            <div class="input-meta">
+                <span id="charCount">0 characters</span>
+                <button type="button" class="btn btn-ghost" id="clearBtn">Clear</button>
+            </div>
+            <div class="actions">
+                <button type="button" class="btn btn-primary" id="generateBtn" disabled>Generate JSON</button>
+            </div>
+            <div class="alert error hidden" id="errorAlert" role="alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div><strong id="errorTitle">Error</strong><div id="errorBody"></div></div>
+            </div>
+        </section>
+
+        <section class="card hidden" id="resultsCard">
+            <h2>Result</h2>
+            <div class="chips" id="chips"></div>
+            <div class="alert warn hidden" id="warnAlert" role="status">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <div>
+                    <strong>Cycles detected</strong>
+                    <div>The map was still generated. Review these circular dependencies:</div>
+                    <ul id="warnList"></ul>
+                </div>
+            </div>
+            <div class="actions">
+                <button type="button" class="btn btn-primary" id="downloadBtn">Download PermDepMap.json</button>
+                <button type="button" class="btn btn-secondary" id="copyBtn">Copy to Clipboard</button>
+            </div>
+            <details class="preview">
+                <summary>Preview (first 100 lines)</summary>
+                <pre id="previewPre"></pre>
+            </details>
+        </section>
+
+        <footer class="tool-footer">
+            <div class="disclosure">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <div>
+                    <strong>Your data stays on your device.</strong>
+                    This page runs entirely in your browser. All processing happens client-side &mdash; nothing you paste is sent, stored, logged, or transmitted to any server. There is no backend, no analytics, and no third-party calls. You can verify this by opening your browser's developer tools network tab, or by saving this page and running it fully offline.
+                </div>
+            </div>
+            <div class="disclosure">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <div>
+                    <strong>Not affiliated with Salesforce.</strong>
+                    This is an independent utility and is not affiliated with, endorsed by, or sponsored by Salesforce, Inc., Workbench, or Salesforce Inspector. Salesforce, Tooling API, and all related marks are trademarks of Salesforce, Inc. Workbench and Salesforce Inspector are the property of their respective owners and are referenced here solely to help you obtain the required input data.
+                </div>
+            </div>
+            <div class="meta-row">
+                <span>Output filename: <code class="inline">PermDepMap.json</code></span>
+                <span>Static resource name: <code class="inline">PermDepMap</code></span>
+            </div>
+        </footer>
+
+    </main>
+
+<script>
+(function () {
+    'use strict';
+
+    // ---------- Core logic (port of build-permission-dependency-map.js) ----------
+
+    function keyOf(permission, permissionType) {
+        return `${permissionType}::${permission}`;
+    }
+
+    function splitKey(key) {
+        const idx = key.indexOf('::');
+        return { permissionType: key.slice(0, idx), permission: key.slice(idx + 2) };
+    }
+
+    function buildAdjacency(records) {
+        const adj = new Map();
+        const sourceMeta = new Map();
+
+        for (const r of records) {
+            const perm = r.Permission;
+            const permType = r.PermissionType;
+            const reqPerm = r.RequiredPermission;
+            const reqType = r.RequiredPermissionType;
+            if (!perm || !permType || !reqPerm || !reqType) continue;
+
+            const srcKey = keyOf(perm, permType);
+            const reqKey = keyOf(reqPerm, reqType);
+
+            if (!adj.has(srcKey)) adj.set(srcKey, new Map());
+            if (!sourceMeta.has(srcKey)) sourceMeta.set(srcKey, { permission: perm, permissionType: permType });
+
+            adj.get(srcKey).set(reqKey, { permission: reqPerm, permissionType: reqType });
+        }
+        return { adj, sourceMeta };
+    }
+
+    function transitiveClosure(startKey, adj, cyclesOut) {
+        const closure = new Map();
+        const expanded = new Set();
+        const onStack = new Set();
+        const stackPath = [];
+
+        function dfs(nodeKey) {
+            if (expanded.has(nodeKey)) return;
+            expanded.add(nodeKey);
+            onStack.add(nodeKey);
+            stackPath.push(nodeKey);
+
+            const edges = adj.get(nodeKey);
+            if (edges) {
+                for (const [reqKey, reqMeta] of edges.entries()) {
+                    if (onStack.has(reqKey)) {
+                        cyclesOut.push([...stackPath, reqKey].map(k => {
+                            const m = splitKey(k);
+                            return `${m.permission} [${m.permissionType}]`;
+                        }).join(' \u2192 '));
+                        continue;
+                    }
+                    if (!closure.has(reqKey)) closure.set(reqKey, reqMeta);
+                    dfs(reqKey);
+                }
+            }
+            onStack.delete(nodeKey);
+            stackPath.pop();
+        }
+
+        dfs(startKey);
+        closure.delete(startKey);
+        return closure;
+    }
+
+    function sortEntries(list) {
+        return list.slice().sort((a, b) => {
+            if (a.permissionType !== b.permissionType) {
+                return a.permissionType < b.permissionType ? -1 : 1;
+            }
+            return a.permission < b.permission ? -1 : 1;
+        });
+    }
+
+    function generate(rawText) {
+        if (!rawText || !rawText.trim()) {
+            throw new PDMError('empty', 'Paste the Tooling API response into the text area first.');
+        }
+        let parsed;
+        try {
+            parsed = JSON.parse(rawText);
+        } catch (e) {
+            throw new PDMError('parse', "That doesn't look like valid JSON. Check that you copied the entire response, including the outer braces.");
+        }
+        if (!parsed || !Array.isArray(parsed.records)) {
+            throw new PDMError('shape', 'Expected a Tooling API QueryResult with a "records" array. Did you run the correct SOQL query against the Tooling API?');
+        }
+
+        const records = parsed.records;
+        const { adj, sourceMeta } = buildAdjacency(records);
+
+        const cycles = [];
+        const dependencies = {};
+        const sourceKeys = [...sourceMeta.keys()].sort();
+
+        for (const srcKey of sourceKeys) {
+            const src = sourceMeta.get(srcKey);
+            const closure = transitiveClosure(srcKey, adj, cycles);
+            const requires = sortEntries([...closure.values()]);
+            dependencies[srcKey] = {
+                permission: src.permission,
+                permissionType: src.permissionType,
+                requires: requires
+            };
+        }
+
+        const today = new Date();
+        const version = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+
+        const output = {
+            version: version,
+            generatedFrom: `Tooling API PermissionDependency, ${records.length} rows`,
+            warnings: cycles.length > 0 ? cycles.map(c => `cycle detected: ${c}`) : [],
+            dependencies: dependencies
+        };
+
+        const jsonString = JSON.stringify(output, null, 2) + '\n';
+        const directEdges = [...adj.values()].reduce((sum, m) => sum + m.size, 0);
+        const closureEdges = Object.values(dependencies).reduce((sum, n) => sum + n.requires.length, 0);
+
+        return {
+            jsonString,
+            summary: {
+                rawRecords: records.length,
+                sourceCount: sourceKeys.length,
+                directEdges,
+                closureEdges
+            },
+            cycles
+        };
+    }
+
+    function PDMError(kind, message) {
+        this.name = 'PDMError';
+        this.kind = kind;
+        this.message = message;
+    }
+    PDMError.prototype = Object.create(Error.prototype);
+
+    // ---------- UI wiring ----------
+
+    const input = document.getElementById('input');
+    const charCount = document.getElementById('charCount');
+    const clearBtn = document.getElementById('clearBtn');
+    const generateBtn = document.getElementById('generateBtn');
+    const errorAlert = document.getElementById('errorAlert');
+    const errorBody = document.getElementById('errorBody');
+    const resultsCard = document.getElementById('resultsCard');
+    const chips = document.getElementById('chips');
+    const warnAlert = document.getElementById('warnAlert');
+    const warnList = document.getElementById('warnList');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const previewPre = document.getElementById('previewPre');
+
+    let lastOutput = null;
+
+    function updateCharCount() {
+        const len = input.value.length;
+        charCount.textContent = `${len.toLocaleString()} character${len === 1 ? '' : 's'}`;
+        generateBtn.disabled = len === 0;
+    }
+
+    function hideError() {
+        errorAlert.classList.add('hidden');
+        errorBody.textContent = '';
+    }
+
+    function showError(message) {
+        errorBody.textContent = message;
+        errorAlert.classList.remove('hidden');
+    }
+
+    function renderChips(summary) {
+        chips.innerHTML = '';
+        const items = [
+            [summary.rawRecords.toLocaleString(), 'raw records'],
+            [summary.sourceCount.toLocaleString(), 'source permissions'],
+            [summary.directEdges.toLocaleString(), 'direct edges'],
+            [summary.closureEdges.toLocaleString(), 'after transitive closure']
+        ];
+        for (const [n, label] of items) {
+            const el = document.createElement('span');
+            el.className = 'chip';
+            el.innerHTML = `<strong>${n}</strong> ${label}`;
+            chips.appendChild(el);
+        }
+    }
+
+    function renderWarnings(cycles) {
+        if (!cycles.length) {
+            warnAlert.classList.add('hidden');
+            return;
+        }
+        warnList.innerHTML = '';
+        for (const c of cycles) {
+            const li = document.createElement('li');
+            li.textContent = c;
+            warnList.appendChild(li);
+        }
+        warnAlert.classList.remove('hidden');
+    }
+
+    function renderPreview(jsonString) {
+        const lines = jsonString.split('\n').slice(0, 100);
+        if (jsonString.split('\n').length > 100) lines.push('...');
+        previewPre.textContent = lines.join('\n');
+    }
+
+    input.addEventListener('input', () => {
+        updateCharCount();
+        hideError();
+    });
+    updateCharCount();
+
+    clearBtn.addEventListener('click', () => {
+        input.value = '';
+        updateCharCount();
+        hideError();
+        resultsCard.classList.add('hidden');
+        lastOutput = null;
+        input.focus();
+    });
+
+    generateBtn.addEventListener('click', () => {
+        hideError();
+        try {
+            const result = generate(input.value);
+            lastOutput = result;
+            renderChips(result.summary);
+            renderWarnings(result.cycles);
+            renderPreview(result.jsonString);
+            resultsCard.classList.remove('hidden');
+            resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (e) {
+            lastOutput = null;
+            resultsCard.classList.add('hidden');
+            showError(e && e.message ? e.message : 'Something went wrong while generating the JSON.');
+        }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+        if (!lastOutput) return;
+        const blob = new Blob([lastOutput.jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'PermDepMap.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 500);
+    });
+
+    copyBtn.addEventListener('click', async () => {
+        if (!lastOutput) return;
+        const original = copyBtn.textContent;
+        try {
+            await navigator.clipboard.writeText(lastOutput.jsonString);
+            copyBtn.textContent = 'Copied!';
+        } catch {
+            const ta = document.createElement('textarea');
+            ta.value = lastOutput.jsonString;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); copyBtn.textContent = 'Copied!'; }
+            catch { copyBtn.textContent = 'Copy failed'; }
+            document.body.removeChild(ta);
+        }
+        setTimeout(() => { copyBtn.textContent = original; }, 1600);
+    });
+
+    // Copy buttons for code blocks
+    document.querySelectorAll('.copy-btn[data-copy-target]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const target = document.getElementById(btn.dataset.copyTarget);
+            if (!target) return;
+            const text = Array.from(target.childNodes)
+                .filter(n => n.nodeType === Node.TEXT_NODE)
+                .map(n => n.textContent)
+                .join('')
+                .trim();
+            try { await navigator.clipboard.writeText(text); }
+            catch {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); } catch {}
+                document.body.removeChild(ta);
+            }
+            btn.classList.add('copied');
+            const original = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.classList.remove('copied'); btn.textContent = original; }, 1400);
+        });
+    });
+
+})();
+
+// Site header scroll effect — single class toggle
+window.addEventListener('scroll', () => {
+    const header = document.getElementById('main-header');
+    if (!header) return;
+    header.classList.toggle('tf-scrolled', window.scrollY > 50);
+});
+document.addEventListener('alpine:initialized', () => setTimeout(() => lucide.createIcons(), 100));
+</script>
+</body>
+</html>

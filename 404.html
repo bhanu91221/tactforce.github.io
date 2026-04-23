@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found | TactForce</title>
+    <meta name="description" content="The page you're looking for doesn't exist.">
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/png" href="/images/logo.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+        }
+        // Honor saved theme
+        if (localStorage.getItem('theme') === 'dark' || localStorage.getItem('theme') === null) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .gradient-bg {
+            background: linear-gradient(-45deg, #007bff, #00A1E0, #16a085, #4da3ff);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #007bff, #00A1E0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans text-gray-800 dark:text-gray-100 min-h-screen flex flex-col">
+
+    <main class="flex-1 flex items-center justify-center px-4 py-16">
+        <div class="max-w-2xl w-full text-center">
+            <div class="inline-flex items-center justify-center w-24 h-24 rounded-full gradient-bg mb-8 animate-float shadow-2xl">
+                <i data-lucide="compass" class="w-12 h-12 text-white"></i>
+            </div>
+            <h1 class="text-7xl md:text-9xl font-black text-gradient mb-4 leading-none">404</h1>
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">Page Not Found</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-400 mb-10 max-w-lg mx-auto">
+                The page you're looking for doesn't exist or has moved. Let's get you back on track.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="/" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all hover:shadow-lg hover:-translate-y-0.5">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                    Go Home
+                </a>
+                <a href="/tools.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-800 dark:text-white font-semibold rounded-xl border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-0.5">
+                    <i data-lucide="wrench" class="w-5 h-5"></i>
+                    Browse Tools
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
+        <a href="/" class="hover:text-blue-600 dark:hover:text-blue-400 transition">TactForce</a>
+    </footer>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

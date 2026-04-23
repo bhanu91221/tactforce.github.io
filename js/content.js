@@ -13,6 +13,10 @@ window.siteContent = {
             "href": "#solutions"
         },
         {
+            "label": "Tools",
+            "href": "tools.html"
+        },
+        {
             "label": "Contact",
             "href": "#contact"
         }
@@ -103,6 +107,32 @@ window.siteContent = {
         "buyMeCoffeeImage": "https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png",
         "linkedInLink": "https://www.linkedin.com/in/bhanuprakashvakati/"
     },
+    "tools": [
+        {
+            "id": "delimiter",
+            "name": "Delimiter",
+            "description": "Convert between column-separated and delimited data \u2014 comma, pipe, tab, or any custom delimiter. Wrap, dedupe, group.",
+            "icon": "list",
+            "url": "tools/delimiter/",
+            "hidden": false
+        },
+        {
+            "id": "md-to-pdf",
+            "name": "MD to PDF",
+            "description": "Paste or drop a Markdown file, preview it live, and export a clean PDF \u2014 100% local, no server.",
+            "icon": "file-text",
+            "url": "tools/md-to-pdf/",
+            "hidden": false
+        },
+        {
+            "id": "permission-dependency-extractor",
+            "name": "Permission Dependency Extractor",
+            "description": "Generate the PermDepMap.json static resource for the Permission Dependency Resolver app.",
+            "icon": "shield",
+            "url": "tools/permission-dependency-extractor/",
+            "hidden": true
+        }
+    ],
     "guides": {
         "dynamic-path": {
             "title": "Dynamic Path User Guide",

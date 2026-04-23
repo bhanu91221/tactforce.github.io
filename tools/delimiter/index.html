@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delimiter | TactForce Tools</title>
+    <meta name="description" content="Convert between column-separated and delimited data — comma, pipe, tab, or any custom delimiter.">
+    <link rel="icon" type="image/png" href="../../images/logo.png">
+
+    <!-- Theme bridge: must run early to prevent flash -->
+    <script src="../../js/tools-theme-bridge.js"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Tailwind (for the site header/footer chrome) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    <!-- Content & app -->
+    <script src="../../js/content.js"></script>
+    <script src="../../js/app.js"></script>
+
+    <style>
+        /* === Tool's original design system, untouched === */
+        :root {
+            color-scheme: light;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+
+            --bg-body: #f9fafb;          /* hybrid: matches site bg-gray-50 */
+            --bg-card: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.8);
+
+            --text-main: #1f2937;        /* hybrid: matches site text-gray-800 */
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+
+            --border: #e5e7eb;           /* hybrid: matches site border-gray-200 */
+            --border-hover: #cbd5e1;
+
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+
+            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --primary: #818cf8;
+            --primary-hover: #a5b4fc;
+            --primary-glow: rgba(129, 140, 248, 0.3);
+
+            --bg-body: #111827;          /* hybrid: matches site bg-gray-900 */
+            --bg-card: #1f2937;          /* hybrid: matches site bg-gray-800 */
+            --bg-glass: rgba(31, 41, 55, 0.8);
+
+            --text-main: #f3f4f6;        /* hybrid: matches site text-gray-100 */
+            --text-muted: #9ca3af;
+            --text-light: #6b7280;
+
+            --border: #374151;           /* hybrid: matches site border-gray-700 */
+            --border-hover: #4b5563;
+
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+            --shadow-glow: 0 0 25px rgba(129, 140, 248, 0.1);
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        .tool-shell { padding: 6rem 2rem 2rem; flex: 1; display: flex; flex-direction: column; max-width: none; width: 100%; margin: 0 auto; gap: 1.5rem; }
+
+        .tool-title-bar { display: flex; align-items: center; justify-content: space-between; padding: 0 0.5rem; }
+        .tool-title-bar h1 { font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 0.6rem; }
+        .tool-title-bar .accent-icon { color: var(--primary); }
+        .tool-title-bar .back-link { font-size: 0.875rem; color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; }
+        .tool-title-bar .back-link:hover { color: var(--primary); }
+
+        .converter-grid { display: grid; grid-template-columns: 1fr 140px 1fr; gap: 1.5rem; align-items: stretch; flex: 1; min-height: 400px; }
+
+        .editor-container { position: relative; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-md); display: flex; flex-direction: column; transition: box-shadow 0.3s ease, border-color 0.3s ease; overflow: hidden; height: 100%; }
+        .editor-container:focus-within { border-color: var(--primary); box-shadow: var(--shadow-glow); }
+        .editor-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-weight: 600; color: var(--text-muted); font-size: 0.875rem; display: flex; justify-content: space-between; align-items: center; background: var(--bg-body); }
+        .header-actions { display: flex; gap: 1rem; align-items: center; }
+        .action-icon { cursor: pointer; color: var(--text-light); transition: color 0.2s; display: flex; align-items: center; }
+        .action-icon:hover { color: var(--primary); }
+        .action-icon.danger:hover { color: #ef4444; }
+        .editor-content { flex: 1; display: flex; position: relative; height: 100%; }
+        .line-numbers { background: var(--bg-body); color: var(--text-light); padding: 1.5rem 0.5rem; text-align: right; border-right: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6; user-select: none; width: 45px; overflow: hidden; }
+        textarea { flex: 1; width: 100%; height: 100%; border: none; padding: 1.5rem; resize: none; background: transparent; color: var(--text-main); font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6; outline: none; white-space: pre; overflow-x: auto; }
+
+        .controls-middle { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 1rem; }
+        .control-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main); width: 50px; height: 50px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-sm); font-size: 1.2rem; }
+        .control-btn:hover { transform: scale(1.1); border-color: var(--primary); color: var(--primary); box-shadow: var(--shadow-glow); }
+        .control-btn.primary { background: var(--primary); color: white; border: none; }
+        .control-btn.primary:hover { background: var(--primary-hover); color: white; }
+
+        .delimiter-select-wrapper { position: relative; width: 100%; }
+        .select-styled { appearance: none; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main); padding: 0.75rem; border-radius: var(--radius-md); width: 100%; cursor: pointer; text-align: center; font-weight: 600; transition: all 0.2s; text-overflow: ellipsis; }
+        .select-styled:focus { outline: none; border-color: var(--primary); box-shadow: var(--shadow-glow); }
+
+        .settings-section { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 0; box-shadow: var(--shadow-sm); transition: all 0.3s ease; }
+        .settings-header-btn { display: flex; align-items: center; justify-content: center; gap: 0.75rem; font-size: 1.1rem; font-weight: 700; cursor: pointer; user-select: none; width: 100%; padding: 1.5rem; transition: color 0.2s; color: var(--text-main); background: none; border: none; }
+        .settings-header-btn:hover { color: var(--primary); }
+        .chevron { transition: transform 0.3s ease; }
+        .settings-section.open .chevron { transform: rotate(180deg); }
+        .settings-content-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; opacity: 0; }
+        .settings-section.open .settings-content-wrapper { max-height: 800px; opacity: 1; }
+        .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; padding: 0 2rem 2rem 2rem; }
+        .setting-card { display: flex; flex-direction: column; gap: 0.75rem; }
+        .setting-label { font-weight: 600; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
+        .setting-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: -0.25rem; }
+        .btn-group { display: flex; background: var(--bg-body); padding: 0.25rem; border-radius: var(--radius-md); border: 1px solid var(--border); }
+        .btn-group-item { flex: 1; background: transparent; border: none; padding: 0.5rem; font-size: 0.85rem; color: var(--text-muted); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; font-weight: 500; }
+        .btn-group-item.active { background: var(--bg-card); color: var(--primary); box-shadow: var(--shadow-sm); font-weight: 600; }
+        .input-styled { background: var(--bg-body); border: 1px solid var(--border); padding: 0.6rem 1rem; border-radius: var(--radius-md); color: var(--text-main); width: 100%; transition: all 0.2s; }
+        .input-styled:focus { outline: none; border-color: var(--primary); }
+        .input-row { display: flex; gap: 0.5rem; }
+
+        @media (max-width: 900px) {
+            .converter-grid { grid-template-columns: 1fr; grid-template-rows: auto auto auto; }
+            .controls-middle { flex-direction: row; padding: 1rem 0; }
+            .delimiter-select-wrapper { width: 150px; }
+        }
+    </style>
+</head>
+<body x-data="toolsApp">
+
+    <!-- Site header -->
+    <header id="main-header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-gradient-to-b from-black/30 to-transparent backdrop-blur-sm"
+            x-init="$el.innerHTML = window.renderHeader({ basePath: '../../' }); $nextTick(() => lucide.createIcons({ root: $el }))">
+    </header>
+
+    <main class="tool-shell">
+        <div class="tool-title-bar">
+            <a href="../../tools.html" class="back-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                All Tools
+            </a>
+        </div>
+
+        <div class="converter-grid">
+            <!-- LEFT PANEL -->
+            <div class="editor-container">
+                <div class="editor-header">
+                    <span>Column Data</span>
+                    <div class="header-actions">
+                        <div class="action-icon" title="Copy" onclick="app.copyLeft()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>
+                        </div>
+                        <div class="action-icon danger" title="Clear" onclick="app.clearLeft()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="editor-content">
+                    <div class="line-numbers" id="linesLeft">1</div>
+                    <textarea id="inputLeft" placeholder="Paste your data here..." spellcheck="false"></textarea>
+                </div>
+            </div>
+
+            <!-- MIDDLE CONTROLS -->
+            <div class="controls-middle">
+                <div class="delimiter-select-wrapper">
+                    <select id="delimiterSelect" class="select-styled">
+                        <option value=",">Comma (,)</option>
+                        <option value=";">Semicolon (;)</option>
+                        <option value="|">Pipe (|)</option>
+                        <option value=" ">Space</option>
+                        <option value="\n">New Line</option>
+                        <option value="custom">Custom...</option>
+                    </select>
+                </div>
+                <button class="control-btn primary" id="btnToRight" title="Convert to Delimited">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+                <button class="control-btn primary" id="btnToLeft" title="Convert to Column">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <button class="control-btn" id="btnClearBoth" title="Clear All" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="editor-container">
+                <div class="editor-header">
+                    <span>Delimited Data</span>
+                    <div class="header-actions">
+                        <div class="action-icon" title="Copy" onclick="app.copyRight()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="editor-content">
+                    <div class="line-numbers" id="linesRight">1</div>
+                    <textarea id="inputRight" placeholder="Result will appear here..." spellcheck="false"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETTINGS PANEL -->
+        <div class="settings-section" id="settingsPanel">
+            <button type="button" class="settings-header-btn" onclick="app.toggleSettings()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path></svg>
+                Advanced Settings
+                <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="settings-content-wrapper">
+                <div class="settings-grid">
+                    <div class="setting-card">
+                        <div class="setting-label">Tidy Up</div>
+                        <div class="setting-desc">Remove newlines from output</div>
+                        <div class="btn-group" data-setting="tidyUp">
+                            <button class="btn-group-item active" data-val="true">Yes</button>
+                            <button class="btn-group-item" data-val="false">No</button>
+                        </div>
+                    </div>
+                    <div class="setting-card">
+                        <div class="setting-label">Attack Clones</div>
+                        <div class="setting-desc">Remove duplicate items</div>
+                        <div class="btn-group" data-setting="removeDuplicates">
+                            <button class="btn-group-item" data-val="true">Yes</button>
+                            <button class="btn-group-item active" data-val="false">No</button>
+                        </div>
+                    </div>
+                    <div class="setting-card">
+                        <div class="setting-label">Explode By</div>
+                        <div class="setting-desc">How to split your input data</div>
+                        <div class="btn-group" data-setting="explode">
+                            <button class="btn-group-item active" data-val="newline">↵</button>
+                            <button class="btn-group-item" data-val="space">Space</button>
+                            <button class="btn-group-item" data-val="comma">,</button>
+                            <button class="btn-group-item" data-val="semicolon">;</button>
+                        </div>
+                    </div>
+                    <div class="setting-card">
+                        <div class="setting-label">Quotes</div>
+                        <div class="setting-desc">Wrap items in quotes</div>
+                        <div class="btn-group" data-setting="quotes">
+                            <button class="btn-group-item active" data-val="none">None</button>
+                            <button class="btn-group-item" data-val="double">" "</button>
+                            <button class="btn-group-item" data-val="single">' '</button>
+                        </div>
+                    </div>
+                    <div class="setting-card" id="customDelimCard" style="display:none;">
+                        <div class="setting-label">Custom Delimiter</div>
+                        <input type="text" id="customDelimInput" class="input-styled" placeholder="e.g. | or :: ">
+                    </div>
+                    <div class="setting-card">
+                        <div class="setting-label">Wrap Tags</div>
+                        <div class="setting-desc">Wrap each item in tags</div>
+                        <div class="input-row">
+                            <input type="text" id="tagOpen" class="input-styled" placeholder="<tag>">
+                            <input type="text" id="tagClose" class="input-styled" placeholder="</tag>">
+                        </div>
+                    </div>
+                    <div class="setting-card">
+                        <div class="setting-label">Interval Break</div>
+                        <div class="setting-desc">New line every N items (0 = off)</div>
+                        <input type="number" id="intervalNum" class="input-styled" value="0" min="0">
+                    </div>
+                    <div class="setting-card">
+                        <div class="setting-label">Interval Wrap</div>
+                        <div class="setting-desc">Wrap the interval block</div>
+                        <div class="input-row">
+                            <input type="text" id="intTagOpen" class="input-styled" placeholder="<ul>">
+                            <input type="text" id="intTagClose" class="input-styled" placeholder="</ul>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Tool logic — unchanged from the original Delimit app, with theme button removed.
+        const app = {
+            state: {
+                settings: { tidyUp: true, removeDuplicates: false, explode: 'newline', quotes: 'none' }
+            },
+            dom: {
+                left: document.getElementById('inputLeft'),
+                right: document.getElementById('inputRight'),
+                linesLeft: document.getElementById('linesLeft'),
+                linesRight: document.getElementById('linesRight'),
+                delimSelect: document.getElementById('delimiterSelect'),
+                customDelim: document.getElementById('customDelimInput'),
+                customDelimCard: document.getElementById('customDelimCard'),
+                tagOpen: document.getElementById('tagOpen'),
+                tagClose: document.getElementById('tagClose'),
+                intervalNum: document.getElementById('intervalNum'),
+                intTagOpen: document.getElementById('intTagOpen'),
+                intTagClose: document.getElementById('intTagClose'),
+                settingsPanel: document.getElementById('settingsPanel'),
+            },
+            init() {
+                this.setupEventListeners();
+                this.updateLineNumbers(this.dom.left, this.dom.linesLeft);
+                this.updateLineNumbers(this.dom.right, this.dom.linesRight);
+            },
+            toggleSettings() { this.dom.settingsPanel.classList.toggle('open'); },
+            setupEventListeners() {
+                const handleInput = (textArea, linesArea) => this.updateLineNumbers(textArea, linesArea);
+                this.dom.left.addEventListener('input', () => handleInput(this.dom.left, this.dom.linesLeft));
+                this.dom.left.addEventListener('scroll', () => this.dom.linesLeft.scrollTop = this.dom.left.scrollTop);
+                this.dom.right.addEventListener('input', () => handleInput(this.dom.right, this.dom.linesRight));
+                this.dom.right.addEventListener('scroll', () => this.dom.linesRight.scrollTop = this.dom.right.scrollTop);
+                document.getElementById('btnToRight').addEventListener('click', () => this.convertRight());
+                document.getElementById('btnToLeft').addEventListener('click', () => this.convertLeft());
+                document.getElementById('btnClearBoth').addEventListener('click', () => this.clearAll());
+                document.querySelectorAll('.btn-group').forEach(group => {
+                    group.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('btn-group-item')) {
+                            group.querySelectorAll('.btn-group-item').forEach(b => b.classList.remove('active'));
+                            e.target.classList.add('active');
+                            const settingKey = group.dataset.setting;
+                            const val = e.target.dataset.val;
+                            this.state.settings[settingKey] = val === 'true' ? true : val === 'false' ? false : val;
+                        }
+                    });
+                });
+                this.dom.delimSelect.addEventListener('change', (e) => {
+                    if (e.target.value === 'custom') {
+                        this.dom.customDelimCard.style.display = 'flex';
+                        this.dom.customDelim.focus();
+                    } else {
+                        this.dom.customDelimCard.style.display = 'none';
+                    }
+                });
+            },
+            updateLineNumbers(textArea, linesArea) {
+                const lines = textArea.value.split('\n').length;
+                linesArea.innerHTML = Array(lines).fill(0).map((_, i) => i + 1).join('<br>');
+            },
+            getDelimiter() {
+                const val = this.dom.delimSelect.value;
+                if (val === 'custom') return this.dom.customDelim.value;
+                return val === '\\n' ? '\n' : val;
+            },
+            convertRight() {
+                const raw = this.dom.left.value;
+                if (!raw) return;
+                let items = [];
+                const strategy = this.state.settings.explode;
+                if (strategy === 'newline') items = raw.split(/\r?\n/);
+                else if (strategy === 'space') items = raw.split(/\s+/);
+                else if (strategy === 'comma') items = raw.split(',');
+                else if (strategy === 'semicolon') items = raw.split(';');
+                items = items.map(s => s.trim()).filter(s => s.length > 0);
+                if (this.state.settings.removeDuplicates) items = [...new Set(items)];
+                const quoteType = this.state.settings.quotes;
+                const tOpen = this.dom.tagOpen.value;
+                const tClose = this.dom.tagClose.value;
+                items = items.map(item => {
+                    let processed = item;
+                    if (quoteType === 'double') processed = `"${processed}"`;
+                    if (quoteType === 'single') processed = `'${processed}'`;
+                    if (tOpen) processed = `${tOpen}${processed}`;
+                    if (tClose) processed = `${processed}${tClose}`;
+                    return processed;
+                });
+                const delim = this.getDelimiter();
+                const interval = parseInt(this.dom.intervalNum.value) || 0;
+                let result = '';
+                if (interval > 0) {
+                    const iOpen = this.dom.intTagOpen.value || '';
+                    const iClose = this.dom.intTagClose.value || '';
+                    const groups = [];
+                    for (let i = 0; i < items.length; i += interval) {
+                        const chunk = items.slice(i, i + interval);
+                        groups.push(`${iOpen}${chunk.join(delim)}${iClose}`);
+                    }
+                    result = groups.join('\n');
+                } else {
+                    result = items.join(delim);
+                }
+                if (this.state.settings.tidyUp && delim !== '\n' && interval === 0) {
+                    result = result.replace(/\r?\n/g, '');
+                }
+                this.dom.right.value = result;
+                this.updateLineNumbers(this.dom.right, this.dom.linesRight);
+            },
+            convertLeft() {
+                let raw = this.dom.right.value;
+                if (!raw) return;
+                const delim = this.getDelimiter();
+                const iOpen = this.dom.intTagOpen.value;
+                const iClose = this.dom.intTagClose.value;
+                if (iOpen) raw = raw.split(iOpen).join('');
+                if (iClose) raw = raw.split(iClose).join('');
+                let items = [];
+                if (delim === '\n') items = raw.split(/\r?\n/);
+                else items = raw.split(delim);
+                const quoteType = this.state.settings.quotes;
+                const tOpen = this.dom.tagOpen.value;
+                const tClose = this.dom.tagClose.value;
+                items = items.map(item => {
+                    let s = item.trim();
+                    if (tOpen && s.startsWith(tOpen)) s = s.substring(tOpen.length);
+                    if (tClose && s.endsWith(tClose)) s = s.substring(0, s.length - tClose.length);
+                    if (quoteType === 'double' && s.startsWith('"') && s.endsWith('"')) s = s.substring(1, s.length - 1);
+                    if (quoteType === 'single' && s.startsWith("'") && s.endsWith("'")) s = s.substring(1, s.length - 1);
+                    return s;
+                });
+                items = items.filter(s => s.length > 0);
+                if (this.state.settings.removeDuplicates) items = [...new Set(items)];
+                this.dom.left.value = items.join('\n');
+                this.updateLineNumbers(this.dom.left, this.dom.linesLeft);
+            },
+            clearAll() {
+                this.dom.left.value = '';
+                this.dom.right.value = '';
+                this.updateLineNumbers(this.dom.left, this.dom.linesLeft);
+                this.updateLineNumbers(this.dom.right, this.dom.linesRight);
+            },
+            clearLeft() {
+                this.dom.left.value = '';
+                this.updateLineNumbers(this.dom.left, this.dom.linesLeft);
+            },
+            copyRight() {
+                if (!this.dom.right.value) return;
+                this.dom.right.select();
+                document.execCommand('copy');
+            },
+            copyLeft() {
+                if (!this.dom.left.value) return;
+                this.dom.left.select();
+                document.execCommand('copy');
+            }
+        };
+        document.addEventListener('DOMContentLoaded', () => app.init());
+
+        // Site header scroll effect — single class toggle
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('main-header');
+            if (!header) return;
+            header.classList.toggle('tf-scrolled', window.scrollY > 50);
+        });
+        document.addEventListener('alpine:initialized', () => setTimeout(() => lucide.createIcons(), 100));
+    </script>
+</body>
+</html>
