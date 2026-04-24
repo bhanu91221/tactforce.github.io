@@ -131,6 +131,14 @@ window.siteContent = {
             "icon": "shield",
             "url": "tools/permission-dependency-extractor/",
             "hidden": true
+        },
+        {
+            "id": "scratch-org-def-gen",
+            "name": "Scratch Org Definition File Generator",
+            "description": "Visual builder for Scratch org definition File.",
+            "icon": "file-code",
+            "url": "tools/scratch-org-def-gen/",
+            "hidden": false
         }
     ],
     "guides": {

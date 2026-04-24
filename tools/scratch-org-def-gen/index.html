@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scratch Org Definition File Generator | TactForce Tools</title>
+    <meta name="description" content="Visual builder for Salesforce project-scratch-def.json — 315 features and 140 setting types, 100% in the browser." />
+    <link rel="icon" type="image/png" href="../../images/logo.png">
+
+    <!-- Theme bridge: must run early to prevent flash -->
+    <script src="../../js/tools-theme-bridge.js"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: { extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            gray: { 800: '#1f2937', 900: '#111827', 950: '#0B0F19' },
+            primary: { 400: '#60A5FA', 500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8' }
+          }
+        } }
+      }
+    </script>
+    <style>
+      body { background-color: #0B0F19; color: #e5e7eb; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+      #root { padding-top: 88px; }
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: #1f2937; }
+      ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+      .animate-fade-in { animation: fadeIn 0.18s ease-out forwards; }
+    </style>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    <!-- Site content & header/footer chrome -->
+    <script src="../../js/content.js"></script>
+    <script src="../../js/app.js"></script>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script src="./data/categories.js"></script>
+    <script src="./data/features.js"></script>
+    <script src="./data/settings.js"></script>
+    <script src="./data/baseline.js"></script>
+</head>
+<body x-data="toolsApp">
+
+    <!-- Site header -->
+    <header id="main-header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-gradient-to-b from-black/30 to-transparent backdrop-blur-sm"
+            x-init="$el.innerHTML = window.renderHeader({ basePath: '../../' }); $nextTick(() => lucide.createIcons({ root: $el }))">
+    </header>
+
+    <div id="root" class="min-h-screen"></div>
+
+    <script type="text/babel" data-presets="env,react">
+        const { useState, useMemo, useEffect } = React;
+
+        // =============================================================
+        // Helpers
+        // =============================================================
+        function toMetadataKey(typeName) {
+            if (!typeName) return typeName;
+            const m = typeName.match(/^([A-Z]+)([A-Z][a-z].*)$/);
+            if (m) return m[1].toLowerCase() + m[2];
+            return typeName.charAt(0).toLowerCase() + typeName.slice(1);
+        }
+
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
+                let cls = 'text-purple-400';
+                if (/^"/.test(match)) cls = /:$/.test(match) ? 'text-primary-400' : 'text-green-400';
+                else if (/true|false/.test(match)) cls = 'text-yellow-400';
+                else if (/null/.test(match)) cls = 'text-gray-500';
+                return `<span class="${cls}">${match}</span>`;
+            });
+        }
+
+        const EDITIONS = ['Developer', 'Enterprise', 'Group', 'Professional', 'Partner Developer', 'Unlimited'];
+
+        // =============================================================
+        // Data access
+        // =============================================================
+        const CATEGORIES = window.CATEGORIES || [];
+        const FEATURES  = window.FEATURES  || [];
+        const SETTINGS  = window.SETTINGS  || [];
+        const BASELINE  = window.BASELINE  || { featureIds: [], settings: {} };
+        const FEATURES_BY_ID   = FEATURES.reduce((a, f) => { a[f.id] = f; return a; }, {});
+        const FEATURES_BY_NAME = FEATURES.reduce((a, f) => { a[f.featureName] = f; return a; }, {});
+        const SETTINGS_BY_ID   = SETTINGS.reduce((a, s) => { a[s.id] = s; return a; }, {});
+        const CATEGORY_BY_ID   = CATEGORIES.reduce((a, c) => { a[c.id] = c; return a; }, {});
+
+        // Settings indexed by their containing category, for the "General Settings"
+        // section shown at the bottom of each feature tab.
+        const SETTINGS_BY_CATEGORY = SETTINGS.reduce((acc, s) => {
+            (acc[s.category] = acc[s.category] || []).push(s);
+            return acc;
+        }, {});
+
+        // =============================================================
+        // Icons
+        // =============================================================
+        const CopyIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>);
+        const DownloadIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>);
+        const CheckIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>);
+        const ChevronDownIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>);
+        const ChevronUpIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>);
+        const SearchIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>);
+        const XIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>);
+        const MinusIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>);
+        const PlusIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>);
+
+        // =============================================================
+        // Baseline utilities
+        // =============================================================
+        function applyBaseline(state) {
+            const next = { ...state };
+            for (const name of BASELINE.featureIds) {
+                const f = FEATURES_BY_NAME[name];
+                if (!f) continue;
+                next.selectedFeatures = { ...next.selectedFeatures, [f.id]: true };
+                if (f.valueRange) next.featureValues = { ...next.featureValues, [f.id]: f.valueRange.default };
+                // Attach the feature's own settings too (smart defaults)
+                for (const sg of (f.settings || [])) {
+                    const sid = sg.typeName;
+                    next.featureIncludedFields = { ...next.featureIncludedFields };
+                    next.featureIncludedFields[f.id] = next.featureIncludedFields[f.id] || {};
+                    next.featureIncludedFields[f.id][sid] = next.featureIncludedFields[f.id][sid] || {};
+                    next.featureFieldValues = { ...next.featureFieldValues };
+                    next.featureFieldValues[f.id] = next.featureFieldValues[f.id] || {};
+                    next.featureFieldValues[f.id][sid] = next.featureFieldValues[f.id][sid] || {};
+                    for (const fd of sg.fields) {
+                        if (fd.smartDefault) {
+                            next.featureIncludedFields[f.id][sid][fd.name] = true;
+                            next.featureFieldValues[f.id][sid][fd.name] = fd.defaultValue;
+                        }
+                    }
+                }
+            }
+            // Direct baseline settings (may or may not be on a feature)
+            for (const [typeName, fields] of Object.entries(BASELINE.settings || {})) {
+                if (!SETTINGS_BY_ID[typeName]) continue;
+                next.selectedSettings = { ...next.selectedSettings, [typeName]: { ...(next.selectedSettings?.[typeName] || {}) } };
+                next.settingValues   = { ...next.settingValues,   [typeName]: { ...(next.settingValues?.[typeName]   || {}) } };
+                for (const [fn, val] of Object.entries(fields)) {
+                    next.selectedSettings[typeName][fn] = true;
+                    next.settingValues[typeName][fn]   = val;
+                }
+            }
+            return next;
+        }
+
+        const EMPTY_STATE = {
+            selectedFeatures: {},
+            featureValues:   {},
+            featureIncludedFields: {},   // { featureId: { settingTypeName: { fieldName: true } } }
+            featureFieldValues:    {},   // { featureId: { settingTypeName: { fieldName: value } } }
+            selectedSettings: {},        // { settingTypeName: { fieldName: true } } — standalone (not tied to a feature)
+            settingValues:   {},
+        };
+
+        // =============================================================
+        // FeatureValueInput
+        // =============================================================
+        function FeatureValueInput({ range, value, onChange }) {
+            const clamp = (v) => Math.max(range.min, Math.min(range.max, v));
+            return (
+                <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2 mt-3 bg-gray-950/60 border border-gray-800 rounded-lg px-2 py-1 w-fit">
+                    <span className="text-[10px] uppercase tracking-wider text-gray-500 mr-1">Value</span>
+                    <button onClick={() => onChange(clamp((value ?? range.default) - 1))} className="w-6 h-6 flex items-center justify-center rounded bg-gray-800 hover:bg-gray-700 text-gray-300"><MinusIcon /></button>
+                    <input type="number" min={range.min} max={range.max} value={value ?? range.default}
+                        onChange={(e) => onChange(clamp(Number(e.target.value) || range.min))}
+                        className="w-16 bg-transparent text-center text-sm text-white focus:outline-none" />
+                    <button onClick={() => onChange(clamp((value ?? range.default) + 1))} className="w-6 h-6 flex items-center justify-center rounded bg-gray-800 hover:bg-gray-700 text-gray-300"><PlusIcon /></button>
+                    <span className="text-[10px] text-gray-500 ml-1">{range.min}–{range.max}</span>
+                </div>
+            );
+        }
+
+        // =============================================================
+        // InlineSettingFieldRow — used inside feature cards and setting cards
+        // =============================================================
+        function InlineFieldRow({ field, included, value, onToggle, onValueChange }) {
+            // A complex field is a nested object/array. Show it as a multi-line JSON
+            // editor when included, since Salesforce expects a structured value, not
+            // a scalar. Default stored value is null until the user edits it.
+            const isComplex = field.type === 'complex';
+            const [numText, setNumText] = React.useState(
+                value === undefined || value === null || Number.isNaN(value) ? '' : String(value)
+            );
+            React.useEffect(() => {
+                // Keep the local text in sync with the prop when it changes externally.
+                if (field.type === 'number') {
+                    const s = (value === undefined || value === null || Number.isNaN(value)) ? '' : String(value);
+                    setNumText(s);
+                }
+            }, [value, field.type]);
+
+            // For complex fields: maintain a local text buffer of the JSON so the
+            // user can type intermediate invalid states without losing their work.
+            const [jsonText, setJsonText] = React.useState(() => {
+                if (value === null || value === undefined) return '';
+                try { return JSON.stringify(value, null, 2); } catch { return String(value); }
+            });
+            const [jsonErr, setJsonErr] = React.useState('');
+
+            const onNumChange = (e) => {
+                const txt = e.target.value;
+                setNumText(txt);
+                // Preserve user's intermediate text; only commit a real number to state.
+                if (txt === '' || txt === '-') {
+                    onValueChange(0);  // clearing the field => 0, never NaN/null in output
+                    return;
+                }
+                const n = Number(txt);
+                if (!Number.isNaN(n)) onValueChange(n);
+            };
+
+            const onJsonChange = (e) => {
+                const txt = e.target.value;
+                setJsonText(txt);
+                if (txt.trim() === '') {
+                    setJsonErr('');
+                    onValueChange(null);
+                    return;
+                }
+                try {
+                    const parsed = JSON.parse(txt);
+                    setJsonErr('');
+                    onValueChange(parsed);
+                } catch (err) {
+                    setJsonErr('Invalid JSON');
+                }
+            };
+
+            return (
+                <div className={`py-1.5 px-2 gap-3 group ${isComplex && included ? 'flex-col' : 'flex items-center justify-between'}`}>
+                    <div className="flex items-center gap-2 flex-1 min-w-0 w-full">
+                        <button onClick={(e) => { e.stopPropagation(); onToggle(); }}
+                            disabled={field.required}
+                            title={field.required ? 'Required by this feature' : (included ? 'Remove from output' : 'Include in output')}
+                            className={`flex-none w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                                field.required ? 'bg-primary-600 border-primary-600 opacity-90 cursor-not-allowed' :
+                                included ? 'bg-primary-600 border-primary-600' : 'border-gray-600 hover:border-gray-500'
+                            }`}>
+                            {included && <CheckIcon />}
+                        </button>
+                        <code className="text-xs text-gray-300 truncate flex-1" title={field.description || field.name}>
+                            {field.name}
+                            {field.required && <span className="ml-1 text-[9px] text-amber-500 uppercase">req</span>}
+                            {isComplex && field.rawType && (
+                                <span className="ml-1.5 text-[9px] text-gray-500 normal-case">({field.rawType})</span>
+                            )}
+                        </code>
+                        {included && field.type === 'boolean' && (
+                            <button onClick={(e) => { e.stopPropagation(); onValueChange(!value); }}
+                                className={`relative inline-flex h-4 w-8 flex-none items-center rounded-full transition-colors ${value ? 'bg-primary-600' : 'bg-gray-700'}`}>
+                                <span className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${value ? 'translate-x-4' : 'translate-x-1'}`} />
+                            </button>
+                        )}
+                        {included && field.type === 'number' && (
+                            <input type="number"
+                                value={numText}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={onNumChange}
+                                className="w-24 bg-gray-800 border border-gray-700 rounded px-2 py-0.5 text-xs text-white focus:border-primary-500 focus:outline-none" />
+                        )}
+                        {included && field.type === 'string' && (
+                            <input type="text"
+                                value={value !== undefined && value !== null ? String(value) : ''}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => onValueChange(e.target.value)}
+                                className="w-32 bg-gray-800 border border-gray-700 rounded px-2 py-0.5 text-xs text-white focus:border-primary-500 focus:outline-none" />
+                        )}
+                    </div>
+                    {included && isComplex && (
+                        <div className="mt-1.5 ml-6 w-full" onClick={(e) => e.stopPropagation()}>
+                            <textarea rows={3} value={jsonText} onChange={onJsonChange}
+                                placeholder='Enter JSON object for this field (e.g. {"enabled": true})'
+                                className={`w-full bg-gray-800 border rounded px-2 py-1 text-[11px] text-white font-mono focus:outline-none ${jsonErr ? 'border-red-500' : 'border-gray-700 focus:border-primary-500'}`} />
+                            {jsonErr && <p className="text-[10px] text-red-400 mt-1">{jsonErr}</p>}
+                            {!jsonErr && <p className="text-[10px] text-gray-500 mt-1">Expects a nested structure. Leave blank to emit <code>null</code>.</p>}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // =============================================================
+        // Feature card — shows inline settings groups when selected
+        // =============================================================
+        function FeatureCard({ feature, selected, value, fieldsState, fieldValues,
+                              onToggle, onValueChange, onToggleField, onFieldValueChange,
+                              showCategoryChip, requiredReason }) {
+            const hasSettings = feature.settings && feature.settings.length > 0;
+            return (
+                <div className={`rounded-xl border transition-all duration-200 overflow-hidden ${
+                    selected
+                        ? 'bg-gray-900 border-primary-600 shadow-[0_0_15px_-3px_rgba(59,130,246,0.2)]'
+                        : 'bg-gray-900/40 border-gray-800 hover:border-gray-700'
+                }`}>
+                    <div onClick={onToggle} className="p-4 cursor-pointer">
+                        <div className="flex justify-between items-start mb-2 gap-2">
+                            <div className="flex-1 min-w-0">
+                                <h3 className={`font-semibold break-words ${selected ? 'text-primary-400' : 'text-gray-200'}`}>{feature.label}</h3>
+                                <p className="text-[10px] font-mono text-gray-600 mt-0.5 break-all">
+                                    {feature.featureName}{feature.valueRange ? ':<value>' : ''}
+                                </p>
+                            </div>
+                            <div className={`w-5 h-5 flex-none rounded-full border flex items-center justify-center transition-colors ${selected ? 'bg-primary-600 border-primary-600' : 'border-gray-600'}`}>
+                                {selected && <CheckIcon />}
+                            </div>
+                        </div>
+                        {feature.description && <p className="text-xs text-gray-500 leading-relaxed">{feature.description}</p>}
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            {showCategoryChip && (
+                                <span className="inline-block text-[10px] uppercase tracking-wider text-gray-600 bg-gray-950 px-2 py-0.5 rounded">
+                                    {CATEGORY_BY_ID[feature.category]?.label ?? feature.category}
+                                </span>
+                            )}
+                            {feature.deprecated && <span className="inline-block text-[10px] uppercase tracking-wider text-amber-500 bg-amber-950/50 px-2 py-0.5 rounded">Deprecated</span>}
+                            {requiredReason && (
+                                <span className="inline-block text-[10px] text-amber-400 bg-amber-950/40 px-2 py-0.5 rounded">required by {requiredReason}</span>
+                            )}
+                            {feature.requires && feature.requires.length > 0 && (
+                                <span className="inline-block text-[10px] text-gray-500">requires: {feature.requires.join(', ')}</span>
+                            )}
+                            {feature.docUrl && (
+                                <a href={feature.docUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-block text-[10px] text-primary-400 hover:text-primary-500">Docs ↗</a>
+                            )}
+                            {hasSettings && (
+                                <span className="inline-block text-[10px] text-gray-500">
+                                    {feature.settings.length} setting group{feature.settings.length === 1 ? '' : 's'}
+                                </span>
+                            )}
+                        </div>
+                        {selected && feature.valueRange && (
+                            <FeatureValueInput range={feature.valueRange} value={value} onChange={onValueChange} />
+                        )}
+                    </div>
+
+                    {/* Inline settings when the feature is selected */}
+                    {selected && hasSettings && (
+                        <div className="bg-gray-950/40 border-t border-gray-800 p-3 space-y-3 animate-fade-in">
+                            {feature.settings.map(sg => (
+                                <div key={sg.typeName} className="bg-gray-900/50 rounded-lg border border-gray-800">
+                                    <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-800">
+                                        <div>
+                                            <code className="text-[11px] text-primary-400 font-mono">{toMetadataKey(sg.typeName)}</code>
+                                            {sg.required && <span className="ml-2 text-[9px] text-amber-500 uppercase">required</span>}
+                                        </div>
+                                        <span className="text-[10px] text-gray-500">{sg.fields.length} field{sg.fields.length === 1 ? '' : 's'}</span>
+                                    </div>
+                                    <div className="py-1">
+                                        {sg.fields.map(fd => {
+                                            const included = !!fieldsState?.[sg.typeName]?.[fd.name];
+                                            const val = fieldValues?.[sg.typeName]?.[fd.name];
+                                            return (
+                                                <InlineFieldRow key={fd.name} field={fd}
+                                                    included={included} value={val}
+                                                    onToggle={() => onToggleField(sg.typeName, fd)}
+                                                    onValueChange={(v) => onFieldValueChange(sg.typeName, fd, v)} />
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // =============================================================
+        // Standalone Setting card (used on Settings tab + General Settings rows)
+        // =============================================================
+        function SettingCard({ setting, fieldsMap, valuesMap, onToggleSetting, onToggleField, onFieldValueChange, defaultExpanded }) {
+            const isEnabled = !!fieldsMap;
+            const [expanded, setExpanded] = useState(!!defaultExpanded || isEnabled);
+            // Auto-expand the first time the setting becomes enabled, so the user
+            // immediately sees which fields got included. If the user then
+            // manually collapses it, we respect that until it's re-enabled.
+            const [prevEnabled, setPrevEnabled] = useState(isEnabled);
+            useEffect(() => {
+                if (isEnabled && !prevEnabled) setExpanded(true);
+                setPrevEnabled(isEnabled);
+            }, [isEnabled]);
+            const includedCount = fieldsMap ? Object.values(fieldsMap).filter(Boolean).length : 0;
+            return (
+                <div className={`rounded-xl border transition-all duration-200 overflow-hidden ${isEnabled ? 'bg-gray-900 border-primary-600 shadow-[0_0_15px_-3px_rgba(59,130,246,0.2)]' : 'bg-gray-900/40 border-gray-800 hover:border-gray-700'}`}>
+                    <div className="p-4">
+                        <div className="flex justify-between items-start mb-2 gap-2">
+                            <div className="flex-1 min-w-0">
+                                <h3 className={`font-semibold break-words ${isEnabled ? 'text-primary-400' : 'text-gray-200'}`}>{setting.label}</h3>
+                                <p className="text-[10px] font-mono text-gray-600 mt-0.5 break-all">{toMetadataKey(setting.settingTypeName)}</p>
+                            </div>
+                            <button onClick={onToggleSetting}
+                                className={`w-5 h-5 flex-none rounded-full border flex items-center justify-center transition-colors ${isEnabled ? 'bg-primary-600 border-primary-600' : 'border-gray-600'}`}>
+                                {isEnabled && <CheckIcon />}
+                            </button>
+                        </div>
+                        {setting.description && <p className="text-xs text-gray-500 leading-relaxed">{setting.description}</p>}
+                        <p className="text-[10px] text-gray-500 mt-2">{setting.fields.length} field{setting.fields.length === 1 ? '' : 's'}{isEnabled && ` · ${includedCount} included`}</p>
+                    </div>
+                    <button onClick={() => setExpanded(e => !e)}
+                        className="w-full flex items-center justify-between text-xs text-gray-500 hover:text-gray-300 border-t border-gray-800 px-4 py-2 bg-gray-950/40">
+                        <span>{expanded ? 'Hide fields' : 'Show fields'}</span>
+                        {expanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                    </button>
+                    {expanded && (
+                        <div className="border-t border-gray-800 p-2 bg-gray-950/30">
+                            {setting.fields.map(fd => (
+                                <InlineFieldRow key={fd.name} field={fd}
+                                    included={!!fieldsMap?.[fd.name]} value={valuesMap?.[fd.name]}
+                                    onToggle={() => onToggleField(fd)}
+                                    onValueChange={(v) => onFieldValueChange(fd, v)} />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // =============================================================
+        // Main App
+        // =============================================================
+        function App() {
+            const [orgName, setOrgName] = useState('Demo company');
+            const [edition, setEdition] = useState('Developer');
+            const [description, setDescription] = useState('');
+            const [adminEmail, setAdminEmail] = useState('');
+			const [hasSampleData, setHasSampleDate] = useState(false);
+            const [state, setState] = useState(() => applyBaseline(EMPTY_STATE));
+            const [activeTab, setActiveTab] = useState('core-platform');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [copied, setCopied] = useState(false);
+
+            const { selectedFeatures, featureValues, featureIncludedFields, featureFieldValues, selectedSettings, settingValues } = state;
+
+            // ===== Actions =====
+            const toggleFeature = (f) => {
+                setState(prev => {
+                    const wasOn = !!prev.selectedFeatures[f.id];
+                    let next = { ...prev };
+                    if (wasOn) {
+                        // Uncheck: drop settings AND wipe user tweaks
+                        next.selectedFeatures = { ...prev.selectedFeatures };
+                        delete next.selectedFeatures[f.id];
+                        next.featureValues = { ...prev.featureValues };
+                        delete next.featureValues[f.id];
+                        next.featureIncludedFields = { ...prev.featureIncludedFields };
+                        delete next.featureIncludedFields[f.id];
+                        next.featureFieldValues = { ...prev.featureFieldValues };
+                        delete next.featureFieldValues[f.id];
+                        // Also uncheck any feature that *required* this one (cascade)
+                        for (const other of FEATURES) {
+                            if ((other.requires || []).includes(f.featureName) && next.selectedFeatures[other.id]) {
+                                // recursively unselect the dependent
+                                next.selectedFeatures = { ...next.selectedFeatures }; delete next.selectedFeatures[other.id];
+                                next.featureValues = { ...next.featureValues }; delete next.featureValues[other.id];
+                                next.featureIncludedFields = { ...next.featureIncludedFields }; delete next.featureIncludedFields[other.id];
+                                next.featureFieldValues = { ...next.featureFieldValues }; delete next.featureFieldValues[other.id];
+                            }
+                        }
+                    } else {
+                        next.selectedFeatures = { ...prev.selectedFeatures, [f.id]: true };
+                        // Auto-check required features
+                        if (f.requires && f.requires.length) {
+                            for (const reqName of f.requires) {
+                                const reqF = FEATURES_BY_NAME[reqName];
+                                if (reqF && !next.selectedFeatures[reqF.id]) {
+                                    next = addFeatureToState(next, reqF);
+                                }
+                            }
+                        }
+                        if (f.valueRange) next.featureValues = { ...next.featureValues, [f.id]: f.valueRange.default };
+                        // Seed smart-default fields for this feature's settings
+                        next = seedFeatureDefaults(next, f);
+                    }
+                    return next;
+                });
+            };
+
+            // Helper: add a feature (used by auto-check of required features)
+            const addFeatureToState = (state, f) => {
+                const next = { ...state };
+                next.selectedFeatures = { ...state.selectedFeatures, [f.id]: true };
+                if (f.valueRange) next.featureValues = { ...state.featureValues, [f.id]: f.valueRange.default };
+                return seedFeatureDefaults(next, f);
+            };
+
+            const seedFeatureDefaults = (state, f) => {
+                if (!f.settings || !f.settings.length) return state;
+                const next = { ...state };
+                next.featureIncludedFields = { ...state.featureIncludedFields, [f.id]: { ...(state.featureIncludedFields[f.id] || {}) } };
+                next.featureFieldValues   = { ...state.featureFieldValues,   [f.id]: { ...(state.featureFieldValues[f.id]   || {}) } };
+                for (const sg of f.settings) {
+                    next.featureIncludedFields[f.id][sg.typeName] = { ...(next.featureIncludedFields[f.id][sg.typeName] || {}) };
+                    next.featureFieldValues[f.id][sg.typeName]   = { ...(next.featureFieldValues[f.id][sg.typeName]   || {}) };
+                    for (const fd of sg.fields) {
+                        if (fd.smartDefault || fd.required) {
+                            next.featureIncludedFields[f.id][sg.typeName][fd.name] = true;
+                            next.featureFieldValues[f.id][sg.typeName][fd.name] = fd.defaultValue;
+                        }
+                    }
+                }
+                return next;
+            };
+
+            const setFeatureValue = (id, v) => setState(s => ({ ...s, featureValues: { ...s.featureValues, [id]: v } }));
+
+            const toggleFeatureField = (featureId, typeName, field) => {
+                if (field.required) return; // cannot uncheck required field
+                setState(s => {
+                    const cur = { ...(s.featureIncludedFields[featureId]?.[typeName] || {}) };
+                    const curVals = { ...(s.featureFieldValues[featureId]?.[typeName] || {}) };
+                    if (cur[field.name]) { delete cur[field.name]; delete curVals[field.name]; }
+                    else { cur[field.name] = true; curVals[field.name] = field.defaultValue; }
+                    return {
+                        ...s,
+                        featureIncludedFields: { ...s.featureIncludedFields, [featureId]: { ...(s.featureIncludedFields[featureId] || {}), [typeName]: cur } },
+                        featureFieldValues:    { ...s.featureFieldValues,    [featureId]: { ...(s.featureFieldValues[featureId]    || {}), [typeName]: curVals } },
+                    };
+                });
+            };
+
+            const setFeatureFieldValue = (featureId, typeName, field, v) => {
+                setState(s => ({
+                    ...s,
+                    featureFieldValues: {
+                        ...s.featureFieldValues,
+                        [featureId]: {
+                            ...(s.featureFieldValues[featureId] || {}),
+                            [typeName]: { ...(s.featureFieldValues[featureId]?.[typeName] || {}), [field.name]: v },
+                        },
+                    },
+                }));
+            };
+
+            // Standalone setting actions
+            const toggleSetting = (s) => {
+                setState(prev => {
+                    const next = { ...prev };
+                    if (next.selectedSettings[s.id]) {
+                        next.selectedSettings = { ...next.selectedSettings }; delete next.selectedSettings[s.id];
+                        next.settingValues   = { ...next.settingValues   }; delete next.settingValues[s.id];
+                    } else {
+                        const fmap = {}; const vmap = {};
+                        for (const fd of s.fields) if (fd.smartDefault) { fmap[fd.name] = true; vmap[fd.name] = fd.defaultValue; }
+                        next.selectedSettings = { ...next.selectedSettings, [s.id]: fmap };
+                        next.settingValues    = { ...next.settingValues,    [s.id]: vmap };
+                    }
+                    return next;
+                });
+            };
+            const toggleSettingField = (s, fd) => {
+                setState(prev => {
+                    const cur = { ...(prev.selectedSettings[s.id] || {}) };
+                    const curVals = { ...(prev.settingValues[s.id] || {}) };
+                    if (cur[fd.name]) { delete cur[fd.name]; delete curVals[fd.name]; }
+                    else { cur[fd.name] = true; curVals[fd.name] = fd.defaultValue; }
+                    return {
+                        ...prev,
+                        selectedSettings: { ...prev.selectedSettings, [s.id]: cur },
+                        settingValues:    { ...prev.settingValues,    [s.id]: curVals },
+                    };
+                });
+            };
+            const setSettingFieldValue = (s, fd, v) => {
+                setState(prev => ({ ...prev, settingValues: { ...prev.settingValues, [s.id]: { ...(prev.settingValues[s.id] || {}), [fd.name]: v } } }));
+            };
+
+            const resetAll = () => setState(applyBaseline(EMPTY_STATE));
+
+            // ===== JSON output =====
+            const outputJson = useMemo(() => {
+                const shape = { orgName: orgName || 'Demo company', edition: edition || 'Developer', features: [], settings: {} };
+                if (description) shape.description = description;
+                if (adminEmail) shape.adminEmail = adminEmail;
+
+                // features
+                for (const fid of Object.keys(selectedFeatures)) {
+                    const f = FEATURES_BY_ID[fid]; if (!f) continue;
+                    if (f.valueRange) shape.features.push(`${f.featureName}:${featureValues[fid] ?? f.valueRange.default}`);
+                    else shape.features.push(f.featureName);
+                }
+                shape.features.sort();
+
+                // Normalize a setting value for emission to JSON.
+                //  - undefined: skip entirely
+                //  - NaN: coerce to 0 so we never emit literal null for an included number
+                //  - null: skip (user hasn't filled a complex field yet)
+                //  - anything else: emit as-is
+                const normalize = (v) => {
+                    if (v === undefined || v === null) return undefined;
+                    if (typeof v === 'number' && Number.isNaN(v)) return 0;
+                    return v;
+                };
+
+                // settings from features (merge per-feature contributions into the same settings object)
+                for (const fid of Object.keys(selectedFeatures)) {
+                    const perFeature = featureIncludedFields[fid] || {};
+                    for (const [typeName, fieldMap] of Object.entries(perFeature)) {
+                        const key = toMetadataKey(typeName);
+                        for (const [fn, on] of Object.entries(fieldMap)) {
+                            if (!on) continue;
+                            const val = normalize(featureFieldValues[fid]?.[typeName]?.[fn]);
+                            if (val === undefined) continue;
+                            shape.settings[key] = shape.settings[key] || {};
+                            shape.settings[key][fn] = val;
+                        }
+                    }
+                }
+
+                // standalone settings (from Settings tab or General Settings sections)
+                for (const [typeName, fmap] of Object.entries(selectedSettings)) {
+                    const key = toMetadataKey(typeName);
+                    for (const [fn, on] of Object.entries(fmap)) {
+                        if (!on) continue;
+                        const val = normalize(settingValues[typeName]?.[fn]);
+                        if (val === undefined) continue;
+                        shape.settings[key] = shape.settings[key] || {};
+                        shape.settings[key][fn] = val;
+                    }
+                }
+
+                // alphabetize settings keys
+                const sorted = {};
+                for (const k of Object.keys(shape.settings).sort()) sorted[k] = shape.settings[k];
+                shape.settings = sorted;
+
+                return JSON.stringify(shape, null, 2);
+            }, [orgName, edition, description, adminEmail, selectedFeatures, featureValues, featureIncludedFields, featureFieldValues, selectedSettings, settingValues]);
+
+            const copyJson = async () => {
+                try { await navigator.clipboard.writeText(outputJson); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {}
+            };
+            const downloadJson = () => {
+                const blob = new Blob([outputJson], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'project-scratch-def.json';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+
+            // Counts per category
+            const featureCountByCat = useMemo(() => {
+                const c = {};
+                for (const id of Object.keys(selectedFeatures)) {
+                    const def = FEATURES_BY_ID[id];
+                    if (def) c[def.category] = (c[def.category] ?? 0) + 1;
+                }
+                return c;
+            }, [selectedFeatures]);
+
+            const featureTotals = useMemo(() => {
+                const c = {};
+                for (const f of FEATURES) c[f.category] = (c[f.category] ?? 0) + 1;
+                return c;
+            }, []);
+
+            const settingsSelectedCount = useMemo(
+                () => Object.keys(selectedSettings).filter(id => Object.keys(selectedSettings[id] || {}).length > 0).length,
+                [selectedSettings]
+            );
+
+            // Figure out "required by" map: featureName -> [other feature names] that require it
+            const requiredByMap = useMemo(() => {
+                const m = {};
+                for (const selectedId of Object.keys(selectedFeatures)) {
+                    const f = FEATURES_BY_ID[selectedId];
+                    for (const req of (f?.requires || [])) {
+                        m[req] = m[req] || [];
+                        if (!m[req].includes(f.label)) m[req].push(f.label);
+                    }
+                }
+                return m;
+            }, [selectedFeatures]);
+
+            // Search
+            const searching = searchQuery.trim().length > 0;
+            const q = searchQuery.trim().toLowerCase();
+            const featureHits = useMemo(() => !searching ? [] : FEATURES.filter(f =>
+                f.label.toLowerCase().includes(q) || f.featureName.toLowerCase().includes(q) || (f.description || '').toLowerCase().includes(q)
+            ).slice(0, 300), [q, searching]);
+            const settingHits = useMemo(() => !searching ? [] : SETTINGS.filter(s =>
+                s.label.toLowerCase().includes(q) || s.settingTypeName.toLowerCase().includes(q) || (s.description || '').toLowerCase().includes(q) ||
+                s.fields.some(fd => fd.name.toLowerCase().includes(q))
+            ).slice(0, 300), [q, searching]);
+
+            const currentCategoryFeatures = useMemo(
+                () => FEATURES.filter(f => f.category === activeTab),
+                [activeTab]
+            );
+            const currentCategorySettings = useMemo(
+                () => SETTINGS_BY_CATEGORY[activeTab] || [],
+                [activeTab]
+            );
+
+            // Chips
+            const featureChips = Object.keys(selectedFeatures).map(id => ({ kind: 'feature', id, label: FEATURES_BY_ID[id]?.label ?? id }));
+            const settingChips = Object.entries(selectedSettings)
+                .filter(([, f]) => Object.keys(f).length > 0)
+                .map(([id]) => ({ kind: 'setting', id, label: SETTINGS_BY_ID[id]?.label ?? id }));
+            const allChips = [...featureChips, ...settingChips];
+
+            const [generalExpanded, setGeneralExpanded] = useState(false);
+
+            return (
+                <div className="min-h-screen flex flex-col md:flex-row text-gray-300 font-sans">
+                    {/* LEFT */}
+                    <div className="w-full md:w-2/3 p-6 md:p-10 flex flex-col gap-6 pb-32 md:pb-10">
+
+                        <div className="border-b border-gray-800 pb-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                            <div>
+                                <h1 className="text-3xl font-bold text-white mb-1">Scratch-Org Def File Generator</h1>
+                                <p className="text-gray-500 text-sm">
+                                    Build your <code className="text-primary-500 bg-gray-900 px-1 py-0.5 rounded">project-scratch-def.json</code>.
+                                </p>
+								<a className="text-primary-500 py-0.5 rounded text-sm" href="../../tools.html">← All Tools</a>
+                            </div>
+                        </div>
+
+                        {/* Meta form */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-gray-400">Org Name</label>
+                                <input type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)}
+                                    className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-white focus:outline-none focus:border-primary-600 transition-colors" />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-gray-400">Edition</label>
+                                <select value={edition} onChange={(e) => setEdition(e.target.value)}
+                                    className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-white focus:outline-none focus:border-primary-600 appearance-none">
+                                    {EDITIONS.map(ed => <option key={ed} value={ed}>{ed}</option>)}
+                                </select>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-gray-400">Admin Email (Optional)</label>
+                                <input type="email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} placeholder="admin@example.com"
+                                    className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-white focus:outline-none focus:border-primary-600" />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-gray-400">Description (Optional)</label>
+                                <input type="text" value={description} onChange={(e) => setDescription(e.target.value)}
+                                    className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-white focus:outline-none focus:border-primary-600" />
+                            </div>
+                        </div>
+
+                        {/* Features & Settings header */}
+                        <div>
+                            <div className="flex flex-col md:flex-row md:items-center justify-between mb-3 gap-4">
+                                <label className="text-sm font-semibold text-gray-400">
+                                    {searching ? `Search results for "${searchQuery}"` : 'Features & Settings'}
+                                </label>
+                                <div className="relative w-full md:w-72">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><SearchIcon /></div>
+                                    <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Search features or settings..."
+                                        className="bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-10 py-2 w-full text-sm text-white focus:outline-none focus:border-primary-600 placeholder-gray-600" />
+                                    {searchQuery && (
+                                        <button onClick={() => setSearchQuery('')} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-white"><XIcon /></button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Tabs — multi-row flex-wrap */}
+                            {!searching && (
+                                <div className="flex flex-wrap gap-1 mb-4 border-b border-gray-800 pb-1">
+                                    {CATEGORIES.map(cat => {
+                                        const count = featureCountByCat[cat.id] ?? 0;
+                                        const total = featureTotals[cat.id] ?? 0;
+                                        const active = activeTab === cat.id;
+                                        return (
+                                            <button key={cat.id} onClick={() => setActiveTab(cat.id)}
+                                                title={`${cat.label} — ${total} features${count ? ` (${count} selected)` : ''}`}
+                                                className={`px-3 py-1.5 rounded-t-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                                                    active ? 'bg-gray-800 text-white border-b-2 border-primary-500' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-900'
+                                                }`}>
+                                                <span>{cat.label}</span>
+                                                {count > 0 && <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-primary-600 text-white text-[10px] font-semibold">{count}</span>}
+                                            </button>
+                                        );
+                                    })}
+                                    <button onClick={() => setActiveTab('settings')}
+                                        title={`All Settings — ${SETTINGS.length} setting types`}
+                                        className={`px-3 py-1.5 rounded-t-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                                            activeTab === 'settings' ? 'bg-gray-800 text-white border-b-2 border-primary-500' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-900'
+                                        }`}>
+                                        <span>All Settings</span>
+                                        {settingsSelectedCount > 0 && <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-primary-600 text-white text-[10px] font-semibold">{settingsSelectedCount}</span>}
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Selected chips */}
+                            {allChips.length > 0 && (
+                                <div className="flex flex-wrap items-center gap-2 mb-4 p-3 rounded-lg bg-gray-950/70 border border-gray-800">
+                                    <span className="text-[11px] uppercase tracking-wider text-gray-500 mr-1">Selected ({allChips.length}):</span>
+                                    {allChips.map(chip => (
+                                        <span key={`${chip.kind}-${chip.id}`}
+                                            className={`inline-flex items-center gap-1.5 pl-2 pr-1 py-0.5 rounded-full text-xs ${
+                                                chip.kind === 'feature' ? 'bg-primary-600/20 text-primary-400 border border-primary-600/40'
+                                                                        : 'bg-emerald-600/20 text-emerald-400 border border-emerald-600/40'
+                                            }`}>
+                                            <span className="truncate max-w-[160px]">{chip.label}</span>
+                                            <button onClick={() => chip.kind === 'feature' ? toggleFeature(FEATURES_BY_ID[chip.id]) : toggleSetting(SETTINGS_BY_ID[chip.id])}
+                                                className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-white/10"><XIcon /></button>
+                                        </span>
+                                    ))}
+                                    <button onClick={resetAll} className="ml-auto text-[11px] text-gray-500 hover:text-red-400">Reset to baseline</button>
+                                </div>
+                            )}
+
+                            {/* Content */}
+                            {searching ? (
+                                (featureHits.length + settingHits.length) === 0 ? (
+                                    <div className="py-10 text-center text-gray-500 italic">No matches for "{searchQuery}".</div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {featureHits.length > 0 && (
+                                            <div>
+                                                <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-3">Features ({featureHits.length})</h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {featureHits.map(f => (
+                                                        <FeatureCard key={f.id} feature={f} showCategoryChip
+                                                            selected={!!selectedFeatures[f.id]} value={featureValues[f.id]}
+                                                            fieldsState={featureIncludedFields[f.id]} fieldValues={featureFieldValues[f.id]}
+                                                            requiredReason={(requiredByMap[f.featureName] || []).join(', ') || null}
+                                                            onToggle={() => toggleFeature(f)}
+                                                            onValueChange={(v) => setFeatureValue(f.id, v)}
+                                                            onToggleField={(tn, fd) => toggleFeatureField(f.id, tn, fd)}
+                                                            onFieldValueChange={(tn, fd, v) => setFeatureFieldValue(f.id, tn, fd, v)} />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {settingHits.length > 0 && (
+                                            <div>
+                                                <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-3">Settings ({settingHits.length})</h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {settingHits.map(s => (
+                                                        <SettingCard key={s.id} setting={s}
+                                                            fieldsMap={selectedSettings[s.id]} valuesMap={settingValues[s.id]}
+                                                            onToggleSetting={() => toggleSetting(s)}
+                                                            onToggleField={(fd) => toggleSettingField(s, fd)}
+                                                            onFieldValueChange={(fd, v) => setSettingFieldValue(s, fd, v)} />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            ) : activeTab === 'settings' ? (
+                                <AllSettingsTab selectedSettings={selectedSettings} settingValues={settingValues}
+                                    onToggleSetting={toggleSetting} onToggleField={toggleSettingField} onFieldValueChange={setSettingFieldValue} />
+                            ) : (
+                                <div>
+                                    <div className="flex items-baseline justify-between mb-3">
+                                        <div>
+                                            <h2 className="text-lg font-semibold text-white">{CATEGORY_BY_ID[activeTab]?.label}</h2>
+                                            <p className="text-xs text-gray-500 mt-0.5">{CATEGORY_BY_ID[activeTab]?.description}</p>
+                                        </div>
+                                        <span className="text-xs text-gray-500">{currentCategoryFeatures.length} features, {currentCategorySettings.length} settings</span>
+                                    </div>
+                                    {currentCategoryFeatures.length === 0 ? (
+                                        <div className="py-6 text-center text-gray-500 italic text-sm">
+                                            No features in this category. See the general settings below.
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {currentCategoryFeatures.map(f => (
+                                                <FeatureCard key={f.id} feature={f}
+                                                    selected={!!selectedFeatures[f.id]} value={featureValues[f.id]}
+                                                    fieldsState={featureIncludedFields[f.id]} fieldValues={featureFieldValues[f.id]}
+                                                    requiredReason={(requiredByMap[f.featureName] || []).join(', ') || null}
+                                                    onToggle={() => toggleFeature(f)}
+                                                    onValueChange={(v) => setFeatureValue(f.id, v)}
+                                                    onToggleField={(tn, fd) => toggleFeatureField(f.id, tn, fd)}
+                                                    onFieldValueChange={(tn, fd, v) => setFeatureFieldValue(f.id, tn, fd, v)} />
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* General settings for this category (settings not tied to any feature) */}
+                                    {currentCategorySettings.length > 0 && (
+                                        <div className="mt-6 rounded-lg border border-gray-800 bg-gray-950/30">
+                                            <button onClick={() => setGeneralExpanded(e => !e)}
+                                                className="w-full flex items-center justify-between px-4 py-3 text-left">
+                                                <div>
+                                                    <div className="text-sm font-semibold text-gray-200">General {CATEGORY_BY_ID[activeTab]?.label} Settings</div>
+                                                    <div className="text-[11px] text-gray-500">Settings in this category that aren't tied to a specific feature above.</div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[11px] text-gray-500">{currentCategorySettings.length} types</span>
+                                                    {generalExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                                                </div>
+                                            </button>
+                                            {generalExpanded && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 border-t border-gray-800">
+                                                    {currentCategorySettings.map(s => (
+                                                        <SettingCard key={s.id} setting={s}
+                                                            fieldsMap={selectedSettings[s.id]} valuesMap={settingValues[s.id]}
+                                                            onToggleSetting={() => toggleSetting(s)}
+                                                            onToggleField={(fd) => toggleSettingField(s, fd)}
+                                                            onFieldValueChange={(fd, v) => setSettingFieldValue(s, fd, v)} />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* RIGHT */}
+                    <div className="w-full md:w-1/3 bg-gray-950 border-l border-gray-800 md:h-screen md:sticky md:top-0 flex flex-col">
+                        <div className="p-6 border-b border-gray-800 bg-gray-950/95 backdrop-blur z-10 flex justify-between items-center">
+                            <div>
+                                <h2 className="text-lg font-bold text-white">Definition File</h2>
+                                <p className="text-[11px] text-gray-500 mt-0.5">project-scratch-def.json</p>
+                            </div>
+                            <div className="flex gap-2">
+                                <button onClick={copyJson} className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors" title="Copy">
+                                    {copied ? <CheckIcon /> : <CopyIcon />}
+                                </button>
+                                <button onClick={downloadJson} className="p-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors" title="Download">
+                                    <DownloadIcon />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-auto p-6">
+                            <pre className="font-mono text-sm text-gray-400 whitespace-pre-wrap break-all">
+                                <code dangerouslySetInnerHTML={{ __html: syntaxHighlight(outputJson) }} />
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Standalone Settings tab: all 140 setting types grouped by category
+        function AllSettingsTab({ selectedSettings, settingValues, onToggleSetting, onToggleField, onFieldValueChange }) {
+            const [open, setOpen] = useState({});
+            const grouped = useMemo(() => {
+                const out = {};
+                for (const s of SETTINGS) (out[s.category] = out[s.category] || []).push(s);
+                return out;
+            }, []);
+            const toggle = (id) => setOpen(o => ({ ...o, [id]: !o[id] }));
+
+            return (
+                <div>
+                    <div className="flex items-baseline justify-between mb-4">
+                        <div>
+                            <h2 className="text-lg font-semibold text-white">All Settings</h2>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                                Every Metadata API setting type. Use this when you need settings that aren't tied to a specific feature.
+                            </p>
+                        </div>
+                        <span className="text-xs text-gray-500">{SETTINGS.length} types · {SETTINGS.reduce((a, s) => a + s.fields.length, 0)} fields</span>
+                    </div>
+                    <div className="space-y-3">
+                        {CATEGORIES.map(cat => {
+                            const items = grouped[cat.id] || [];
+                            if (!items.length) return null;
+                            const isOpen = open[cat.id] ?? items.some(s => selectedSettings[s.id]);
+                            const selectedCount = items.filter(s => selectedSettings[s.id] && Object.keys(selectedSettings[s.id]).length > 0).length;
+                            return (
+                                <div key={cat.id} className="rounded-lg border border-gray-800 bg-gray-950/30">
+                                    <button onClick={() => toggle(cat.id)}
+                                        className="w-full flex items-center justify-between px-4 py-3 text-left">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-sm font-semibold text-gray-200">{cat.label}</span>
+                                            <span className="text-xs text-gray-500">{items.length} types</span>
+                                            {selectedCount > 0 && <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-primary-600 text-white text-[10px] font-semibold">{selectedCount}</span>}
+                                        </div>
+                                        {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                                    </button>
+                                    {isOpen && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 border-t border-gray-800">
+                                            {items.map(s => (
+                                                <SettingCard key={s.id} setting={s}
+                                                    fieldsMap={selectedSettings[s.id]} valuesMap={settingValues[s.id]}
+                                                    onToggleSetting={() => onToggleSetting(s)}
+                                                    onToggleField={(fd) => onToggleField(s, fd)}
+                                                    onFieldValueChange={(fd, v) => onFieldValueChange(s, fd, v)} />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+
+    <script>
+        // Header scroll effect — matches other TactForce tool pages
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('main-header');
+            if (!header) return;
+            header.classList.toggle('tf-scrolled', window.scrollY > 50);
+        });
+        document.addEventListener('alpine:initialized', () => {
+            setTimeout(() => lucide.createIcons(), 100);
+        });
+    </script>
+</body>
+</html>
