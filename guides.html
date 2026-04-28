@@ -37,11 +37,21 @@
     <script src="js/app.js"></script>
 
     <style>
-      .gd-shell { padding-top: 80px; min-height: 100vh; display: flex; flex-direction: column; }
-      .gd-layout { display: grid; grid-template-columns: 280px 1fr; gap: 56px; max-width: 1280px; margin: 0 auto; padding: 48px 48px 80px; flex: 1; }
+      .gd-shell { padding-top: 80px; min-height: 100vh; }
+      .gd-layout {
+        display: grid;
+        grid-template-columns: 280px minmax(0, 1fr);
+        gap: 56px;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 48px 48px 80px;
+        width: 100%;
+        box-sizing: border-box;
+      }
       @media (max-width: 1000px) { .gd-layout { grid-template-columns: 1fr; gap: 32px; padding: 32px 20px 60px; } }
-      .gd-side { position: sticky; top: 80px; align-self: start; max-height: calc(100vh - 80px); overflow-y: auto; }
+      .gd-side { position: sticky; top: 96px; align-self: start; max-height: calc(100vh - 110px); overflow-y: auto; }
       @media (max-width: 1000px) { .gd-side { position: static; max-height: none; } }
+      .gd-main { min-width: 0; }
       .gd-card { background: var(--bg-2); border: 1px solid var(--rule); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
       .gd-toc { list-style: none; padding: 0; margin: 0; }
       .gd-toc li { margin: 0; }
@@ -125,7 +135,7 @@
   <header id="main-header" x-init="$el.innerHTML = window.renderHeader()"></header>
 
   <!-- Not found -->
-  <div x-show="!currentGuide" class="tf-section" style="border:none; min-height: 60vh; display:flex; align-items:center; justify-content:center;">
+  <div x-show="!currentGuide" class="tf-section" style="border:none; min-height: 60vh; padding-top: 120px; display:flex; align-items:center; justify-content:center;">
     <div style="text-align:center; max-width: 480px; padding: 0 20px;">
       <span class="tf-mono tf-mono--accent">// 404</span>
       <h1 class="tf-h2" style="margin: 16px 0;">Guide not found.</h1>
@@ -189,7 +199,7 @@
       </aside>
 
       <!-- Main -->
-      <main>
+      <main class="gd-main">
         <div style="margin-bottom: 36px;">
           <span class="tf-mono tf-mono--accent">// documentation</span>
           <h1 class="tf-h2" style="margin-top: 12px;" x-text="currentGuide?.title"></h1>
@@ -212,15 +222,36 @@
     <!-- Footer -->
     <footer class="tf-footer">
       <div class="tf-wrap">
-        <div class="tf-footer__wordmark" style="font-size: clamp(48px, 9vw, 120px);">TACT<span class="tf-accent">FORCE</span></div>
-        <div class="tf-footer__row">
-          <div x-text="content.footer.copyright"></div>
-          <div>DOCS / <span x-text="currentGuide?.title || ''"></span></div>
-          <div class="tf-footer__links">
-            <a href="index.html">HOME</a>
-            <a href="tools.html">TOOLS</a>
-            <a href="admin.html" style="opacity:.5;">ADMIN</a>
+        <div class="tf-footer__cols">
+          <div>
+            <a href="index.html" class="tf-footer__brand">
+              <img src="images/logo.png" alt="TactForce" onerror="this.style.display='none'">
+              <span class="tf-footer__brand-name">TactForce</span>
+            </a>
+            <p class="tf-footer__tag">Building free Salesforce apps and browser tools, in the open.</p>
           </div>
+          <div>
+            <div class="tf-footer__col-title">// Quick Links</div>
+            <ul class="tf-footer__nav">
+              <template x-for="link in content.navigation" :key="link.label">
+                <li><a :href="window.resolveNavHref(link.href, '', 'index.html')" x-text="link.label"></a></li>
+              </template>
+            </ul>
+          </div>
+          <div>
+            <div class="tf-footer__col-title">// Support</div>
+            <a :href="content.footer.buyMeCoffeeLink" target="_blank" rel="noreferrer" class="tf-footer__bmc">
+              <img :src="content.footer.buyMeCoffeeImage" alt="Buy Me A Coffee">
+            </a>
+            <a :href="content.footer.linkedInLink" target="_blank" rel="noreferrer" class="tf-footer__linkedin">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              <span>Connect on LinkedIn</span>
+            </a>
+          </div>
+        </div>
+        <div class="tf-footer__bottom">
+          <span x-text="content.footer.copyright"></span>
+          <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ Back to top</a>
         </div>
       </div>
     </footer>

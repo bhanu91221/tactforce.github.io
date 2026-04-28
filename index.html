@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title x-data="site" x-text="content.meta.title">TactForce — Free Salesforce Apps & Tools</title>
-    <meta name="description" content="Building free Salesforce tools in the open. Native AppExchange apps and browser-based utilities by Bhanu Vakati, a registered Salesforce Partner.">
+    <meta name="description" content="Building free Salesforce tools in the open. Native AppExchange apps and browser-based utilities, a registered Salesforce Partner.">
     <link rel="icon" type="image/png" href="images/logo.png">
 
     <!-- Open Graph / Twitter -->
@@ -64,7 +64,33 @@
     </a>
     <ul class="tf-nav__list">
       <template x-for="link in content.navigation" :key="link.label">
-        <li><a :href="link.href" class="tf-nav__link" x-text="link.label"></a></li>
+        <li>
+          <template x-if="link.dropdown === 'products'">
+            <div @click.away="closeAppsDropdown()">
+              <button class="tf-nav__link" :class="{ 'is-open': appsDropdownOpen }" @click="toggleAppsDropdown()">
+                <span x-text="link.label"></span>
+                <span class="caret">▾</span>
+              </button>
+              <div class="tf-nav__menu" x-show="appsDropdownOpen" x-transition style="display:none;">
+                <template x-for="p in content.products" :key="p.id">
+                  <div>
+                    <a :href="'#' + p.id" @click="closeAppsDropdown()" class="tf-nav__menu-item">
+                      <span x-text="p.name"></span>
+                      <span class="meta" x-text="p.tagline || ''"></span>
+                    </a>
+                    <div class="tf-nav__menu-sub">
+                      <a :href="p.appExchangeLink" target="_blank" rel="noreferrer" @click="closeAppsDropdown()">AppExchange ↗</a>
+                      <a :href="p.guideLink" @click="closeAppsDropdown()">Setup Guide</a>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+          <template x-if="!link.dropdown">
+            <a :href="link.href" class="tf-nav__link" x-text="link.label"></a>
+          </template>
+        </li>
       </template>
     </ul>
     <div style="display:flex; align-items:center; gap:14px;">
@@ -122,7 +148,7 @@
           </div>
           <div class="tf-term__body">
             <div><span class="prompt">$</span>whoami</div>
-            <div class="out" style="margin-bottom: 12px;">bhanu — salesforce architect &amp; developer</div>
+            <div class="out" style="margin-bottom: 12px;">salesforce architect &amp; developer</div>
             <div><span class="prompt">$</span>ls ./apps</div>
             <div class="out" style="margin-bottom: 12px;">
               <template x-for="(p, i) in content.products" :key="p.id"><span><span x-text="p.id"></span>/<span x-show="i &lt; content.products.length - 1">  </span></span></template>
@@ -133,7 +159,7 @@
         </div>
 
         <!-- Stats -->
-        <div class="tf-stats reveal">
+        <div class="tf-stats tf-stats--2 reveal">
           <div class="tf-stat">
             <div class="tf-stat__k">AppExchange Apps</div>
             <div class="tf-stat__v" x-text="String(content.products.length).padStart(2,'0')">--</div>
@@ -141,14 +167,6 @@
           <div class="tf-stat">
             <div class="tf-stat__k">Browser Tools</div>
             <div class="tf-stat__v" x-text="(content.tools.filter(t=>!t.hidden).length) + '+'">-</div>
-          </div>
-          <div class="tf-stat">
-            <div class="tf-stat__k">Total Cost</div>
-            <div class="tf-stat__v">$0</div>
-          </div>
-          <div class="tf-stat">
-            <div class="tf-stat__k">External APIs</div>
-            <div class="tf-stat__v">0</div>
           </div>
         </div>
       </div>
@@ -254,7 +272,6 @@
             <p class="body" x-text="content.about.text[1]"></p>
             <div class="tf-about__cta">
               <a :href="content.about.linkedIn" target="_blank" rel="noreferrer" class="tf-btn tf-btn--pill">LinkedIn ↗</a>
-              <span class="tf-about__loc" x-text="content.about.location"></span>
             </div>
           </div>
         </div>
@@ -345,17 +362,36 @@
   <!-- Footer -->
   <footer class="tf-footer">
     <div class="tf-wrap">
-      <div class="tf-footer__wordmark">
-        TACT<span class="tf-accent">FORCE</span>
-      </div>
-      <div class="tf-footer__row">
-        <div x-text="content.footer.copyright"></div>
-        <div x-text="content.about.location"></div>
-        <div class="tf-footer__links">
-          <a :href="content.footer.linkedInLink" target="_blank" rel="noreferrer">LINKEDIN ↗</a>
-          <a :href="content.footer.buyMeCoffeeLink" target="_blank" rel="noreferrer">BMC ↗</a>
-          <a href="admin.html" style="opacity:.5;">ADMIN</a>
+      <div class="tf-footer__cols">
+        <div>
+          <a href="#hero" class="tf-footer__brand">
+            <img src="images/logo.png" alt="TactForce" onerror="this.style.display='none'">
+            <span class="tf-footer__brand-name">TactForce</span>
+          </a>
+          <p class="tf-footer__tag">Building free Salesforce apps and browser tools, in the open.</p>
         </div>
+        <div>
+          <div class="tf-footer__col-title">// Quick Links</div>
+          <ul class="tf-footer__nav">
+            <template x-for="link in content.navigation" :key="link.label">
+              <li><a :href="link.href" x-text="link.label"></a></li>
+            </template>
+          </ul>
+        </div>
+        <div>
+          <div class="tf-footer__col-title">// Support</div>
+          <a :href="content.footer.buyMeCoffeeLink" target="_blank" rel="noreferrer" class="tf-footer__bmc">
+            <img :src="content.footer.buyMeCoffeeImage" alt="Buy Me A Coffee">
+          </a><br>
+          <a :href="content.footer.linkedInLink" target="_blank" rel="noreferrer" class="tf-footer__linkedin">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            <span>Connect on LinkedIn</span>
+          </a>
+        </div>
+      </div>
+      <div class="tf-footer__bottom">
+        <span x-text="content.footer.copyright"></span>
+        <a href="#hero">↑ Back to top</a>
       </div>
     </div>
   </footer>

@@ -4,7 +4,8 @@ window.siteContent = {
         "description": "Building free Salesforce tools in the open. Native AppExchange apps and browser-based utilities by Bhanu Vakati, a registered Salesforce Partner."
     },
     "navigation": [
-        { "label": "~/apps",    "href": "#solutions" },
+        { "label": "~/home",    "href": "index.html" },
+        { "label": "~/apps",    "href": "#solutions", "dropdown": "products" },
         { "label": "~/tools",   "href": "tools.html" },
         { "label": "~/about",   "href": "#about" },
         { "label": "~/contact", "href": "#contact" }
@@ -67,7 +68,7 @@ window.siteContent = {
             "id": "dynamic-path",
             "num": "02",
             "name": "Dynamic Path",
-            "tagline": "Path, but it bends.",
+            "tagline": "A Flexible and Highly customizable LWC Path Component",
             "description": "The Dynamic Path component enhances standard Path functionality and offers greater customizability for your Salesforce processes. Group picklist values, surface key fields, write rich guidance per stage. Standard or custom objects. Zero Apex required.",
             "features": [
                 "Highly Customizable for both Standard and Custom Objects",
@@ -89,7 +90,7 @@ window.siteContent = {
             "id": "rocket-reports",
             "num": "03",
             "name": "Rocket Reports",
-            "tagline": "Schedule. Send. Stay native.",
+            "tagline": "Salesforce Native solution to send reports to external emails",
             "description": "Effortlessly schedule and send your vital Salesforce reports to any email address. Built entirely on Apex + LWC. Zero external API calls. v2.0 supports multiple reports per subscription.",
             "features": [
                 "Built entirely on the Salesforce platform using Apex and LWC",

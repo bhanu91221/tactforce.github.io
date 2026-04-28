@@ -27,19 +27,26 @@ document.addEventListener("alpine:init", () => {
     },
   };
 
+  // Mixins shared by index/tools/guides
+  const navMixin = {
+    mobileMenuOpen: false,
+    appsDropdownOpen: false,
+    toggleMenu() { this.mobileMenuOpen = !this.mobileMenuOpen; },
+    toggleAppsDropdown() { this.appsDropdownOpen = !this.appsDropdownOpen; },
+    closeAppsDropdown() { this.appsDropdownOpen = false; },
+  };
+
   // Index page
   Alpine.data("site", () => ({
     ...siteStore,
-    mobileMenuOpen: false,
+    ...navMixin,
     contactSent: false,
-    toggleMenu() { this.mobileMenuOpen = !this.mobileMenuOpen; },
   }));
 
   // Tools page
   Alpine.data("toolsApp", () => ({
     ...siteStore,
-    mobileMenuOpen: false,
-    toggleMenu() { this.mobileMenuOpen = !this.mobileMenuOpen; },
+    ...navMixin,
     get visibleTools() {
       return (this.content.tools || []).filter((t) => !t.hidden);
     },
@@ -48,10 +55,9 @@ document.addEventListener("alpine:init", () => {
   // Guides page
   Alpine.data("guideApp", () => ({
     ...siteStore,
+    ...navMixin,
     id: new URLSearchParams(window.location.search).get("id"),
     guideDropdownOpen: false,
-    mobileMenuOpen: false,
-    toggleMenu() { this.mobileMenuOpen = !this.mobileMenuOpen; },
     get currentGuide() { return this.content.guides[this.id]; },
     get availableGuides() {
       return Object.entries(this.content.guides).map(([key, g]) => ({ id: key, title: g.title }));
@@ -66,20 +72,24 @@ document.addEventListener("alpine:init", () => {
 });
 
 // ----------------------------------------------------------------------------
-// Live UTC clock — updates any element with [data-utc] every second.
+// Live local clock — updates any element with [data-utc] every second.
 // ----------------------------------------------------------------------------
-function tickUTC() {
+const LOCAL_TZ = new Intl.DateTimeFormat(undefined, { timeZoneName: "short" })
+  .formatToParts(new Date())
+  .find((p) => p.type === "timeZoneName")?.value ?? "";
+
+function tickClock() {
   const els = document.querySelectorAll("[data-utc]");
   if (!els.length) return;
   const d = new Date();
-  const hh = String(d.getUTCHours()).padStart(2, "0");
-  const mm = String(d.getUTCMinutes()).padStart(2, "0");
-  const ss = String(d.getUTCSeconds()).padStart(2, "0");
-  const txt = `${hh}:${mm}:${ss} UTC`;
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  const ss = String(d.getSeconds()).padStart(2, "0");
+  const txt = `${hh}:${mm}:${ss} ${LOCAL_TZ}`;
   els.forEach((el) => { el.textContent = txt; });
 }
-setInterval(tickUTC, 1000);
-document.addEventListener("DOMContentLoaded", tickUTC);
+setInterval(tickClock, 1000);
+document.addEventListener("DOMContentLoaded", tickClock);
 
 // ----------------------------------------------------------------------------
 // Scroll-reveal observer
@@ -100,15 +110,34 @@ window.initScrollReveal = initScrollReveal;
 document.addEventListener("DOMContentLoaded", () => setTimeout(initScrollReveal, 50));
 
 // ----------------------------------------------------------------------------
-// Resolve nav hrefs from sub-pages (e.g. tools/delimiter/) back to home anchors.
+// Resolve nav hrefs to home page when needed.
+// - On index.html: anchor stays as `#section`
+// - On any non-index page (tools.html, guides.html, tool sub-pages, admin):
+//   `#section` resolves to `<homeHref>#section` so the link still works.
+// renderHeader() is only called on non-index pages, so we always prepend.
 // ----------------------------------------------------------------------------
 window.resolveNavHref = function (href, basePath, homeHref) {
   if (!href) return "#";
-  if (href.charAt(0) === "#") {
-    return basePath ? homeHref + href : href;
-  }
+  if (href.charAt(0) === "#") return homeHref + href;
   return basePath + href;
 };
+
+// ----------------------------------------------------------------------------
+// Smooth scroll any in-page anchor click, accounting for fixed-nav offset.
+// ----------------------------------------------------------------------------
+document.addEventListener("click", function (e) {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a) return;
+  const id = a.getAttribute("href").slice(1);
+  if (!id) return;
+  const target = document.getElementById(id);
+  if (!target) return;
+  e.preventDefault();
+  const navOffset = 70;
+  const top = target.getBoundingClientRect().top + window.pageYOffset - navOffset;
+  window.scrollTo({ top, behavior: "smooth" });
+  if (history.replaceState) history.replaceState(null, "", "#" + id);
+});
 
 // ----------------------------------------------------------------------------
 // Shared header markup — used by tools.html, guides.html, tool sub-pages.
@@ -121,6 +150,7 @@ window.renderHeader = function (options) {
   const homeHref = options.homeHref || basePath + "index.html";
   const stylesHref = basePath + "css/style.css";
   const hrefExpr = `window.resolveNavHref(link.href, '${basePath}', '${homeHref}')`;
+  const productHrefExpr = `window.resolveNavHref('#' + p.id, '${basePath}', '${homeHref}')`;
 
   return `
     <link rel="stylesheet" href="${stylesHref}">
@@ -133,7 +163,31 @@ window.renderHeader = function (options) {
       <ul class="tf-nav__list">
         <template x-for="link in content.navigation" :key="link.label">
           <li>
-            <a :href="${hrefExpr}" class="tf-nav__link" x-text="link.label"></a>
+            <template x-if="link.dropdown === 'products'">
+              <div @click.away="closeAppsDropdown()">
+                <button class="tf-nav__link" :class="{ 'is-open': appsDropdownOpen }" @click="toggleAppsDropdown()">
+                  <span x-text="link.label"></span>
+                  <span class="caret">▾</span>
+                </button>
+                <div class="tf-nav__menu" x-show="appsDropdownOpen" x-transition style="display:none;">
+                  <template x-for="p in content.products" :key="p.id">
+                    <div>
+                      <a :href="${productHrefExpr}" @click="closeAppsDropdown()" class="tf-nav__menu-item">
+                        <span x-text="p.name"></span>
+                        <span class="meta" x-text="(p.tagline || '')"></span>
+                      </a>
+                      <div class="tf-nav__menu-sub">
+                        <a :href="p.appExchangeLink" target="_blank" rel="noreferrer" @click="closeAppsDropdown()">AppExchange ↗</a>
+                        <a :href="window.resolveNavHref(p.guideLink, '${basePath}', '${homeHref}')" @click="closeAppsDropdown()">Setup Guide</a>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+            <template x-if="!link.dropdown">
+              <a :href="${hrefExpr}" class="tf-nav__link" x-text="link.label"></a>
+            </template>
           </li>
         </template>
       </ul>
