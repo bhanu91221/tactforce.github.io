@@ -11,7 +11,7 @@ window.siteContent = {
         { "label": "~/contact", "href": "#contact" }
     ],
     "hero": {
-        "tag": "SALESFORCE PARTNER · STATUS: SHIPPING",
+        "tag": "SALESFORCE PARTNER · STATUS: ACTIVE",
         "title": "Building free",
         "titleAccent": "tools",
         "titleSuffix": "in the open.",
@@ -31,7 +31,8 @@ window.siteContent = {
             "TactForce is my way of giving back to the Salesforce community. Every app I publish on the AppExchange is free, built with care, and backed by my commitment as a registered Salesforce Partner."
         ],
         "location": "BHANU VAKATI · TORONTO, CA",
-        "linkedIn": "https://www.linkedin.com/in/bhanuprakashvakati/"
+        "linkedIn": "https://www.linkedin.com/in/bhanuprakashvakati/",
+		"trailhead": "https://www.salesforce.com/trailblazer/bvakati"
     },
     "solutions": {
         "label": "// 01 APPS",
@@ -202,7 +203,14 @@ window.siteContent = {
         "Permissions Xplorer": {
             "title": "Permissions Xplorer User Guide",
             "versions": [],
-            "sections": []
+            "sections": [
+				{
+					"id": "introduction",
+                    "title": "Application In-Development",
+					"content": "Updates Coming Soon."
+				
+				}
+			]
         },
         "dynamic-path": {
             "title": "Dynamic Path User Guide",

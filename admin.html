@@ -486,6 +486,7 @@
             <div class="ad-row--2">
               <label><span class="ad-label">location</span><input type="text" x-model="data.about.location" class="ad-input"></label>
               <label><span class="ad-label">linkedin url</span><input type="text" x-model="data.about.linkedIn" class="ad-input"></label>
+			        <label><span class="ad-label">Trailhead url</span><input type="text" x-model="data.about.trailhead" class="ad-input"></label>
             </div>
           </div>
 
@@ -636,6 +637,7 @@
           this.data.about = this.data.about || { title: 'About', text: ['',''], location: '', linkedIn: '' };
           if (!this.data.about.location) this.data.about.location = 'BHANU VAKATI · TORONTO, CA';
           if (!this.data.about.linkedIn) this.data.about.linkedIn = 'https://www.linkedin.com/in/bhanuprakashvakati/';
+		      if (!this.data.about.trailhead) this.data.about.trailhead = 'https://www.salesforce.com/trailblazer/bvakati';
           this.data.contact.label = this.data.contact.label || '// 04 CONTACT';
           this.data.contact.headlineAccent = this.data.contact.headlineAccent || 'case.';
           this.data.hero.tag = this.data.hero.tag || 'SALESFORCE PARTNER · STATUS: SHIPPING';
