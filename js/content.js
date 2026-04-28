@@ -1,44 +1,76 @@
 window.siteContent = {
     "meta": {
-        "title": "TactForce - Expert Salesforce Solutions",
-        "description": "Showcasing AppExchange Solutions Dynamic Path and Rocket Reports by TactForce, a Salesforce Partner."
+        "title": "TactForce — Free Salesforce Apps & Tools",
+        "description": "Building free Salesforce tools in the open. Native AppExchange apps and browser-based utilities by Bhanu Vakati, a registered Salesforce Partner."
     },
     "navigation": [
-        {
-            "label": "Home",
-            "href": "index.html"
-        },
-        {
-            "label": "Solutions",
-            "href": "#solutions"
-        },
-        {
-            "label": "Tools",
-            "href": "tools.html"
-        },
-        {
-            "label": "Contact",
-            "href": "#contact"
-        }
+        { "label": "~/home",    "href": "index.html" },
+        { "label": "~/apps",    "href": "#solutions", "dropdown": "products" },
+        { "label": "~/tools",   "href": "tools.html" },
+        { "label": "~/about",   "href": "#about" },
+        { "label": "~/contact", "href": "#contact" }
     ],
     "hero": {
-        "title": "Expert Salesforce Solutions",
-        "subtitle": "Elevate your Salesforce experience with powerful AppExchange apps developed by TactForce, a proud Salesforce Partner.",
-        "cta": "Explore the Apps",
-        "ctaLink": "#solutions"
+        "tag": "SALESFORCE PARTNER · STATUS: ACTIVE",
+        "title": "Building free",
+        "titleAccent": "tools",
+        "titleSuffix": "in the open.",
+        "subtitle": "A growing collection of free AppExchange apps and browser utilities — built by a Salesforce Architect, given back to the community.",
+        "cta": "Browse apps →",
+        "ctaLink": "#solutions",
+        "ctaSecondary": "Contact",
+        "ctaSecondaryLink": "#contact"
     },
     "about": {
         "title": "About",
+        "headline": "Built by an architect.",
+        "headlineAccent": "architect.",
+        "headlineSuffix": "Given to the community.",
         "text": [
             "I'm a Salesforce Architect & Developer with a passion for building tools that make life easier for admins and developers.",
             "TactForce is my way of giving back to the Salesforce community. Every app I publish on the AppExchange is free, built with care, and backed by my commitment as a registered Salesforce Partner."
-        ]
+        ],
+        "location": "BHANU VAKATI · TORONTO, CA",
+        "linkedIn": "https://www.linkedin.com/in/bhanuprakashvakati/",
+		"trailhead": "https://www.salesforce.com/trailblazer/bvakati"
+    },
+    "solutions": {
+        "label": "// 01 APPS",
+        "headline": "Native apps.",
+        "headlineAccent": "All free.",
+        "caption": "SHIPPING · MORE IN PROGRESS"
     },
     "products": [
         {
+            "id": "permissions-xplorer",
+            "num": "01",
+            "name": "Permissions Xplorer",
+            "tagline": "Audit, compare, migrate. From one console.",
+            "description": "Permissions Xplorer is a Salesforce-native app that lets admins instantly audit, compare, and migrate user permissions, profiles, and permission sets from a single command center—turning hours of manual access reviews into a few clicks.",
+            "features": [
+                "Permission Lookup — instantly find every user who has a specific permission",
+                "User Analysis — full audit of any user's combined Profile + Permission Set access",
+                "Profile-to-Permission-Set Migration Wizard",
+                "Side-by-Side Set Comparison — color-coded diff for 2–3 permission sets",
+                "Dashboard with metrics, recent activity, and built-in audit log",
+                "100% native — built on Apex + LWC, no external API calls"
+            ],
+            "image": "images/px.png",
+            "appExchangeLink": "#",
+            "guideLink": "guides.html?id=Permissions Xplorer",
+            "version": "0.9",
+            "released": "2026.Q2",
+            "installs": "IN-DEV",
+            "featured": true,
+            "featuredName": "In Development",
+            "featuredIcon": "zap"
+        },
+        {
             "id": "dynamic-path",
+            "num": "02",
             "name": "Dynamic Path",
-            "description": "The Dynamic Path component enhances standard Path functionality and offers greater customizability for your Salesforce processes.",
+            "tagline": "A Flexible and Highly customizable LWC Path Component",
+            "description": "The Dynamic Path component enhances standard Path functionality and offers greater customizability for your Salesforce processes. Group picklist values, surface key fields, write rich guidance per stage. Standard or custom objects. Zero Apex required.",
             "features": [
                 "Highly Customizable for both Standard and Custom Objects",
                 "Group multiple picklist values in Path",
@@ -48,70 +80,90 @@ window.siteContent = {
             "image": "images/dp.png",
             "appExchangeLink": "https://appexchange.salesforce.com/appxListingDetail?listingId=4255e60a-5080-4ec2-8461-01b7275a99b4",
             "guideLink": "guides.html?id=dynamic-path",
+            "version": "1.4",
+            "released": "2026.01.12",
+            "installs": "FREE",
             "featured": false,
             "featuredName": "Popular Choice",
             "featuredIcon": "Heart"
         },
         {
             "id": "rocket-reports",
+            "num": "03",
             "name": "Rocket Reports",
-            "description": "Effortlessly schedule and send your vital Salesforce reports to any email address.",
+            "tagline": "Salesforce Native solution to send reports to external emails",
+            "description": "Effortlessly schedule and send your vital Salesforce reports to any email address. Built entirely on Apex + LWC. Zero external API calls. v2.0 supports multiple reports per subscription.",
             "features": [
                 "Built entirely on the Salesforce platform using Apex and LWC",
                 "Simple and Easy interface to Manage Subscriptions",
-                "No External API calls"
+                "No External API calls",
+                "Multi-report subscriptions (v2.0)"
             ],
             "image": "images/rr.png",
             "appExchangeLink": "https://appexchange.salesforce.com/appxListingDetail?listingId=4f304763-c601-4a00-823f-2a3d697fdce6",
             "guideLink": "guides.html?id=rocket-reports",
+            "version": "2.0",
+            "released": "2026.01.23",
+            "installs": "FREE",
             "featured": false,
             "featuredName": "Popular Choice",
             "featuredIcon": "zap"
         }
     ],
     "features": {
-        "title": "Why TactForce",
-        "heading": "Built for Success",
+        "title": "// 03 PRINCIPLES",
+        "heading": "Built for the platform.",
         "items": [
             {
                 "icon": "zap",
                 "iconColor": "blue",
-                "title": "Lightning Fast",
-                "description": "Built with performance in mind, every app delivers lightning-fast results without compromising functionality."
+                "title": "Native, always",
+                "description": "Built on the Salesforce platform — Apex, LWC, Flow. No middleware, no external dependencies, no surprises in your audit log."
             },
             {
                 "icon": "shield-check",
                 "iconColor": "teal",
-                "title": "Secure & Reliable",
-                "description": "Enterprise-grade security built into every solution. Your data stays safe within Salesforce."
+                "title": "Free to install",
+                "description": "Every app on AppExchange is free. Forever. This is a contribution to the community, not a funnel."
             },
             {
                 "icon": "smile",
                 "iconColor": "purple",
-                "title": "Easy to Use",
-                "description": "Intuitive interfaces designed for users of all technical levels. Get started in minutes, not hours."
+                "title": "Documented",
+                "description": "Every release ships with a setup guide, edge cases, and known issues. No reverse-engineering required."
             }
         ]
     },
     "contact": {
+        "label": "// 04 CONTACT",
         "title": "Get In Touch",
-        "subtitle": "Have questions about an app, need support, or just want to say hi? I'd love to hear from you.",
+        "headline": "Open a case.",
+        "headlineAccent": "case.",
+        "subtitle": "Questions, feedback, or just say hi. Or email support@tactforce.ca.",
         "formAction": "https://webto.salesforce.com/servlet/servlet.WebToCase?encoding=UTF-8&orgId=00Dau000004vwBR",
         "orgId": "00Dau000004vwBR",
         "retURL": "tactforce.ca",
         "supportEmail": "support@tactforce.ca"
     },
     "footer": {
-        "copyright": "© 2025 TactForce. All Rights Reserved.",
+        "copyright": "© 2026 TACTFORCE",
         "buyMeCoffeeLink": "https://www.buymeacoffee.com/BhanuVakati",
         "buyMeCoffeeImage": "https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png",
         "linkedInLink": "https://www.linkedin.com/in/bhanuprakashvakati/"
+    },
+    "toolsMeta": {
+        "label": "// 02 TOOLS",
+        "headline": "Browser-based",
+        "headlineSuffix": "utilities.",
+        "caption": "100% LOCAL · NO SIGN-UP"
     },
     "tools": [
         {
             "id": "delimiter",
             "name": "Delimiter",
-            "description": "Convert between column-separated and delimited data \u2014 comma, pipe, tab, or any custom delimiter. Wrap, dedupe, group.",
+            "description": "Convert between column-separated and delimited data — comma, pipe, tab, or any custom delimiter. Wrap, dedupe, group.",
+            "tagline": "Comma, pipe, tab, custom.",
+            "cmd": "$ tf delimiter",
             "icon": "list",
             "url": "tools/delimiter/",
             "hidden": false
@@ -119,7 +171,9 @@ window.siteContent = {
         {
             "id": "md-to-pdf",
             "name": "MD to PDF",
-            "description": "Paste or drop a Markdown file, preview it live, and export a clean PDF \u2014 100% local, no server.",
+            "description": "Paste or drop a Markdown file, preview it live, and export a clean PDF — 100% local, no server.",
+            "tagline": "Live Markdown → clean PDF.",
+            "cmd": "$ tf md2pdf",
             "icon": "file-text",
             "url": "tools/md-to-pdf/",
             "hidden": false
@@ -128,20 +182,36 @@ window.siteContent = {
             "id": "permission-dependency-extractor",
             "name": "Permission Dependency Extractor",
             "description": "Generate the PermDepMap.json static resource for the Permission Dependency Resolver app.",
+            "tagline": "PermDepMap.json builder.",
+            "cmd": "$ tf permdep",
             "icon": "shield",
             "url": "tools/permission-dependency-extractor/",
             "hidden": true
         },
         {
             "id": "scratch-org-def-gen",
-            "name": "Scratch Org Definition File Generator",
+            "name": "Scratch Org Gen",
             "description": "Visual builder for Scratch org definition File.",
+            "tagline": "project-scratch-def.json builder.",
+            "cmd": "$ tf scratchgen",
             "icon": "file-code",
             "url": "tools/scratch-org-def-gen/",
             "hidden": false
         }
     ],
     "guides": {
+        "Permissions Xplorer": {
+            "title": "Permissions Xplorer User Guide",
+            "versions": [],
+            "sections": [
+				{
+					"id": "introduction",
+                    "title": "Application In-Development",
+					"content": "Updates Coming Soon."
+				
+				}
+			]
+        },
         "dynamic-path": {
             "title": "Dynamic Path User Guide",
             "versions": [

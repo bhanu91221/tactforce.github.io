@@ -13,7 +13,10 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Site design system (used by injected nav/footer chrome) -->
+    <link rel="stylesheet" href="../../css/style.css">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -29,7 +32,7 @@
       }
     </script>
     <style>
-      body { background-color: #0B0F19; color: #e5e7eb; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+      body { background-color: #0B0F19; color: #e5e7eb; font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
       #root { padding-top: 88px; }
       ::-webkit-scrollbar { width: 8px; height: 8px; }
       ::-webkit-scrollbar-track { background: #1f2937; }
@@ -61,7 +64,7 @@
 <body x-data="toolsApp">
 
     <!-- Site header -->
-    <header id="main-header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-gradient-to-b from-black/30 to-transparent backdrop-blur-sm"
+    <header id="main-header"
             x-init="$el.innerHTML = window.renderHeader({ basePath: '../../' }); $nextTick(() => lucide.createIcons({ root: $el }))">
     </header>
 

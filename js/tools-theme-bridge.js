@@ -1,26 +1,17 @@
-// Syncs the parent site's `dark` class on <html> with the tool pages' `data-theme` attribute,
-// so each tool's existing [data-theme="dark"] CSS keeps working unchanged.
-// Runs before Alpine loads to prevent flash of wrong theme.
+// Sync site theme with tool sub-pages BEFORE Alpine boots — prevents flash.
+// Sets [data-theme="dark|light"] on <html>; tools' existing [data-theme="dark"] CSS keeps working.
+// Mirrors the .dark Tailwind class so legacy `dark:` utilities in tools also work.
 (function () {
-  // Initial theme: mirror what siteStore.init() in app.js would pick.
-  // Site default is dark if no preference is saved.
   var saved = localStorage.getItem("theme");
-  var isDark = saved === "dark" || saved === null;
-  if (isDark) {
-    document.documentElement.classList.add("dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-  }
+  // Site default is dark unless user explicitly chose light.
+  var isDark = saved !== "light";
+  var root = document.documentElement;
+  root.setAttribute("data-theme", isDark ? "dark" : "light");
+  root.classList.toggle("dark", isDark);
 
-  function sync() {
-    var dark = document.documentElement.classList.contains("dark");
-    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
-  }
-  sync();
-
-  // Keep data-theme in sync whenever Alpine toggles the `dark` class.
-  new MutationObserver(sync).observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["class"],
-  });
+  // Keep attr in sync if anything later flips the .dark class (Alpine toggle).
+  new MutationObserver(function () {
+    var dark = root.classList.contains("dark");
+    root.setAttribute("data-theme", dark ? "dark" : "light");
+  }).observe(root, { attributes: true, attributeFilter: ["class"] });
 })();

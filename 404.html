@@ -1,84 +1,94 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page Not Found | TactForce</title>
-    <meta name="description" content="The page you're looking for doesn't exist.">
+    <title>404 — TactForce</title>
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/png" href="/images/logo.png">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
-        }
-        // Honor saved theme
-        if (localStorage.getItem('theme') === 'dark' || localStorage.getItem('theme') === null) {
-            document.documentElement.classList.add('dark');
-        }
+      (function() {
+        var saved = localStorage.getItem("theme");
+        var isDark = saved !== "light";
+        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+        document.documentElement.classList.toggle("dark", isDark);
+      })();
     </script>
 
-    <!-- Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/style.css">
 
     <style>
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .animate-float { animation: float 3s ease-in-out infinite; }
-        .gradient-bg {
-            background: linear-gradient(-45deg, #007bff, #00A1E0, #16a085, #4da3ff);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-        }
-        .text-gradient {
-            background: linear-gradient(135deg, #007bff, #00A1E0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+      body { min-height: 100vh; display: flex; flex-direction: column; }
+      .nf-shell { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; position: relative; overflow: hidden; }
+      .nf-shell .grid {
+        position: absolute; inset: 0; opacity: 0.4; pointer-events: none;
+        background-image:
+          linear-gradient(to right, var(--rule) 1px, transparent 1px),
+          linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+        background-size: 80px 80px;
+        -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+                mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+      }
+      .nf-shell .glow {
+        position: absolute; left: 50%; top: 0; transform: translateX(-50%);
+        width: 700px; height: 600px; border-radius: 50%;
+        background: radial-gradient(circle, var(--accent-soft) 0%, transparent 60%);
+        pointer-events: none; filter: blur(40px);
+      }
+      .nf-content { position: relative; z-index: 1; max-width: 720px; width: 100%; }
+      .nf-code {
+        font-family: var(--font-mono);
+        font-size: clamp(96px, 18vw, 220px);
+        font-weight: 500; letter-spacing: -0.05em; line-height: 1;
+        color: var(--fg); margin: 0 0 16px;
+      }
+      .nf-code .accent { color: var(--accent); }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 font-sans text-gray-800 dark:text-gray-100 min-h-screen flex flex-col">
+<body>
+  <main class="nf-shell">
+    <div class="grid" aria-hidden="true"></div>
+    <div class="glow" aria-hidden="true"></div>
+    <div class="nf-content">
+      <div class="tf-pill" style="margin-bottom: 28px;">
+        <span class="tf-pill__dot"></span>
+        <span>STATUS: 404 · ROUTE NOT FOUND</span>
+      </div>
 
-    <main class="flex-1 flex items-center justify-center px-4 py-16">
-        <div class="max-w-2xl w-full text-center">
-            <div class="inline-flex items-center justify-center w-24 h-24 rounded-full gradient-bg mb-8 animate-float shadow-2xl">
-                <i data-lucide="compass" class="w-12 h-12 text-white"></i>
-            </div>
-            <h1 class="text-7xl md:text-9xl font-black text-gradient mb-4 leading-none">404</h1>
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">Page Not Found</h2>
-            <p class="text-lg text-gray-600 dark:text-gray-400 mb-10 max-w-lg mx-auto">
-                The page you're looking for doesn't exist or has moved. Let's get you back on track.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                <a href="/" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all hover:shadow-lg hover:-translate-y-0.5">
-                    <i data-lucide="home" class="w-5 h-5"></i>
-                    Go Home
-                </a>
-                <a href="/tools.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-800 dark:text-white font-semibold rounded-xl border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-0.5">
-                    <i data-lucide="wrench" class="w-5 h-5"></i>
-                    Browse Tools
-                </a>
-            </div>
+      <h1 class="nf-code">4<span class="accent">0</span>4</h1>
+      <h2 class="tf-h2" style="font-size: clamp(28px, 4vw, 44px); margin-bottom: 16px;">Page not found.</h2>
+      <p class="tf-body" style="margin-bottom: 32px; max-width: 480px;">
+        The route you tried doesn't exist on this host. Maybe it moved, or maybe it never did.
+      </p>
+
+      <div class="tf-term" style="margin-top: 0; max-width: 600px;">
+        <div class="tf-term__bar">
+          <span class="tf-term__dot tf-term__dot--r"></span>
+          <span class="tf-term__dot tf-term__dot--y"></span>
+          <span class="tf-term__dot tf-term__dot--g"></span>
+          <span class="tf-term__title">tactforce — bash</span>
         </div>
-    </main>
+        <div class="tf-term__body">
+          <div><span class="prompt">$</span>cat /404</div>
+          <div class="out">cat: /404: No such file or directory</div>
+          <div><span class="prompt">$</span>cd /<span class="tf-term__cursor">▌</span></div>
+        </div>
+      </div>
 
-    <footer class="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
-        <a href="/" class="hover:text-blue-600 dark:hover:text-blue-400 transition">TactForce</a>
-    </footer>
+      <div style="margin-top: 36px; display:flex; gap: 12px; flex-wrap: wrap;">
+        <a href="/" class="tf-btn tf-btn--primary">cd / →</a>
+        <a href="/tools.html" class="tf-btn tf-btn--ghost">browse tools</a>
+      </div>
+    </div>
+  </main>
 
-    <script>lucide.createIcons();</script>
+  <footer style="padding: 32px 24px; text-align: center; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--dim);">
+    <a href="/" style="color: var(--dim-2); text-decoration: none;">© 2026 TACTFORCE</a>
+  </footer>
 </body>
 </html>

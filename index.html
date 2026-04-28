@@ -1,586 +1,410 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title x-data="site" x-text="content.meta.title">TactForce - Expert Salesforce Solutions</title>
-    <meta name="description" content="TactForce builds innovative Salesforce products and solutions — Rocket Reports, free admin/dev tools, and expert guides.">
+    <title x-data="site" x-text="content.meta.title">TactForce — Free Salesforce Apps & Tools</title>
+    <meta name="description" content="Building free Salesforce tools in the open. Native AppExchange apps and browser-based utilities, a registered Salesforce Partner.">
     <link rel="icon" type="image/png" href="images/logo.png">
 
     <!-- Open Graph / Twitter -->
-    <meta property="og:title" content="TactForce - Expert Salesforce Solutions">
-    <meta property="og:description" content="TactForce builds innovative Salesforce products and solutions — Rocket Reports, free admin/dev tools, and expert guides.">
+    <meta property="og:title" content="TactForce — Free Salesforce Apps & Tools">
+    <meta property="og:description" content="Building free Salesforce tools in the open. Native AppExchange apps and browser-based utilities.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://tactforce.ca/">
     <meta property="og:image" content="https://tactforce.ca/images/TactForce.png">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="TactForce - Expert Salesforce Solutions">
-    <meta name="twitter:description" content="TactForce builds innovative Salesforce products and solutions.">
+    <meta name="twitter:title" content="TactForce — Free Salesforce Apps & Tools">
+    <meta name="twitter:description" content="Native AppExchange apps. Browser-based utilities. All free.">
     <meta name="twitter:image" content="https://tactforce.ca/images/TactForce.png">
+
+    <!-- Apply theme attribute before Alpine to prevent flash -->
+    <script>
+      (function() {
+        var saved = localStorage.getItem("theme");
+        var isDark = saved !== "light";
+        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+        document.documentElement.classList.toggle("dark", isDark);
+      })();
+    </script>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- Tailwind -->
+    <!-- Design system -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Tailwind (utility classes used in a few spots) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        primary: { DEFAULT: '#007bff', dark: '#0056b3', light: '#4da3ff' },
-                        secondary: { DEFAULT: '#6c757d', dark: '#5a6268' },
-                        accent: { DEFAULT: '#16a085', dark: '#117a65' },
-                        highlight: '#f8f9fa',
-                        salesforce: '#00A1E0'
-                    }
-                }
-            }
-        }
+      tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Geist', 'sans-serif'], mono: ['Geist Mono', 'monospace'] } } } };
     </script>
 
-    <!-- Icons -->
+    <!-- Lucide icons (used in admin links etc.) -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Alpine.js -->
+    <!-- Alpine -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
 
-    <!-- Content -->
+    <!-- Content + app -->
     <script src="js/content.js"></script>
-    <!-- Custom Scripts -->
     <script src="js/app.js"></script>
-
-    <style>
-        /* Modern animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .animate-fade-in-up {
-            animation: fadeInUp 0.8s ease-out forwards;
-        }
-
-        .animate-float {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(-45deg, #007bff, #00A1E0, #16a085, #4da3ff);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-        }
-
-        .text-gradient {
-            background: linear-gradient(135deg, #007bff, #00A1E0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        section[id], div[id] {
-            scroll-margin-top: 120px;
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #007bff; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: #0056b3; }
-
-        /* Feature cards hover */
-        .feature-card {
-            transition: all 0.3s ease;
-        }
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 123, 255, 0.2);
-        }
-
-        /* Dropdown menu */
-        .dropdown {
-            position: relative;
-            z-index: 100;
-        }
-
-        .dropdown-content {
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            min-width: 280px;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            border-radius: 1rem;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            margin-top: 0.5rem;
-            overflow: visible;
-            z-index: 110;
-        }
-
-        .dropdown-item {
-            position: relative;
-            z-index: 1;
-        }
-
-        .dropdown-links {
-            display: none;
-            position: absolute;
-            left: 100%;
-            top: 0;
-            min-width: 220px;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            border-radius: 0.75rem;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            margin-left: 0.5rem;
-            padding: 0.5rem;
-            z-index: 120;
-        }
-
-        .dropdown-item:hover .dropdown-links {
-            display: block;
-        }
-
-        .dropdown-link-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1rem;
-            color: #1f2937;
-            text-decoration: none;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-        }
-
-        .dropdown-link-item:hover {
-            background: linear-gradient(135deg, #007bff, #00A1E0);
-            color: white;
-            transform: translateX(4px);
-        }
-
-        .dark .dropdown-content, .dark .dropdown-links {
-            background: rgba(31, 41, 55, 0.98);
-            border: 1px solid rgba(75, 85, 99, 0.4);
-        }
-        
-        .dark .dropdown-link-item {
-            color: #d1d5db;
-        }
-        
-        .dark .dropdown-link-item:hover {
-            color: white;
-        }
-    </style>
-
-    <meta name="description" x-data="site" x-text="content.meta.description" content="Showcasing AppExchange Solutions by TactForce">
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 font-sans text-gray-800 dark:text-gray-100 overflow-x-hidden transition-colors duration-300" x-data="site">
 
-    <!-- Modern Navigation -->
-    <header id="main-header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-gradient-to-b from-black/30 to-transparent backdrop-blur-sm">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex justify-between items-center">
-                <a href="#hero" class="flex items-center space-x-3 group">
-                    <img src="images/logo.png" alt="TactForce Logo" class="w-14 h-14 object-contain transition-transform group-hover:scale-110 drop-shadow-lg" onerror="this.style.display='none'">
-                    <span class="text-xl font-bold text-white hidden sm:inline drop-shadow-lg">TactForce</span>
-                </a>
+<body x-data="site" x-cloak>
 
-                <ul class="hidden md:flex space-x-8 items-center">
-                    <!-- Theme Toggle -->
-                    <li>
-                        <button @click="toggleTheme()" class="p-2 rounded-full hover:bg-white/10 text-white transition-colors duration-200" :title="darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
-                            <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5"></i>
-                            <i x-show="darkMode" data-lucide="sun" class="w-5 h-5" style="display: none;"></i>
-                        </button>
-                    </li>
-                    <template x-for="link in content.navigation">
-                        <li :class="link.label === 'Solutions' ? 'dropdown' : ''">
-                            <template x-if="link.label === 'Solutions'">
-                                <div>
-                                    <button @click="solutionsDropdownOpen = !solutionsDropdownOpen" @click.away="solutionsDropdownOpen = false" class="text-white hover:text-blue-200 transition duration-300 font-medium flex items-center gap-1">
-                                        <span x-text="link.label"></span>
-                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                    </button>
-                                    <div x-show="solutionsDropdownOpen"
-                                         x-transition:enter="transition ease-out duration-200"
-                                         x-transition:enter-start="opacity-0 -translate-y-2"
-                                         x-transition:enter-end="opacity-100 translate-y-0"
-                                         class="dropdown-content"
-                                         style="display: none;">
-                                        <template x-for="product in content.products">
-                                            <div class="dropdown-item">
-                                                <button @click="scrollToProduct(product.id)" class="w-full text-left px-4 py-3 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 transition duration-200 font-medium flex items-center justify-between group">
-                                                    <span x-text="product.name"></span>
-                                                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 group-hover:text-blue-600"></i>
-                                                </button>
-                                                <div class="dropdown-links">
-                                                    <a :href="product.appExchangeLink" target="_blank" class="dropdown-link-item">
-                                                        <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-                                                        <span>AppExchange</span>
-                                                    </a>
-                                                    <a :href="product.guideLink" class="dropdown-link-item">
-                                                        <i data-lucide="book-open" class="w-4 h-4"></i>
-                                                        <span>Setup Guide</span>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-                            </template>
-                            <template x-if="link.label !== 'Solutions'">
-                                <a :href="link.href" class="text-white hover:text-blue-200 transition duration-300 font-medium" x-text="link.label"></a>
-                            </template>
-                        </li>
-                    </template>
-                </ul>
-
-                <button @click="toggleTheme()" class="md:hidden text-white hover:text-blue-200 focus:outline-none p-2 mr-2">
-                    <i x-show="!darkMode" data-lucide="moon" class="w-6 h-6"></i>
-                    <i x-show="darkMode" data-lucide="sun" class="w-6 h-6" style="display: none;"></i>
-                </button>
-                <button @click="toggleMenu()" class="md:hidden text-white hover:text-blue-200 focus:outline-none">
-                    <i data-lucide="menu" class="w-6 h-6"></i>
-                </button>
-            </div>
-        </nav>
-
-        <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 -translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            class="md:hidden bg-white/10 backdrop-blur-md"
-            style="display: none;">
-            <ul class="flex flex-col items-center py-4 space-y-2">
-                <template x-for="link in content.navigation">
-                    <li class="w-full text-center">
-                        <template x-if="link.label === 'Solutions'">
-                            <div>
-                                <button @click="solutionsDropdownOpen = !solutionsDropdownOpen" class="block px-4 py-2 text-white hover:text-blue-200 transition duration-300">
-                                    <span x-text="link.label"></span>
-                                </button>
-                                <div x-show="solutionsDropdownOpen" class="bg-white/20 backdrop-blur-sm mt-2 rounded-lg overflow-hidden">
-                                    <template x-for="product in content.products">
-                                        <div class="border-b border-white/10 last:border-0">
-                                            <button @click="scrollToProduct(product.id)" class="block w-full px-4 py-2 text-white hover:bg-white/10 transition duration-200" x-text="product.name"></button>
-                                            <div class="flex justify-center gap-2 pb-2">
-                                                <a :href="product.appExchangeLink" target="_blank" class="px-3 py-1 text-xs text-white bg-white/10 rounded-full hover:bg-white/20">
-                                                    AppExchange
-                                                </a>
-                                                <a :href="product.guideLink" class="px-3 py-1 text-xs text-white bg-white/10 rounded-full hover:bg-white/20">
-                                                    Setup Guide
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
-                        <template x-if="link.label !== 'Solutions'">
-                            <a :href="link.href" @click="toggleMenu()" class="block px-4 py-2 text-white hover:text-blue-200 transition duration-300" x-text="link.label"></a>
-                        </template>
-                    </li>
-                </template>
-            </ul>
-        </div>
-    </header>
-
-    <main>
-        <!-- Hero Section with Gradient Background -->
-        <section id="hero" class="relative min-h-screen flex items-center justify-center text-white overflow-hidden gradient-bg">
-            <div class="absolute inset-0 opacity-20">
-                <div class="absolute top-20 left-10 w-72 h-72 bg-white rounded-full filter blur-3xl animate-float"></div>
-                <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-300 rounded-full filter blur-3xl animate-float" style="animation-delay: 1s;"></div>
-            </div>
-
-            <div class="relative z-10 max-w-6xl mx-auto px-4 text-center pb-24">
-                <div class="animate-fade-in-up">
-                    <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight drop-shadow-2xl" x-text="content.hero.title"></h1>
-                    <p class="text-xl md:text-2xl mb-12 font-light max-w-3xl mx-auto text-blue-50 drop-shadow-lg" x-text="content.hero.subtitle"></p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center relative z-10">
-                        <a :href="content.hero.ctaLink" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-full overflow-hidden transition-all hover:scale-105 hover:shadow-2xl">
-                            <span class="relative z-10" x-text="content.hero.cta"></span>
-                            <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
-                        </a>
-                        <a href="#contact" class="px-8 py-4 text-lg font-semibold text-white border-2 border-white rounded-full hover:bg-white hover:text-blue-600 transition-all hover:scale-105">
-                            Get In Touch
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Scroll Indicator -->
-                <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-20">
-                    <a href="#about" class="block p-2 hover:scale-110 transition-transform">
-                        <i data-lucide="chevron-down" class="w-8 h-8 text-white drop-shadow-lg"></i>
+  <!-- Mono Nav -->
+  <nav class="tf-nav" id="main-header">
+    <a href="#hero" class="tf-nav__brand">
+      <span class="tf-nav__dot"></span>
+      <span class="tf-nav__name">TACTFORCE</span>
+      <span class="tf-nav__ver">/ v2026</span>
+    </a>
+    <ul class="tf-nav__list">
+      <template x-for="link in content.navigation" :key="link.label">
+        <li>
+          <template x-if="link.dropdown === 'products'">
+            <div @click.away="closeAppsDropdown()">
+              <button class="tf-nav__link" :class="{ 'is-open': appsDropdownOpen }" @click="toggleAppsDropdown()">
+                <span x-text="link.label"></span>
+                <span class="caret">▾</span>
+              </button>
+              <div class="tf-nav__menu" x-show="appsDropdownOpen" x-transition style="display:none;">
+                <template x-for="p in content.products" :key="p.id">
+                  <div>
+                    <a :href="'#' + p.id" @click="closeAppsDropdown()" class="tf-nav__menu-item">
+                      <span x-text="p.name"></span>
+                      <span class="meta" x-text="p.tagline || ''"></span>
                     </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section id="about" class="py-24 bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900">
-            <div class="max-w-5xl mx-auto px-4 text-center">
-                <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold mb-6" x-text="content.about.title"></span>
-                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-8">
-                    Passion Meets <span class="text-gradient">Purpose</span>
-                </h2>
-                <template x-for="para in content.about.text">
-                    <p class="text-xl text-gray-600 dark:text-gray-300 mb-6 leading-relaxed" x-text="para"></p>
+                    <div class="tf-nav__menu-sub">
+                      <a :href="p.appExchangeLink" target="_blank" rel="noreferrer" @click="closeAppsDropdown()">AppExchange ↗</a>
+                      <a :href="p.guideLink" @click="closeAppsDropdown()">Setup Guide</a>
+                    </div>
+                  </div>
                 </template>
+              </div>
             </div>
-        </section>
+          </template>
+          <template x-if="!link.dropdown">
+            <a :href="link.href" class="tf-nav__link" x-text="link.label"></a>
+          </template>
+        </li>
+      </template>
+    </ul>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <span class="tf-nav__time tf-hide-mobile" data-utc>--:--:-- UTC</span>
+      <button @click="toggleTheme()" class="tf-nav__icon-btn" :title="darkMode ? 'Switch to Light' : 'Switch to Dark'" aria-label="Toggle theme">
+        <svg x-show="!darkMode" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg x-show="darkMode" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+      <button @click="toggleMenu()" class="tf-nav__icon-btn tf-burger" aria-label="Toggle menu">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+  <div class="tf-mobile-panel" :class="{ 'tf-open': mobileMenuOpen }">
+    <ul class="tf-mobile-list">
+      <template x-for="link in content.navigation" :key="link.label">
+        <li><a :href="link.href" @click="toggleMenu()" class="tf-mobile-link" x-text="link.label"></a></li>
+      </template>
+    </ul>
+  </div>
 
-        <!-- Solutions Section -->
-        <section id="solutions" class="py-24 bg-white dark:bg-gray-900">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-sm font-semibold mb-6">AppExchange Apps</span>
-                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                        Powerful Apps for <span class="text-gradient">Salesforce</span>
-                    </h2>
-                    <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                        Free, innovative AppExchange apps designed to enhance your Salesforce experience
-                    </p>
-                </div>
-
-                <!-- Solutions Container -->
-                <template x-for="(product, index) in content.products" :key="product.id">
-                    <div :id="product.id" class="mb-24">
-                        <div class="grid md:grid-cols-2 gap-12 items-center">
-                            <!-- Content (alternating order) -->
-                            <div :class="index % 2 === 0 ? 'order-2 md:order-1' : ''">
-                                <div x-show="product.featured" class="inline-flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-full mb-6">
-                                    <i :data-lucide="product.featuredIcon" x-init="lucide.createIcons({ root: $el })" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
-                                    <span class="text-blue-600 dark:text-blue-400 font-semibold" x-text="product.featuredName"></span>
-                                </div>
-                                <h3 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6" x-text="product.name"></h3>
-                                <p class="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed" x-text="product.description"></p>
-
-                                <h4 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Key Features:</h4>
-                                <ul class="space-y-3 mb-8">
-                                    <template x-for="feature in product.features">
-                                        <li class="flex items-start">
-                                            <i data-lucide="check-circle" class="w-6 h-6 text-green-500 mr-3 flex-shrink-0 mt-0.5"></i>
-                                            <span class="text-gray-700 dark:text-gray-300" x-text="feature"></span>
-                                        </li>
-                                    </template>
-                                </ul>
-
-                                <div class="flex flex-col sm:flex-row gap-4">
-                                    <a :href="product.appExchangeLink" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 hover:shadow-xl transition-all hover:scale-105">
-                                        <i data-lucide="external-link" class="w-5 h-5 mr-2"></i>
-                                        View on AppExchange
-                                    </a>
-                                    <a :href="product.guideLink" class="inline-flex items-center justify-center px-6 py-3 bg-teal-500 text-white font-semibold rounded-lg shadow-lg hover:bg-teal-600 hover:shadow-xl transition-all hover:scale-105">
-                                        <i data-lucide="book-open" class="w-5 h-5 mr-2"></i>
-                                        Setup & User Guide
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Image (alternating order) -->
-                            <div :class="index % 2 === 0 ? 'order-1 md:order-2' : ''">
-                                <div class="relative group">
-                                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-teal-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-300"></div>
-                                    <img :src="product.image" :alt="product.name" class="relative rounded-2xl shadow-2xl w-full transform group-hover:scale-105 transition-transform duration-300" loading="lazy">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section id="features" class="py-24 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-sm font-semibold mb-6" x-text="content.features.title"></span>
-                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                        <span x-text="content.features.heading.split(' ')[0]"></span> <span class="text-gradient" x-text="content.features.heading.split(' ').slice(1).join(' ')"></span>
-                    </h2>
-                </div>
-
-                <div class="grid md:grid-cols-3 gap-8">
-                    <template x-for="feature in content.features.items">
-                        <div class="feature-card bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-transparent dark:border-gray-700">
-                            <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-6"
-                                 :class="{
-                                     'bg-blue-100 dark:bg-blue-900/30': feature.iconColor === 'blue',
-                                     'bg-teal-100 dark:bg-teal-900/30': feature.iconColor === 'teal',
-                                     'bg-purple-100 dark:bg-purple-900/30': feature.iconColor === 'purple'
-                                 }">
-                                <i :data-lucide="feature.icon" class="w-8 h-8"
-                                   :class="{
-                                       'text-blue-600 dark:text-blue-400': feature.iconColor === 'blue',
-                                       'text-teal-600 dark:text-teal-400': feature.iconColor === 'teal',
-                                       'text-purple-600 dark:text-purple-400': feature.iconColor === 'purple'
-                                   }"></i>
-                            </div>
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3" x-text="feature.title"></h3>
-                            <p class="text-gray-600 dark:text-gray-400" x-text="feature.description"></p>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="py-24 bg-white dark:bg-gray-900">
-            <div class="max-w-4xl mx-auto px-4">
-                <div class="text-center mb-12">
-                    <span class="inline-block px-4 py-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-sm font-semibold mb-6" x-text="content.contact.title"></span>
-                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                        Let's <span class="text-gradient">Connect</span>
-                    </h2>
-                    <p class="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed" x-text="content.contact.subtitle"></p>
-                </div>
-
-                <form :action="content.contact.formAction" method="POST" class="max-w-2xl mx-auto bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 p-8 md:p-12 rounded-2xl shadow-xl space-y-6">
-                    <input type="hidden" name="orgid" :value="content.contact.orgId">
-                    <input type="hidden" name="retURL" :value="content.contact.retURL">
-
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Contact Name *</label>
-                            <input name="name" type="text" maxlength="80" required class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 bg-opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:text-white transition-all outline-none" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Company</label>
-                            <input name="company" type="text" maxlength="80" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 bg-opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:text-white transition-all outline-none" />
-                        </div>
-                    </div>
-
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Email *</label>
-                            <input name="email" type="email" maxlength="80" required class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 bg-opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:text-white transition-all outline-none" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone</label>
-                            <input name="phone" type="tel" maxlength="40" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 bg-opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:text-white transition-all outline-none" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Subject *</label>
-                        <input name="subject" type="text" maxlength="80" required class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 bg-opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:text-white transition-all outline-none" />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Description *</label>
-                        <textarea name="description" rows="5" required class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 bg-opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:text-white transition-all outline-none resize-none"></textarea>
-                    </div>
-
-                    <div class="text-center pt-4">
-                        <button type="submit" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-full overflow-hidden transition-all hover:shadow-xl hover:scale-105">
-                            <span class="relative z-10">Send Message</span>
-                            <i data-lucide="send" class="ml-2 w-5 h-5"></i>
-                        </button>
-                    </div>
-                </form>
-
-                <p class="mt-8 text-center text-gray-600 dark:text-gray-400">
-                    Or email directly at:
-                    <a :href="'mailto:' + content.contact.supportEmail" class="text-blue-600 hover:text-blue-700 font-semibold hover:underline" x-text="content.contact.supportEmail"></a>
-                </p>
-            </div>
-        </section>
-    </main>
-
-    <!-- Modern Footer -->
-    <footer class="bg-gradient-to-r from-gray-900 to-gray-800 text-gray-300 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-3 gap-8 mb-8">
-                <div>
-                    <div class="flex items-center space-x-3 mb-4">
-                        <img src="images/logo.png" alt="TactForce Logo" class="w-12 h-12 object-contain" onerror="this.style.display='none'">
-                        <span class="text-xl font-bold text-white">TactForce</span>
-                    </div>
-                    <p class="text-gray-400">Building free Salesforce apps, one solution at a time.</p>
-                </div>
-
-                <div>
-                    <h3 class="text-white font-semibold mb-4">Quick Links</h3>
-                    <ul class="space-y-2">
-                        <template x-for="link in content.navigation">
-                            <li><a :href="link.href" class="hover:text-white transition duration-300" x-text="link.label"></a></li>
-                        </template>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="text-white font-semibold mb-4">Support Us</h3>
-                    <a :href="content.footer.buyMeCoffeeLink" target="_blank" class="inline-block transition-transform hover:scale-105">
-                        <img :src="content.footer.buyMeCoffeeImage" alt="Buy Me A Coffee" class="h-12">
-                    </a>
-                    <div class="mt-4">
-                        <a :href="content.footer.linkedInLink" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-200">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                            </svg>
-                            <span class="text-sm">Connect on LinkedIn</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-400 mb-4 md:mb-0">
-                    <span x-text="content.footer.copyright"></span>
-                    <span class="mx-2">•</span>
-                    <a href="admin.html" class="text-gray-500 hover:text-gray-300 text-xs transition-colors">Admin</a>
-                </p>
-                <a href="#hero" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
-                    <i data-lucide="arrow-up" class="w-5 h-5 mr-2"></i>
-                    Back to Top
-                </a>
-            </div>
+  <main>
+    <!-- Hero -->
+    <section id="hero" class="tf-hero">
+      <div class="tf-hero__grid-bg" aria-hidden="true"></div>
+      <div class="tf-hero__glow" aria-hidden="true"></div>
+      <div class="tf-hero__inner">
+        <div class="tf-pill animate-fade-in">
+          <span class="tf-pill__dot"></span>
+          <span x-text="content.hero.tag"></span>
         </div>
-    </footer>
 
-    <script>
-        // Enhanced scroll effects
-        window.addEventListener('scroll', () => {
-            const header = document.getElementById('main-header');
-            if (window.scrollY > 50) {
-                header.classList.add('bg-white/90', 'dark:bg-gray-900/90', 'backdrop-blur-md', 'shadow-lg');
-                header.querySelectorAll('a, button').forEach(el => {
-                    if (!el.querySelector('i')) { // Exclude icon-only buttons
-                         el.classList.remove('text-white', 'hover:text-blue-200');
-                         el.classList.add('text-gray-800', 'dark:text-white', 'hover:text-blue-600', 'dark:hover:text-blue-400');
-                    }
-                });
-            } else {
-                header.classList.remove('bg-white/90', 'dark:bg-gray-900/90', 'backdrop-blur-md', 'shadow-lg');
-                header.querySelectorAll('a, button').forEach(el => {
-                     if (!el.querySelector('i')) { 
-                        el.classList.remove('text-gray-800', 'dark:text-white', 'hover:text-blue-600', 'dark:hover:text-blue-400');
-                        el.classList.add('text-white', 'hover:text-blue-200');
-                     }
-                });
-            }
-        });
+        <div class="tf-hero__split animate-fade-in-up">
+          <h1 class="tf-hero__h1">
+            <span x-text="content.hero.title"></span><br>
+            Salesforce <span class="tf-accent" x-text="content.hero.titleAccent"></span><br>
+            <span x-text="content.hero.titleSuffix"></span>
+          </h1>
+          <div style="padding-bottom: 16px;">
+            <p class="tf-hero__sub" x-text="content.hero.subtitle"></p>
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+              <a :href="content.hero.ctaLink" class="tf-btn tf-btn--primary" x-text="content.hero.cta"></a>
+              <a :href="content.hero.ctaSecondaryLink" class="tf-btn tf-btn--ghost" x-text="content.hero.ctaSecondary"></a>
+            </div>
+          </div>
+        </div>
 
-        // Init Lucide icons after Alpine loads
-        document.addEventListener('alpine:initialized', () => {
-            setTimeout(() => lucide.createIcons(), 100);
-        });
-    </script>
+        <!-- Terminal -->
+        <div class="tf-term reveal">
+          <div class="tf-term__bar">
+            <span class="tf-term__dot tf-term__dot--r"></span>
+            <span class="tf-term__dot tf-term__dot--y"></span>
+            <span class="tf-term__dot tf-term__dot--g"></span>
+            <span class="tf-term__title">tactforce — bash — 80×24</span>
+          </div>
+          <div class="tf-term__body">
+            <div><span class="prompt">$</span>whoami</div>
+            <div class="out" style="margin-bottom: 12px;">salesforce architect &amp; developer</div>
+            <div><span class="prompt">$</span>ls ./apps</div>
+            <div class="out" style="margin-bottom: 12px;">
+              <template x-for="(p, i) in content.products" :key="p.id"><span><span x-text="p.id"></span>/<span x-show="i &lt; content.products.length - 1">  </span></span></template>
+            </div>
+            <div><span class="prompt">$</span>cat ./mission.txt</div>
+            <div class="out">build → publish → free → repeat<span class="tf-term__cursor">▌</span></div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="tf-stats tf-stats--2 reveal">
+          <div class="tf-stat">
+            <div class="tf-stat__k">AppExchange Apps</div>
+            <div class="tf-stat__v" x-text="String(content.products.length).padStart(2,'0')">--</div>
+          </div>
+          <div class="tf-stat">
+            <div class="tf-stat__k">Browser Tools</div>
+            <div class="tf-stat__v" x-text="(content.tools.filter(t=>!t.hidden).length) + '+'">-</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Apps -->
+    <section id="solutions" class="tf-section">
+      <div class="tf-wrap">
+        <div class="tf-grid-gutter" style="margin-bottom: 64px;">
+          <span class="tf-mono tf-mono--accent" x-text="content.solutions.label"></span>
+          <div>
+            <h2 class="tf-h2">
+              <span x-text="content.solutions.headline"></span><br>
+              <span class="tf-accent" x-text="content.solutions.headlineAccent"></span>
+            </h2>
+            <div class="tf-mono-caption" style="margin-top: 20px;">
+              <span x-text="'> ' + String(content.products.length).padStart(2,'0') + ' ' + content.solutions.caption"></span>
+            </div>
+          </div>
+        </div>
+
+        <template x-for="(p, i) in content.products" :key="p.id">
+          <article :id="p.id" class="tf-app reveal" :class="{ 'tf-app--reverse': i % 2 === 1 }">
+            <div class="tf-app__text">
+              <div class="tf-app__meta">
+                <span class="num" x-text="p.num || (String(i+1).padStart(2,'0'))"></span>
+                <span class="sep">·</span>
+                <span class="ver" x-text="'v' + (p.version || '1.0')"></span>
+                <span class="sep">·</span>
+                <span class="date" x-text="p.released || ''"></span>
+                <span class="sep">·</span>
+                <span class="badge" :class="{ 'badge--warn': (p.installs || 'FREE') !== 'FREE' }" x-text="p.installs || 'FREE'"></span>
+              </div>
+              <h3 class="tf-app__title" x-text="p.name"></h3>
+              <p class="tf-app__tagline" x-text="p.tagline || ''" x-show="p.tagline"></p>
+              <p class="tf-app__desc" x-text="p.description"></p>
+              <ul class="tf-app__features">
+                <template x-for="f in p.features"><li x-text="f"></li></template>
+              </ul>
+              <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <a :href="p.appExchangeLink" target="_blank" rel="noopener noreferrer" class="tf-btn tf-btn--primary">AppExchange ↗</a>
+                <a :href="p.guideLink" class="tf-btn tf-btn--ghost">Setup Guide</a>
+              </div>
+            </div>
+            <div class="tf-app__media">
+              <div class="tf-app__media-bar">
+                <span class="d"></span><span class="d"></span><span class="d"></span>
+                <span class="label" x-text="'./' + p.id + '/preview'"></span>
+              </div>
+              <div class="tf-app__media-canvas">
+                <img :src="p.image" :alt="p.name" loading="lazy" onerror="this.style.display='none'">
+              </div>
+            </div>
+          </article>
+        </template>
+      </div>
+    </section>
+
+    <!-- Tools (preview, links to /tools.html) -->
+    <section id="tools" class="tf-section">
+      <div class="tf-wrap">
+        <div style="display:grid; grid-template-columns: 200px 1fr auto; gap: 64px; margin-bottom: 56px; align-items: end;" class="tf-tools-head">
+          <span class="tf-mono tf-mono--accent" x-text="content.toolsMeta.label"></span>
+          <h2 class="tf-h2">
+            <span x-text="content.toolsMeta.headline"></span><br>
+            <span x-text="content.toolsMeta.headlineSuffix"></span>
+          </h2>
+          <a href="tools.html" class="tf-btn tf-btn--ghost" style="white-space:nowrap;">All tools →</a>
+        </div>
+        <div class="tf-tools">
+          <template x-for="t in content.tools.filter(t => !t.hidden)" :key="t.id">
+            <a :href="t.url" class="tf-tool-card reveal">
+              <div class="tf-tool-card__cmd" x-text="t.cmd || ('$ tf ' + t.id)"></div>
+              <h3 class="tf-tool-card__name" x-text="t.name"></h3>
+              <p class="tf-tool-card__desc" x-text="t.tagline || t.description"></p>
+              <div class="tf-tool-card__foot">
+                <span class="tag" x-text="content.toolsMeta.caption.split(' · ')[0] || '100% LOCAL'"></span>
+                <span class="arrow">→</span>
+              </div>
+            </a>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <!-- About (V1 Editorial swap-in) -->
+    <section id="about" class="tf-about">
+      <div class="tf-about__inner">
+        <div class="tf-about__head">
+          <div class="tf-about__label-block">
+            <div class="label">§ <span x-text="content.about.title"></span></div>
+            <div class="caption">03 — Behind TactForce</div>
+          </div>
+          <h2 class="tf-h2">
+            Built by an <span class="tf-italic-accent">architect.</span><br>
+            Given to the community.
+          </h2>
+        </div>
+        <div class="tf-about__body">
+          <div></div>
+          <div class="tf-about__lead">
+            <p class="lead" x-text="content.about.text[0]"></p>
+            <p class="body" x-text="content.about.text[1]"></p>
+            <div class="tf-about__cta">
+              <a :href="content.about.linkedIn" target="_blank" rel="noreferrer" class="tf-btn tf-btn--pill">LinkedIn ↗</a>&emsp;
+              <a :href="content.about.trailhead" target="_blank" rel="noreferrer" class="tf-btn tf-btn--pill">Trailhead ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Principles -->
+    <section id="principles" class="tf-section">
+      <div class="tf-wrap">
+        <div class="tf-grid-gutter" style="margin-bottom: 56px;">
+          <span class="tf-mono tf-mono--accent" x-text="content.features.title"></span>
+          <h2 class="tf-h2" x-text="content.features.heading"></h2>
+        </div>
+        <div class="tf-principles">
+          <template x-for="(item, i) in content.features.items" :key="i">
+            <div class="tf-principle reveal">
+              <div class="tf-principle__num" x-text="String(i+1).padStart(2,'0')"></div>
+              <h3 class="tf-principle__title" x-text="item.title"></h3>
+              <p class="tf-principle__body" x-text="item.description"></p>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact (Salesforce Web-to-Case — DO NOT change input names/action/orgid) -->
+    <section id="contact" class="tf-section">
+      <div class="tf-wrap">
+        <div class="tf-grid-gutter" style="margin-bottom: 56px;">
+          <span class="tf-mono tf-mono--accent" x-text="content.contact.label"></span>
+          <div>
+            <h2 class="tf-h2">
+              Open a <span class="tf-accent" x-text="content.contact.headlineAccent"></span>
+            </h2>
+            <p class="tf-body" style="margin-top: 24px; max-width: 560px;">
+              Questions, feedback, or just say hi. Or email
+              <a :href="'mailto:' + content.contact.supportEmail" class="tf-accent" style="text-decoration:none;" x-text="content.contact.supportEmail"></a>.
+            </p>
+          </div>
+        </div>
+
+        <form :action="content.contact.formAction" method="POST" class="tf-grid-gutter" @submit="contactSent = true">
+          <input type="hidden" name="orgid" :value="content.contact.orgId">
+          <input type="hidden" name="retURL" :value="content.contact.retURL">
+          <div></div>
+          <div class="tf-form-card">
+            <div class="tf-form-row">
+              <label class="tf-form-field">
+                <span class="tf-form-field__label">contact_name *</span>
+                <input name="name" type="text" maxlength="80" required />
+              </label>
+              <label class="tf-form-field">
+                <span class="tf-form-field__label">company</span>
+                <input name="company" type="text" maxlength="80" />
+              </label>
+            </div>
+            <div class="tf-form-row">
+              <label class="tf-form-field">
+                <span class="tf-form-field__label">email *</span>
+                <input name="email" type="email" maxlength="80" required />
+              </label>
+              <label class="tf-form-field">
+                <span class="tf-form-field__label">phone</span>
+                <input name="phone" type="tel" maxlength="40" />
+              </label>
+            </div>
+            <div class="tf-form-row" style="grid-template-columns: 1fr;">
+              <label class="tf-form-field">
+                <span class="tf-form-field__label">subject *</span>
+                <input name="subject" type="text" maxlength="80" required />
+              </label>
+            </div>
+            <div class="tf-form-row" style="grid-template-columns: 1fr; margin-bottom: 28px;">
+              <label class="tf-form-field">
+                <span class="tf-form-field__label">description *</span>
+                <textarea name="description" rows="5" required></textarea>
+              </label>
+            </div>
+            <button type="submit" class="tf-btn tf-btn--primary">
+              <span x-text="contactSent ? '✓ case opened' : 'submit →'">submit →</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="tf-footer">
+    <div class="tf-wrap">
+      <div class="tf-footer__cols">
+        <div>
+          <a href="#hero" class="tf-footer__brand">
+            <img src="images/logo.png" alt="TactForce" onerror="this.style.display='none'">
+            <span class="tf-footer__brand-name">TactForce</span>
+          </a>
+          <p class="tf-footer__tag">Building free Salesforce apps and browser tools, in the open.</p>
+        </div>
+        <div>
+          <div class="tf-footer__col-title">// Quick Links</div>
+          <ul class="tf-footer__nav">
+            <template x-for="link in content.navigation" :key="link.label">
+              <li><a :href="link.href" x-text="link.label"></a></li>
+            </template>
+          </ul>
+        </div>
+        <div>
+          <div class="tf-footer__col-title">// Support</div>
+          <a :href="content.footer.buyMeCoffeeLink" target="_blank" rel="noreferrer" class="tf-footer__bmc">
+            <img :src="content.footer.buyMeCoffeeImage" alt="Buy Me A Coffee">
+          </a><br>
+          <a :href="content.footer.linkedInLink" target="_blank" rel="noreferrer" class="tf-footer__linkedin">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            <span>Connect on LinkedIn</span>
+          </a>
+        </div>
+      </div>
+      <div class="tf-footer__bottom">
+        <span x-text="content.footer.copyright"></span>
+        <a href="#hero">↑ Back to top</a>
+      </div>
+    </div>
+  </footer>
+
+  <style>
+    @media (max-width: 900px) {
+      .tf-tools-head {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+        align-items: start !important;
+      }
+    }
+  </style>
 </body>
 </html>
