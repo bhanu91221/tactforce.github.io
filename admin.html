@@ -1,726 +1,760 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex,nofollow">
-    <title>TactForce Admin CMS</title>
+    <title>TactForce CMS / admin</title>
+
+    <script>
+      (function() {
+        var saved = localStorage.getItem("theme");
+        var isDark = saved !== "light";
+        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+        document.documentElement.classList.toggle("dark", isDark);
+      })();
+    </script>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- Tailwind -->
+    <!-- Design tokens (shared with site) -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Tailwind for utility classes -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        primary: { DEFAULT: '#007bff', dark: '#0056b3', light: '#4da3ff' },
-                        accent: { DEFAULT: '#16a085', dark: '#117a65' },
-                        secondary: '#6c757d'
-                    }
-                }
-            }
-        }
+      tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Geist','sans-serif'], mono: ['Geist Mono','monospace'] } } } };
     </script>
 
-    <!-- Alpine -->
+    <!-- Alpine + Lucide + Quill -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
-    <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Quill Rich Text Editor -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
-    <!-- Load content (window.siteContent) -->
     <script src="js/content.js"></script>
-
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('admin', () => ({
-                data: JSON.parse(JSON.stringify(window.siteContent)), // Deep copy from global
-                activeTab: 'guides', // guides, content, apps
-                selectedGuide: 'dynamic-path',
-                authed: false,
-                passkey: '',
-                quillInstances: {},
-
-                login() {
-                    if (this.passkey === 'tactforce@admin') {
-                        this.authed = true;
-                        this.$nextTick(() => {
-                            lucide.createIcons();
-                        });
-                    } else {
-                        alert('Invalid Passkey');
-                    }
-                },
-
-                // --- Apps Management ---
-                addApp() {
-                    const id = prompt("Enter App ID (e.g., 'new-app'):");
-                    if (!id) return;
-
-                    this.data.products.push({
-                        id: id.toLowerCase().replace(/\s+/g, '-'),
-                        name: "New App",
-                        description: "App Description",
-                        features: ["Feature 1", "Feature 2"],
-                        image: "images/placeholder.png",
-                        appExchangeLink: "#",
-                        guideLink: "guides.html?id=" + id,
-                        featured: false
-                    });
-
-                    // Also create a blank guide entry
-                    if (!this.data.guides[id]) {
-                        this.data.guides[id] = {
-                            title: "New App User Guide",
-                            versions: [],
-                            sections: []
-                        };
-                    }
-                    alert("App created! Don't forget to configure its Guide in the 'User Guides' tab.");
-                },
-
-                removeApp(index) {
-                    if (confirm('Are you sure? This removes the app from the homepage.')) {
-                        this.data.products.splice(index, 1);
-                    }
-                },
-
-                addFeature(productIndex) {
-                    this.data.products[productIndex].features.push("New Feature");
-                },
-
-                removeFeature(productIndex, featureIndex) {
-                    this.data.products[productIndex].features.splice(featureIndex, 1);
-                },
-
-                // --- Feature Items Management ---
-                addFeatureItem() {
-                    this.data.features.items.push({
-                        icon: "zap",
-                        iconColor: "blue",
-                        title: "New Feature",
-                        description: "Feature description"
-                    });
-                },
-
-                removeFeatureItem(index) {
-                    this.data.features.items.splice(index, 1);
-                },
-
-                // --- Guides Management ---
-                addVersion() {
-                    if (!this.data.guides[this.selectedGuide].versions) {
-                        this.data.guides[this.selectedGuide].versions = [];
-                    }
-                    this.data.guides[this.selectedGuide].versions.unshift({
-                        version: "1.X",
-                        date: new Date().toISOString().split('T')[0],
-                        description: "New update description"
-                    });
-                },
-
-                removeVersion(index) {
-                    if (confirm('Delete this version entry?')) {
-                        this.data.guides[this.selectedGuide].versions.splice(index, 1);
-                    }
-                },
-
-                addSection() {
-                    const id = prompt("Enter Section ID (e.g., 'setup'):");
-                    if (id) {
-                        this.data.guides[this.selectedGuide].sections.push({
-                            id: id.toLowerCase().replace(/\s+/g, '-'),
-                            title: "New Section",
-                            content: "<p>Content goes here...</p>"
-                        });
-                        this.$nextTick(() => {
-                            // Handled by x-init in the DOM
-                        });
-                    }
-                },
-
-                removeSection(index) {
-                    if (confirm('Delete this entire section?')) {
-                        this.data.guides[this.selectedGuide].sections.splice(index, 1);
-                    }
-                },
-
-                // --- Export ---
-                exportParams() {
-                    const fileContent = `window.siteContent = ${JSON.stringify(this.data, null, 4)};`;
-                    const blob = new Blob([fileContent], { type: 'text/javascript' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'content.js';
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    alert('Configuration downloaded! Replace /js/content.js in your repository with this file to apply changes.');
-                },
-
-                initQuill(el, model, index, type) {
-                    const quill = new Quill(el, {
-                        theme: 'snow',
-                        modules: {
-                            toolbar: [
-                                ['bold', 'italic', 'underline', 'strike'],
-                                ['blockquote', 'code-block'],
-                                [{ 'header': 1 }, { 'header': 2 }],
-                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                                [{ 'color': [] }, { 'background': [] }],
-                                ['link'],
-                                ['clean']
-                            ]
-                        }
-                    });
-
-                    // Set initial content
-                    quill.root.innerHTML = model;
-
-                    // Update Alpine model on change
-                    quill.on('text-change', () => {
-                        if (type === 'section') {
-                            this.data.guides[this.selectedGuide].sections[index].content = quill.root.innerHTML;
-                        }
-                    });
-                }
-            }));
-        });
-    </script>
+    <script src="js/app.js"></script>
 
     <style>
-        /* Gradient background animation */
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+      /* === Admin shell === */
+      .ad-shell { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--fg); font-family: var(--font-sans); }
+      .ad-header {
+        position: sticky; top: 0; z-index: 30;
+        padding: 14px 28px;
+        border-bottom: 1px solid var(--rule);
+        background: color-mix(in oklab, var(--bg) 92%, transparent);
+        backdrop-filter: blur(20px);
+        display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        font-family: var(--font-mono); font-size: 12px;
+      }
+      .ad-header__brand { display: flex; align-items: center; gap: 12px; }
+      .ad-header__brand .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: pulse 2.5s ease-in-out infinite; }
+      .ad-header__brand .name { color: var(--fg); font-weight: 500; letter-spacing: 0.04em; }
+      .ad-header__brand .ver { color: var(--dim); }
 
-        .gradient-bg {
-            background: linear-gradient(-45deg, #007bff, #00A1E0, #16a085, #4da3ff);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-        }
+      .ad-grid { flex: 1; display: grid; grid-template-columns: 260px 1fr; min-height: 0; }
+      @media (max-width: 900px) { .ad-grid { grid-template-columns: 1fr; } }
 
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
+      .ad-side { border-right: 1px solid var(--rule); padding: 24px 16px; background: var(--bg-2); }
+      @media (max-width: 900px) { .ad-side { border-right: none; border-bottom: 1px solid var(--rule); } }
+      .ad-tab {
+        display: flex; align-items: center; gap: 12px;
+        width: 100%; text-align: left;
+        padding: 12px 14px;
+        background: transparent; border: 1px solid transparent;
+        color: var(--dim-2);
+        font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.02em;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s, border-color 0.15s;
+      }
+      .ad-tab:hover { color: var(--fg); background: var(--bg-3); }
+      .ad-tab.is-active { color: var(--accent); border-color: var(--rule); background: var(--bg-3); }
 
-        /* Floating blur elements */
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) translateX(0px); }
-            50% { transform: translateY(-20px) translateX(10px); }
-        }
+      .ad-main { padding: 32px; overflow-y: auto; max-height: calc(100vh - 56px); }
+      @media (max-width: 900px) { .ad-main { padding: 20px; } }
+      .ad-card {
+        background: var(--bg-2);
+        border: 1px solid var(--rule);
+        border-radius: 12px;
+        padding: 28px;
+        margin-bottom: 20px;
+      }
+      .ad-card__head {
+        display: flex; justify-content: space-between; align-items: center;
+        padding-bottom: 16px; margin-bottom: 20px;
+        border-bottom: 1px solid var(--rule);
+      }
+      .ad-card__title { font-size: 18px; font-weight: 500; letter-spacing: -0.015em; margin: 0; color: var(--fg); }
+      .ad-card__title small { color: var(--dim); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; margin-left: 8px; }
 
-        .animate-float {
-            animation: float 6s ease-in-out infinite;
-        }
+      .ad-label { display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--dim); margin-bottom: 6px; text-transform: lowercase; }
+      .ad-input, .ad-textarea, .ad-select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--rule-strong);
+        background: var(--bg-3);
+        color: var(--fg);
+        font-family: var(--font-mono);
+        font-size: 13px;
+        border-radius: 6px;
+        outline: none;
+        transition: border-color 0.15s;
+        box-sizing: border-box;
+      }
+      .ad-input:focus, .ad-textarea:focus, .ad-select:focus { border-color: var(--accent); }
+      .ad-textarea { resize: vertical; min-height: 80px; font-family: var(--font-sans); }
 
-        /* Quill editor styling */
-        .ql-editor {
-            min-height: 200px;
-            background: white;
-            font-family: 'Inter', sans-serif;
-        }
+      .ad-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 12px; }
+      .ad-row--2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+      @media (max-width: 700px) { .ad-row--2 { grid-template-columns: 1fr; } }
 
-        .ql-container.ql-snow {
-            border-radius: 0 0 0.75rem 0.75rem;
-            border-color: #e5e7eb;
-        }
+      .ad-pill-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 8px 14px;
+        background: var(--accent); color: var(--accent-fg);
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+        cursor: pointer;
+        transition: opacity 0.15s, transform 0.15s;
+      }
+      .ad-pill-btn:hover { transform: translateY(-1px); }
+      .ad-pill-btn--ghost {
+        background: transparent; color: var(--fg);
+        border-color: var(--rule-strong);
+      }
+      .ad-pill-btn--danger {
+        background: transparent;
+        color: oklch(0.7 0.18 30);
+        border-color: oklch(0.5 0.15 30);
+      }
+      .ad-pill-btn--danger:hover { background: oklch(0.4 0.2 30 / 0.15); }
 
-        .ql-toolbar.ql-snow {
-            border-radius: 0.75rem 0.75rem 0 0;
-            border-color: #e5e7eb;
-            background: #f9fafb;
-        }
+      .ad-feature-row { display: flex; gap: 8px; margin-bottom: 8px; }
+      .ad-feature-row .ad-input { flex: 1; }
 
-        /* Smooth transitions */
-        * {
-            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-        }
+      /* Login card */
+      .ad-login {
+        position: fixed; inset: 0; z-index: 50;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--bg); padding: 24px;
+      }
+      .ad-login::before {
+        content: ""; position: absolute; inset: 0; opacity: 0.45; pointer-events: none;
+        background-image:
+          linear-gradient(to right, var(--rule) 1px, transparent 1px),
+          linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+        background-size: 80px 80px;
+        -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+                mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+      }
+      .ad-login::after {
+        content: ""; position: absolute; left: 50%; top: 0; transform: translateX(-50%);
+        width: 700px; height: 600px; border-radius: 50%;
+        background: radial-gradient(circle, var(--accent-soft) 0%, transparent 60%);
+        pointer-events: none; filter: blur(40px);
+      }
+      .ad-login__card {
+        position: relative; z-index: 1;
+        width: 100%; max-width: 420px;
+        background: var(--bg-2);
+        border: 1px solid var(--rule);
+        border-radius: 12px;
+        padding: 32px;
+      }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
+      /* Quill restyle for dark */
+      .ql-editor { min-height: 200px; background: var(--bg-3); color: var(--fg); font-family: var(--font-sans); }
+      .ql-container.ql-snow { border-radius: 0 0 8px 8px; border-color: var(--rule); }
+      .ql-toolbar.ql-snow { border-radius: 8px 8px 0 0; border-color: var(--rule); background: var(--bg-2); }
+      [data-theme="dark"] .ql-toolbar.ql-snow .ql-stroke { stroke: var(--dim-2); }
+      [data-theme="dark"] .ql-toolbar.ql-snow .ql-fill { fill: var(--dim-2); }
+      [data-theme="dark"] .ql-toolbar.ql-snow button:hover .ql-stroke,
+      [data-theme="dark"] .ql-toolbar.ql-snow .ql-active .ql-stroke { stroke: var(--accent); }
+      [data-theme="dark"] .ql-toolbar.ql-snow button:hover .ql-fill,
+      [data-theme="dark"] .ql-toolbar.ql-snow .ql-active .ql-fill { fill: var(--accent); }
+      [data-theme="dark"] .ql-snow .ql-picker { color: var(--dim-2); }
+      [data-theme="dark"] .ql-snow .ql-picker-options { background: var(--bg-2); border-color: var(--rule); }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #007bff;
-            border-radius: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #0056b3;
-        }
+      .empty {
+        text-align: center; padding: 40px 16px;
+        border: 1px dashed var(--rule-strong);
+        border-radius: 12px;
+        color: var(--dim);
+        font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em;
+      }
     </style>
 </head>
+<body x-data="admin" x-cloak>
 
-<body class="bg-gray-50 min-h-screen font-sans antialiased" x-data="admin">
+  <!-- Login -->
+  <div x-show="!authed" class="ad-login">
+    <div class="ad-login__card">
+      <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 20px;">
+        <span style="width:8px; height:8px; border-radius:999px; background:var(--accent); box-shadow:0 0 12px var(--accent);"></span>
+        <span style="font-family:var(--font-mono); font-size:12px; letter-spacing:0.06em; color:var(--fg);">TACTFORCE / cms / v2026</span>
+      </div>
+      <h1 class="tf-h2" style="font-size: 36px; margin-bottom: 8px;">
+        sudo <span class="tf-accent">login</span>
+      </h1>
+      <p class="tf-mono-caption" style="margin-bottom: 28px;">// passkey required</p>
 
-    <!-- Login Screen -->
-    <div x-show="!authed" class="fixed inset-0 z-50 flex items-center justify-center overflow-hidden gradient-bg">
-        <!-- Floating blur elements -->
-        <div class="absolute top-20 left-10 w-72 h-72 bg-white/30 rounded-full filter blur-3xl animate-float"></div>
-        <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-300/30 rounded-full filter blur-3xl animate-float" style="animation-delay: 2s;"></div>
+      <label class="tf-form-field" style="display:block; margin-bottom: 16px;">
+        <span class="tf-form-field__label">passkey *</span>
+        <input type="password"
+               x-model="passkey"
+               @keydown.enter="login()"
+               placeholder="enter passkey"
+               autofocus
+               style="width:100%; padding:12px 14px; border:1px solid var(--rule-strong); border-radius:8px; font-family:var(--font-mono); font-size:14px; color:var(--fg); background:var(--bg-3); outline:none; box-sizing:border-box;"
+               onfocus="this.style.borderColor='var(--accent)'"
+               onblur="this.style.borderColor='var(--rule-strong)'">
+      </label>
 
-        <div class="relative glass-effect p-10 rounded-2xl shadow-2xl w-full max-w-md text-center backdrop-blur-xl">
-            <div class="mb-8">
-                <div class="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
-                    <i data-lucide="lock" class="w-8 h-8 text-white"></i>
-                </div>
-                <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">TactForce CMS</h1>
-                <p class="text-gray-600">Enter your credentials to continue</p>
-            </div>
+      <button @click="login()" class="tf-btn tf-btn--primary" style="width:100%; justify-content:center;">
+        unlock →
+      </button>
 
-            <div class="space-y-4">
-                <input type="password"
-                    x-model="passkey"
-                    @keydown.enter="login()"
-                    placeholder="Enter Passkey"
-                    class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl text-lg focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"
-                    autofocus>
-
-                <button @click="login()"
-                    class="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-4 rounded-xl font-bold text-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]">
-                    <span class="flex items-center justify-center gap-2">
-                        <i data-lucide="unlock" class="w-5 h-5"></i>
-                        Unlock Dashboard
-                    </span>
-                </button>
-            </div>
-
-            <p class="mt-6 text-gray-500 text-sm">Default passkey: <code class="bg-gray-100 px-2 py-1 rounded">admin</code></p>
-        </div>
+      <p style="margin-top: 20px; font-family:var(--font-mono); font-size:11px; color:var(--dim); letter-spacing:0.08em;">
+        // hint: <code style="color:var(--accent);">tactforce@admin</code>
+      </p>
     </div>
+  </div>
 
-    <!-- Dashboard -->
-    <div x-show="authed" class="min-h-screen flex flex-col" style="display: none;">
+  <!-- Dashboard -->
+  <div x-show="authed" class="ad-shell">
 
-        <!-- Header -->
-        <header class="bg-white shadow-md z-20 sticky top-0 border-b border-gray-200">
-            <div class="w-full px-6 h-20 flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-white font-bold shadow-lg transform hover:scale-110 transition-transform">
-                        <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-xl text-gray-900">TactForce CMS</h1>
-                        <p class="text-xs text-gray-500">Content Management System</p>
-                    </div>
-                </div>
+    <!-- Header -->
+    <header class="ad-header">
+      <div class="ad-header__brand">
+        <span class="dot"></span>
+        <span class="name">TACTFORCE</span>
+        <span class="ver">/ cms / v2026</span>
+      </div>
+      <div style="display:flex; gap: 10px; align-items: center;">
+        <a href="index.html" target="_blank" class="ad-pill-btn ad-pill-btn--ghost">
+          <span>preview ↗</span>
+        </a>
+        <button @click="exportParams()" class="ad-pill-btn">
+          export config →
+        </button>
+      </div>
+    </header>
 
-                <div class="flex gap-3">
-                    <a href="index.html" target="_blank"
-                        class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium flex items-center gap-2 transition-all hover:shadow-md">
-                        <i data-lucide="external-link" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">Preview Site</span>
-                    </a>
-                    <button @click="exportParams()"
-                        class="px-5 py-2.5 bg-gradient-to-r from-accent to-accent-dark hover:shadow-xl text-white rounded-lg font-semibold flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95">
-                        <i data-lucide="download" class="w-4 h-4"></i>
-                        Export Config
-                    </button>
-                </div>
-            </div>
-        </header>
+    <div class="ad-grid">
+      <!-- Sidebar -->
+      <nav class="ad-side">
+        <div style="padding: 0 4px 16px; font-family:var(--font-mono); font-size:10px; letter-spacing:0.18em; color: var(--dim); text-transform: uppercase;">// sections</div>
+        <button class="ad-tab" :class="{ 'is-active': activeTab==='guides' }" @click="activeTab='guides'">~/guides</button>
+        <button class="ad-tab" :class="{ 'is-active': activeTab==='apps' }" @click="activeTab='apps'">~/apps</button>
+        <button class="ad-tab" :class="{ 'is-active': activeTab==='tools' }" @click="activeTab='tools'">~/tools</button>
+        <button class="ad-tab" :class="{ 'is-active': activeTab==='content' }" @click="activeTab='content'">~/content</button>
+        <button class="ad-tab" :class="{ 'is-active': activeTab==='nav' }" @click="activeTab='nav'">~/nav</button>
 
-        <div class="flex flex-1 w-full gap-0">
-
-            <!-- Sidebar Navigation -->
-            <nav class="w-72 bg-white border-r border-gray-200 shrink-0 min-h-[calc(100vh-5rem)]">
-                <div class="p-6 space-y-2">
-                    <button @click="activeTab = 'guides'"
-                        :class="activeTab === 'guides'
-                            ? 'bg-gradient-to-r from-primary/10 to-accent/10 text-primary border-l-4 border-primary font-semibold shadow-sm'
-                            : 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent hover:border-gray-200'"
-                        class="w-full text-left px-5 py-4 rounded-lg transition-all flex items-center gap-3 group">
-                        <i data-lucide="book-open" class="w-5 h-5 transition-transform group-hover:scale-110"></i>
-                        <span>User Guides</span>
-                    </button>
-
-                    <button @click="activeTab = 'apps'"
-                        :class="activeTab === 'apps'
-                            ? 'bg-gradient-to-r from-primary/10 to-accent/10 text-primary border-l-4 border-primary font-semibold shadow-sm'
-                            : 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent hover:border-gray-200'"
-                        class="w-full text-left px-5 py-4 rounded-lg transition-all flex items-center gap-3 group">
-                        <i data-lucide="box" class="w-5 h-5 transition-transform group-hover:scale-110"></i>
-                        <span>Manage Apps</span>
-                    </button>
-
-                    <button @click="activeTab = 'content'"
-                        :class="activeTab === 'content'
-                            ? 'bg-gradient-to-r from-primary/10 to-accent/10 text-primary border-l-4 border-primary font-semibold shadow-sm'
-                            : 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent hover:border-gray-200'"
-                        class="w-full text-left px-5 py-4 rounded-lg transition-all flex items-center gap-3 group">
-                        <i data-lucide="file-text" class="w-5 h-5 transition-transform group-hover:scale-110"></i>
-                        <span>Site Content</span>
-                    </button>
-                </div>
-
-                <!-- Sidebar Footer -->
-                <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-200 bg-gradient-to-t from-gray-50 to-white">
-                    <div class="text-xs text-gray-500 text-center">
-                        <p class="font-semibold text-gray-700 mb-1">Quick Tips</p>
-                        <p>Make changes and click Export to save your configuration.</p>
-                    </div>
-                </div>
-            </nav>
-
-            <!-- Main Panel -->
-            <main class="flex-1 bg-gray-50 p-8 overflow-y-auto h-[calc(100vh-5rem)]">
-
-                <!-- Guides Tab -->
-                <div x-show="activeTab === 'guides'" class="max-w-6xl mx-auto">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                        <div>
-                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Manage Documentation</h2>
-                            <p class="text-gray-600">Edit guide content, version history, and sections</p>
-                        </div>
-                        <select x-model="selectedGuide"
-                            class="px-5 py-3 border-2 border-gray-200 rounded-xl bg-white shadow-sm font-medium hover:border-primary focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                            <template x-for="(guide, key) in data.guides">
-                                <option :value="key" x-text="guide.title"></option>
-                            </template>
-                        </select>
-                    </div>
-
-                    <!-- Version History -->
-                    <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 mb-8 hover:shadow-xl transition-shadow">
-                        <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-                            <h3 class="font-bold text-xl text-gray-900 flex items-center gap-2">
-                                <i data-lucide="clock" class="w-5 h-5 text-primary"></i>
-                                Version History
-                            </h3>
-                            <button @click="addVersion()"
-                                class="bg-primary/10 hover:bg-primary text-primary hover:text-white px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 transform hover:scale-105">
-                                <i data-lucide="plus" class="w-4 h-4"></i>
-                                Add Version
-                            </button>
-                        </div>
-
-                        <div class="space-y-4">
-                            <template x-for="(ver, idx) in data.guides[selectedGuide].versions">
-                                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start bg-gradient-to-r from-gray-50 to-blue-50/30 p-5 rounded-xl relative group hover:shadow-md transition-all border border-gray-100">
-                                    <div class="md:col-span-2">
-                                        <label class="text-xs text-gray-600 uppercase font-semibold mb-1 block">Version</label>
-                                        <input type="text" x-model="ver.version"
-                                            class="w-full bg-white border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                    </div>
-                                    <div class="md:col-span-3">
-                                        <label class="text-xs text-gray-600 uppercase font-semibold mb-1 block">Date</label>
-                                        <input type="date" x-model="ver.date"
-                                            class="w-full bg-white border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                    </div>
-                                    <div class="md:col-span-6">
-                                        <label class="text-xs text-gray-600 uppercase font-semibold mb-1 block">Description</label>
-                                        <input type="text" x-model="ver.description"
-                                            class="w-full bg-white border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                    </div>
-                                    <div class="md:col-span-1 flex items-end justify-center">
-                                        <button @click="removeVersion(idx)"
-                                            class="text-gray-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all transform hover:scale-110"
-                                            title="Remove Version">
-                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
-                            <div x-show="!data.guides[selectedGuide] || !data.guides[selectedGuide].versions || data.guides[selectedGuide].versions.length === 0"
-                                class="text-center text-gray-400 py-8 italic bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                                <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                                <p>No versions logged yet. Click "Add Version" to get started.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sections Editor -->
-                    <div class="space-y-6">
-                        <div class="flex justify-between items-center">
-                            <h3 class="font-bold text-gray-900 text-2xl flex items-center gap-2">
-                                <i data-lucide="file-text" class="w-6 h-6 text-primary"></i>
-                                Guide Sections
-                            </h3>
-                            <button @click="addSection()"
-                                class="bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center gap-2 transform hover:scale-105 active:scale-95">
-                                <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                                Add Section
-                            </button>
-                        </div>
-
-                        <template x-for="(sec, idx) in data.guides[selectedGuide].sections" :key="sec.id + idx">
-                            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 relative hover:shadow-xl transition-all">
-                                <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-                                    <input type="text" x-model="sec.title"
-                                        class="text-xl font-bold border-2 border-transparent hover:border-gray-300 focus:border-primary rounded-lg outline-none px-3 py-2 w-2/3 transition-all focus:ring-4 focus:ring-primary/10"
-                                        placeholder="Section Title">
-                                    <button @click="removeSection(idx)"
-                                        class="text-red-500 hover:text-white hover:bg-red-500 px-4 py-2 rounded-lg font-medium transition-all transform hover:scale-105">
-                                        <i data-lucide="trash-2" class="w-4 h-4 inline mr-1"></i>
-                                        Remove
-                                    </button>
-                                </div>
-
-                                <!-- Quill Container -->
-                                <div x-init="initQuill($el, sec.content, idx, 'section')" class="rounded-xl overflow-hidden border-2 border-gray-200 hover:border-primary/50 transition-all"></div>
-                            </div>
-                        </template>
-
-                        <div x-show="!data.guides[selectedGuide]?.sections || data.guides[selectedGuide].sections.length === 0"
-                            class="text-center text-gray-400 py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                            <i data-lucide="file-plus" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
-                            <p class="text-lg mb-2">No sections yet</p>
-                            <p class="text-sm">Click "Add Section" to create your first section.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Manage Apps Tab -->
-                <div x-show="activeTab === 'apps'" class="max-w-6xl mx-auto" style="display: none;">
-                    <div class="flex justify-between items-start sm:items-center flex-col sm:flex-row gap-4 mb-8">
-                        <div>
-                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Manage Apps</h2>
-                            <p class="text-gray-600">Add, edit, or remove applications from your site</p>
-                        </div>
-                        <button @click="addApp()"
-                            class="bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center gap-2 transform hover:scale-105 active:scale-95">
-                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                            New App
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-6">
-                        <template x-for="(prod, idx) in data.products">
-                            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all">
-                                <div class="bg-gradient-to-r from-gray-50 to-blue-50/30 px-8 py-4 border-b border-gray-200 flex justify-between items-center">
-                                    <h3 class="font-bold text-xl text-gray-800 flex items-center gap-2">
-                                        <i data-lucide="box" class="w-5 h-5 text-primary"></i>
-                                        <span x-text="prod.name"></span>
-                                    </h3>
-                                    <button @click="removeApp(idx)"
-                                        class="text-red-500 hover:text-white hover:bg-red-500 px-4 py-2 rounded-lg font-medium transition-all transform hover:scale-105">
-                                        <i data-lucide="trash-2" class="w-4 h-4 inline mr-1"></i>
-                                        Delete
-                                    </button>
-                                </div>
-
-                                <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div class="space-y-4">
-                                        <div>
-                                            <label class="block text-sm font-semibold text-gray-700 mb-2">App Name</label>
-                                            <input type="text" x-model="prod.name"
-                                                class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                                            <textarea x-model="prod.description" rows="3"
-                                                class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"></textarea>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-semibold text-gray-700 mb-2">AppExchange Link</label>
-                                            <input type="text" x-model="prod.appExchangeLink"
-                                                class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-primary focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Image Path</label>
-                                            <input type="text" x-model="prod.image"
-                                                class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-gray-600 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                        </div>
-                                        <div>
-                                            <label class="flex items-center gap-3 cursor-pointer">
-                                                <input type="checkbox" x-model="prod.featured"
-                                                    class="w-5 h-5 text-primary border-2 border-gray-300 rounded focus:ring-4 focus:ring-primary/10 transition-all">
-                                                <span class="text-sm font-semibold text-gray-700">Featured Solution</span>
-                                            </label>
-                                            <p class="text-xs text-gray-500 mt-1 ml-8">Display "Featured Solution" badge on this app</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="space-y-5">
-                                        <label class="block text-sm font-semibold text-gray-700">Key Features</label>
-                                        <div class="space-y-3">
-                                            <template x-for="(feat, fIdx) in prod.features">
-                                                <div class="flex gap-2">
-                                                    <input type="text" x-model="prod.features[fIdx]"
-                                                        class="flex-1 border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                                    <button @click="removeFeature(idx, fIdx)"
-                                                        class="text-gray-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all transform hover:scale-110"
-                                                        title="Remove Feature">
-                                                        <i data-lucide="x" class="w-5 h-5"></i>
-                                                    </button>
-                                                </div>
-                                            </template>
-                                            <button @click="addFeature(idx)"
-                                                class="text-sm text-primary hover:text-primary-dark font-medium flex items-center gap-1 hover:gap-2 transition-all">
-                                                <i data-lucide="plus" class="w-4 h-4"></i>
-                                                Add Feature
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-
-                        <div x-show="!data.products || data.products.length === 0"
-                            class="text-center text-gray-400 py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                            <i data-lucide="package" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
-                            <p class="text-lg mb-2">No apps yet</p>
-                            <p class="text-sm">Click "New App" to add your first application.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Site Content Tab -->
-                <div x-show="activeTab === 'content'" class="max-w-4xl mx-auto" style="display: none;">
-                    <div class="mb-8">
-                        <h2 class="text-3xl font-bold text-gray-900 mb-2">General Site Content</h2>
-                        <p class="text-gray-600">Edit your website's hero section and about page content</p>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
-                            <h3 class="text-xl font-bold mb-6 text-gray-900 flex items-center gap-2 pb-4 border-b border-gray-200">
-                                <i data-lucide="home" class="w-5 h-5 text-primary"></i>
-                                Hero Section
-                            </h3>
-                            <div class="space-y-5">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Main Heading</label>
-                                    <input type="text" x-model="data.hero.title"
-                                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Subtitle</label>
-                                    <textarea x-model="data.hero.subtitle" rows="2"
-                                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
-                            <h3 class="text-xl font-bold mb-6 text-gray-900 flex items-center gap-2 pb-4 border-b border-gray-200">
-                                <i data-lucide="info" class="w-5 h-5 text-primary"></i>
-                                About Us
-                            </h3>
-                            <div class="space-y-5">
-                                <template x-for="(para, idx) in data.about.text">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2"
-                                            x-text="'Paragraph ' + (idx + 1)"></label>
-                                        <textarea x-model="data.about.text[idx]" rows="3"
-                                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"></textarea>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <!-- Why Choose Us / Features Section -->
-                        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
-                            <h3 class="text-xl font-bold mb-6 text-gray-900 flex items-center gap-2 pb-4 border-b border-gray-200">
-                                <i data-lucide="star" class="w-5 h-5 text-primary"></i>
-                                Why Choose Us
-                            </h3>
-                            <div class="space-y-5">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Section Title</label>
-                                    <input type="text" x-model="data.features.title"
-                                        class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Main Heading</label>
-                                    <input type="text" x-model="data.features.heading"
-                                        class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                    <p class="text-xs text-gray-500 mt-1">The last word will be displayed with gradient styling</p>
-                                </div>
-
-                                <div class="border-t border-gray-200 pt-6 mt-6">
-                                    <h4 class="text-lg font-bold text-gray-800 mb-4">Feature Items</h4>
-                                    <div class="space-y-6">
-                                        <template x-for="(item, idx) in data.features.items">
-                                            <div class="p-6 bg-gray-50 rounded-xl border-2 border-gray-200">
-                                                <div class="flex items-center justify-between mb-4">
-                                                    <h5 class="font-bold text-gray-700" x-text="'Feature ' + (idx + 1)"></h5>
-                                                    <button @click="removeFeatureItem(idx)"
-                                                        class="text-gray-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all"
-                                                        title="Remove Feature">
-                                                        <i data-lucide="x" class="w-5 h-5"></i>
-                                                    </button>
-                                                </div>
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-                                                        <input type="text" x-model="data.features.items[idx].title"
-                                                            class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Icon</label>
-                                                        <select x-model="data.features.items[idx].icon"
-                                                            class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                                            <option value="zap">Lightning (zap)</option>
-                                                            <option value="shield-check">Shield Check</option>
-                                                            <option value="smile">Smile</option>
-                                                            <option value="rocket">Rocket</option>
-                                                            <option value="heart">Heart</option>
-                                                            <option value="star">Star</option>
-                                                            <option value="award">Award</option>
-                                                            <option value="check-circle">Check Circle</option>
-                                                        </select>
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Icon Color</label>
-                                                        <select x-model="data.features.items[idx].iconColor"
-                                                            class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all">
-                                                            <option value="blue">Blue</option>
-                                                            <option value="teal">Teal</option>
-                                                            <option value="purple">Purple</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="md:col-span-2">
-                                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                                                        <textarea x-model="data.features.items[idx].description" rows="2"
-                                                            class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"></textarea>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                    <button @click="addFeatureItem()"
-                                        class="mt-4 text-sm text-primary hover:text-primary-dark font-medium flex items-center gap-1 hover:gap-2 transition-all">
-                                        <i data-lucide="plus" class="w-4 h-4"></i>
-                                        Add Feature Item
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </main>
+        <div style="margin-top: 32px; padding: 14px; border: 1px dashed var(--rule); border-radius: 8px;">
+          <div style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.16em; color: var(--dim); margin-bottom: 6px;">// HINT</div>
+          <p style="font-size: 12px; color: var(--dim-2); margin: 0; line-height: 1.55;">
+            Edit anything here, then click <strong style="color:var(--fg);">export config</strong> and replace <code style="color:var(--accent);">js/content.js</code> in the repo.
+          </p>
         </div>
-    </div>
+      </nav>
 
-    <script>
-        // Initialize Lucide icons after Alpine loads
-        document.addEventListener('alpine:initialized', () => {
-            setTimeout(() => {
-                lucide.createIcons();
-            }, 100);
-        });
-    </script>
+      <!-- Main panel -->
+      <main class="ad-main">
+
+        <!-- ==================== GUIDES ==================== -->
+        <div x-show="activeTab==='guides'">
+          <div style="display:flex; justify-content:space-between; gap:16px; align-items:end; margin-bottom: 28px; flex-wrap:wrap;">
+            <div>
+              <span class="tf-mono tf-mono--accent">// 01 GUIDES</span>
+              <h2 class="tf-h2" style="font-size: clamp(28px, 4vw, 44px); margin-top: 8px;">User Guides</h2>
+              <p class="tf-body" style="font-size: 14px; margin-top: 6px;">Versions and Quill-edited sections per app guide.</p>
+            </div>
+            <select x-model="selectedGuide" class="ad-select" style="max-width: 320px;">
+              <template x-for="(g, key) in data.guides" :key="key">
+                <option :value="key" x-text="g.title"></option>
+              </template>
+            </select>
+          </div>
+
+          <!-- Versions -->
+          <div class="ad-card">
+            <div class="ad-card__head">
+              <h3 class="ad-card__title">Version History <small>// VERSIONS</small></h3>
+              <button @click="addVersion()" class="ad-pill-btn">+ add version</button>
+            </div>
+            <template x-for="(ver, idx) in data.guides[selectedGuide]?.versions" :key="idx">
+              <div class="ad-card" style="padding: 16px; margin-bottom: 10px; background: var(--bg-3);">
+                <div class="ad-row" style="grid-template-columns: 100px 140px 1fr auto; align-items: end; gap: 10px;">
+                  <label><span class="ad-label">version</span><input type="text" x-model="ver.version" class="ad-input"></label>
+                  <label><span class="ad-label">date</span><input type="date" x-model="ver.date" class="ad-input"></label>
+                  <label><span class="ad-label">description</span><input type="text" x-model="ver.description" class="ad-input"></label>
+                  <button @click="removeVersion(idx)" class="ad-pill-btn ad-pill-btn--danger">remove</button>
+                </div>
+              </div>
+            </template>
+            <div class="empty" x-show="!data.guides[selectedGuide]?.versions?.length">// no versions logged yet</div>
+          </div>
+
+          <!-- Sections -->
+          <div class="ad-card">
+            <div class="ad-card__head">
+              <h3 class="ad-card__title">Sections <small>// QUILL</small></h3>
+              <button @click="addSection()" class="ad-pill-btn">+ add section</button>
+            </div>
+            <template x-for="(sec, idx) in data.guides[selectedGuide]?.sections" :key="sec.id + idx">
+              <div class="ad-card" style="background: var(--bg-3); margin-bottom: 16px;">
+                <div class="ad-card__head" style="padding-bottom: 12px; margin-bottom: 14px;">
+                  <input type="text" x-model="sec.title" class="ad-input" style="max-width: 60%;" placeholder="section title">
+                  <button @click="removeSection(idx)" class="ad-pill-btn ad-pill-btn--danger">remove</button>
+                </div>
+                <div x-init="initQuill($el, sec.content, idx, 'section')" style="border: 1px solid var(--rule); border-radius: 8px; overflow: hidden;"></div>
+              </div>
+            </template>
+            <div class="empty" x-show="!data.guides[selectedGuide]?.sections?.length">// no sections — click "add section"</div>
+          </div>
+        </div>
+
+        <!-- ==================== APPS ==================== -->
+        <div x-show="activeTab==='apps'" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:end; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <span class="tf-mono tf-mono--accent">// 02 APPS</span>
+              <h2 class="tf-h2" style="font-size: clamp(28px, 4vw, 44px); margin-top: 8px;">Manage Apps</h2>
+              <p class="tf-body" style="font-size: 14px; margin-top: 6px;">AppExchange products surfaced on the homepage.</p>
+            </div>
+            <button @click="addApp()" class="ad-pill-btn">+ new app</button>
+          </div>
+
+          <template x-for="(prod, idx) in data.products" :key="prod.id + idx">
+            <div class="ad-card">
+              <div class="ad-card__head">
+                <h3 class="ad-card__title">
+                  <span x-text="prod.name"></span>
+                  <small x-text="'// ' + (prod.installs || 'FREE')"></small>
+                </h3>
+                <button @click="removeApp(idx)" class="ad-pill-btn ad-pill-btn--danger">remove</button>
+              </div>
+
+              <div class="ad-row--2">
+                <label><span class="ad-label">name</span><input type="text" x-model="prod.name" class="ad-input"></label>
+                <label><span class="ad-label">id (slug)</span><input type="text" x-model="prod.id" class="ad-input"></label>
+              </div>
+
+              <label style="display:block; margin-bottom: 12px;">
+                <span class="ad-label">tagline (one-line hook)</span>
+                <input type="text" x-model="prod.tagline" class="ad-input" placeholder="Path, but it bends.">
+              </label>
+
+              <label style="display:block; margin-bottom: 12px;">
+                <span class="ad-label">description</span>
+                <textarea x-model="prod.description" class="ad-textarea" rows="3"></textarea>
+              </label>
+
+              <div class="ad-row" style="grid-template-columns: 80px 100px 140px 110px;">
+                <label><span class="ad-label">num</span><input type="text" x-model="prod.num" class="ad-input" placeholder="01"></label>
+                <label><span class="ad-label">version</span><input type="text" x-model="prod.version" class="ad-input" placeholder="1.4"></label>
+                <label><span class="ad-label">released</span><input type="text" x-model="prod.released" class="ad-input" placeholder="2026.01.12"></label>
+                <label><span class="ad-label">installs</span>
+                  <select x-model="prod.installs" class="ad-select">
+                    <option value="FREE">FREE</option>
+                    <option value="IN-DEV">IN-DEV</option>
+                    <option value="SOON">SOON</option>
+                    <option value="BETA">BETA</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="ad-row--2">
+                <label><span class="ad-label">appExchange link</span><input type="text" x-model="prod.appExchangeLink" class="ad-input"></label>
+                <label><span class="ad-label">guide link</span><input type="text" x-model="prod.guideLink" class="ad-input"></label>
+              </div>
+              <label style="display:block; margin-bottom: 12px;">
+                <span class="ad-label">image path</span><input type="text" x-model="prod.image" class="ad-input">
+              </label>
+
+              <div style="margin-top: 16px;">
+                <span class="ad-label">key features</span>
+                <template x-for="(feat, fIdx) in prod.features" :key="fIdx">
+                  <div class="ad-feature-row">
+                    <input type="text" x-model="prod.features[fIdx]" class="ad-input">
+                    <button @click="removeFeature(idx, fIdx)" class="ad-pill-btn ad-pill-btn--danger" title="remove">×</button>
+                  </div>
+                </template>
+                <button @click="addFeature(idx)" class="ad-pill-btn ad-pill-btn--ghost" style="margin-top: 6px;">+ feature</button>
+              </div>
+            </div>
+          </template>
+
+          <div class="empty" x-show="!data.products?.length">// no apps yet — click "new app"</div>
+        </div>
+
+        <!-- ==================== TOOLS ==================== -->
+        <div x-show="activeTab==='tools'" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:end; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <span class="tf-mono tf-mono--accent">// 03 TOOLS</span>
+              <h2 class="tf-h2" style="font-size: clamp(28px, 4vw, 44px); margin-top: 8px;">Browser Tools</h2>
+              <p class="tf-body" style="font-size: 14px; margin-top: 6px;">Cards displayed on /tools.html and the homepage tools strip.</p>
+            </div>
+            <button @click="addTool()" class="ad-pill-btn">+ new tool</button>
+          </div>
+
+          <template x-for="(t, idx) in data.tools" :key="t.id + idx">
+            <div class="ad-card">
+              <div class="ad-card__head">
+                <h3 class="ad-card__title">
+                  <span x-text="t.name"></span>
+                  <small x-text="t.cmd || ('$ tf ' + t.id)"></small>
+                </h3>
+                <button @click="removeTool(idx)" class="ad-pill-btn ad-pill-btn--danger">remove</button>
+              </div>
+              <div class="ad-row--2">
+                <label><span class="ad-label">name</span><input type="text" x-model="t.name" class="ad-input"></label>
+                <label><span class="ad-label">id (slug)</span><input type="text" x-model="t.id" class="ad-input"></label>
+              </div>
+              <div class="ad-row--2">
+                <label><span class="ad-label">command (terminal label)</span><input type="text" x-model="t.cmd" class="ad-input" placeholder="$ tf delimiter"></label>
+                <label><span class="ad-label">tagline (short hook)</span><input type="text" x-model="t.tagline" class="ad-input"></label>
+              </div>
+              <label style="display:block; margin-bottom: 12px;">
+                <span class="ad-label">description</span>
+                <textarea x-model="t.description" class="ad-textarea" rows="2"></textarea>
+              </label>
+              <div class="ad-row" style="grid-template-columns: 1fr 140px 100px;">
+                <label><span class="ad-label">url</span><input type="text" x-model="t.url" class="ad-input"></label>
+                <label><span class="ad-label">icon (lucide)</span><input type="text" x-model="t.icon" class="ad-input"></label>
+                <label style="display:flex; align-items: end; gap: 8px;">
+                  <input type="checkbox" x-model="t.hidden" style="width:16px; height:16px;">
+                  <span class="ad-label" style="margin: 0;">hidden</span>
+                </label>
+              </div>
+            </div>
+          </template>
+
+          <div class="empty" x-show="!data.tools?.length">// no tools registered</div>
+        </div>
+
+        <!-- ==================== CONTENT ==================== -->
+        <div x-show="activeTab==='content'" style="display:none;">
+          <span class="tf-mono tf-mono--accent">// 04 CONTENT</span>
+          <h2 class="tf-h2" style="font-size: clamp(28px, 4vw, 44px); margin: 8px 0 24px;">Site Content</h2>
+
+          <!-- Hero -->
+          <div class="ad-card">
+            <div class="ad-card__head"><h3 class="ad-card__title">Hero <small>// HERO</small></h3></div>
+            <label style="display:block; margin-bottom: 12px;">
+              <span class="ad-label">tag (status pill)</span>
+              <input type="text" x-model="data.hero.tag" class="ad-input">
+            </label>
+            <div class="ad-row" style="grid-template-columns: 1fr 1fr 1fr;">
+              <label><span class="ad-label">title</span><input type="text" x-model="data.hero.title" class="ad-input"></label>
+              <label><span class="ad-label">accent (highlighted word)</span><input type="text" x-model="data.hero.titleAccent" class="ad-input"></label>
+              <label><span class="ad-label">title suffix</span><input type="text" x-model="data.hero.titleSuffix" class="ad-input"></label>
+            </div>
+            <label style="display:block; margin-bottom: 12px;">
+              <span class="ad-label">subtitle</span>
+              <textarea x-model="data.hero.subtitle" class="ad-textarea" rows="2"></textarea>
+            </label>
+            <div class="ad-row--2">
+              <label><span class="ad-label">cta primary</span><input type="text" x-model="data.hero.cta" class="ad-input"></label>
+              <label><span class="ad-label">cta primary link</span><input type="text" x-model="data.hero.ctaLink" class="ad-input"></label>
+            </div>
+            <div class="ad-row--2">
+              <label><span class="ad-label">cta secondary</span><input type="text" x-model="data.hero.ctaSecondary" class="ad-input"></label>
+              <label><span class="ad-label">cta secondary link</span><input type="text" x-model="data.hero.ctaSecondaryLink" class="ad-input"></label>
+            </div>
+          </div>
+
+          <!-- About -->
+          <div class="ad-card">
+            <div class="ad-card__head"><h3 class="ad-card__title">About <small>// ABOUT</small></h3></div>
+            <label style="display:block; margin-bottom: 12px;">
+              <span class="ad-label">label</span>
+              <input type="text" x-model="data.about.title" class="ad-input">
+            </label>
+            <template x-for="(_, idx) in data.about.text" :key="idx">
+              <label style="display:block; margin-bottom: 12px;">
+                <span class="ad-label" x-text="'paragraph ' + (idx + 1)"></span>
+                <textarea x-model="data.about.text[idx]" class="ad-textarea" rows="3"></textarea>
+              </label>
+            </template>
+            <div class="ad-row--2">
+              <label><span class="ad-label">location</span><input type="text" x-model="data.about.location" class="ad-input"></label>
+              <label><span class="ad-label">linkedin url</span><input type="text" x-model="data.about.linkedIn" class="ad-input"></label>
+            </div>
+          </div>
+
+          <!-- Solutions header -->
+          <div class="ad-card">
+            <div class="ad-card__head"><h3 class="ad-card__title">Solutions Header <small>// 01 APPS</small></h3></div>
+            <div class="ad-row--2">
+              <label><span class="ad-label">label</span><input type="text" x-model="data.solutions.label" class="ad-input"></label>
+              <label><span class="ad-label">caption</span><input type="text" x-model="data.solutions.caption" class="ad-input"></label>
+            </div>
+            <div class="ad-row--2">
+              <label><span class="ad-label">headline</span><input type="text" x-model="data.solutions.headline" class="ad-input"></label>
+              <label><span class="ad-label">accent</span><input type="text" x-model="data.solutions.headlineAccent" class="ad-input"></label>
+            </div>
+          </div>
+
+          <!-- Tools header -->
+          <div class="ad-card">
+            <div class="ad-card__head"><h3 class="ad-card__title">Tools Header <small>// 02 TOOLS</small></h3></div>
+            <div class="ad-row--2">
+              <label><span class="ad-label">label</span><input type="text" x-model="data.toolsMeta.label" class="ad-input"></label>
+              <label><span class="ad-label">caption</span><input type="text" x-model="data.toolsMeta.caption" class="ad-input"></label>
+            </div>
+            <div class="ad-row--2">
+              <label><span class="ad-label">headline</span><input type="text" x-model="data.toolsMeta.headline" class="ad-input"></label>
+              <label><span class="ad-label">suffix</span><input type="text" x-model="data.toolsMeta.headlineSuffix" class="ad-input"></label>
+            </div>
+          </div>
+
+          <!-- Principles -->
+          <div class="ad-card">
+            <div class="ad-card__head">
+              <h3 class="ad-card__title">Principles / Features <small>// 03 PRINCIPLES</small></h3>
+              <button @click="addFeatureItem()" class="ad-pill-btn">+ principle</button>
+            </div>
+            <div class="ad-row--2">
+              <label><span class="ad-label">label</span><input type="text" x-model="data.features.title" class="ad-input"></label>
+              <label><span class="ad-label">heading</span><input type="text" x-model="data.features.heading" class="ad-input"></label>
+            </div>
+            <template x-for="(item, idx) in data.features.items" :key="idx">
+              <div class="ad-card" style="background: var(--bg-3); padding: 16px; margin-top: 12px; margin-bottom: 0;">
+                <div class="ad-card__head" style="padding-bottom: 8px; margin-bottom: 12px;">
+                  <span class="tf-mono tf-mono--accent" x-text="'0' + (idx+1)"></span>
+                  <button @click="removeFeatureItem(idx)" class="ad-pill-btn ad-pill-btn--danger">remove</button>
+                </div>
+                <div class="ad-row--2">
+                  <label><span class="ad-label">title</span><input type="text" x-model="data.features.items[idx].title" class="ad-input"></label>
+                  <label><span class="ad-label">icon (lucide)</span><input type="text" x-model="data.features.items[idx].icon" class="ad-input"></label>
+                </div>
+                <label style="display:block; margin-top: 8px;">
+                  <span class="ad-label">description</span>
+                  <textarea x-model="data.features.items[idx].description" class="ad-textarea" rows="2"></textarea>
+                </label>
+              </div>
+            </template>
+          </div>
+
+          <!-- Contact -->
+          <div class="ad-card">
+            <div class="ad-card__head"><h3 class="ad-card__title">Contact / Web-to-Case <small>// 04 CONTACT</small></h3></div>
+            <p class="tf-body" style="font-size:13px; margin: 0 0 16px; color: var(--dim);">
+              <span class="tf-accent">⚠</span> The form action and orgId are wired to Salesforce Web-to-Case. Don't change unless you've moved orgs.
+            </p>
+            <div class="ad-row--2">
+              <label><span class="ad-label">label</span><input type="text" x-model="data.contact.label" class="ad-input"></label>
+              <label><span class="ad-label">accent (headline word)</span><input type="text" x-model="data.contact.headlineAccent" class="ad-input"></label>
+            </div>
+            <div class="ad-row--2">
+              <label><span class="ad-label">orgId</span><input type="text" x-model="data.contact.orgId" class="ad-input"></label>
+              <label><span class="ad-label">retURL</span><input type="text" x-model="data.contact.retURL" class="ad-input"></label>
+            </div>
+            <label style="display:block; margin-bottom: 12px;">
+              <span class="ad-label">form action</span>
+              <input type="text" x-model="data.contact.formAction" class="ad-input">
+            </label>
+            <label style="display:block;">
+              <span class="ad-label">support email</span>
+              <input type="text" x-model="data.contact.supportEmail" class="ad-input">
+            </label>
+          </div>
+
+          <!-- Footer -->
+          <div class="ad-card">
+            <div class="ad-card__head"><h3 class="ad-card__title">Footer <small>// FOOTER</small></h3></div>
+            <div class="ad-row--2">
+              <label><span class="ad-label">copyright</span><input type="text" x-model="data.footer.copyright" class="ad-input"></label>
+              <label><span class="ad-label">linkedin</span><input type="text" x-model="data.footer.linkedInLink" class="ad-input"></label>
+            </div>
+            <div class="ad-row--2">
+              <label><span class="ad-label">buy me a coffee</span><input type="text" x-model="data.footer.buyMeCoffeeLink" class="ad-input"></label>
+              <label><span class="ad-label">bmc image</span><input type="text" x-model="data.footer.buyMeCoffeeImage" class="ad-input"></label>
+            </div>
+          </div>
+
+          <!-- Meta -->
+          <div class="ad-card">
+            <div class="ad-card__head"><h3 class="ad-card__title">Meta <small>// SEO</small></h3></div>
+            <label style="display:block; margin-bottom: 12px;">
+              <span class="ad-label">title</span><input type="text" x-model="data.meta.title" class="ad-input">
+            </label>
+            <label style="display:block;">
+              <span class="ad-label">description</span><textarea x-model="data.meta.description" class="ad-textarea" rows="2"></textarea>
+            </label>
+          </div>
+        </div>
+
+        <!-- ==================== NAV ==================== -->
+        <div x-show="activeTab==='nav'" style="display:none;">
+          <span class="tf-mono tf-mono--accent">// 05 NAVIGATION</span>
+          <h2 class="tf-h2" style="font-size: clamp(28px, 4vw, 44px); margin: 8px 0 24px;">Navigation Links</h2>
+          <div class="ad-card">
+            <div class="ad-card__head">
+              <h3 class="ad-card__title">Site Nav</h3>
+              <button @click="addNav()" class="ad-pill-btn">+ link</button>
+            </div>
+            <template x-for="(n, idx) in data.navigation" :key="idx">
+              <div class="ad-feature-row" style="margin-bottom: 8px;">
+                <input type="text" x-model="n.label" class="ad-input" placeholder="label (e.g. ~/apps)">
+                <input type="text" x-model="n.href" class="ad-input" placeholder="href (e.g. #solutions)">
+                <button @click="removeNav(idx)" class="ad-pill-btn ad-pill-btn--danger" title="remove">×</button>
+              </div>
+            </template>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('admin', () => ({
+        data: JSON.parse(JSON.stringify(window.siteContent)),
+        authed: false,
+        passkey: '',
+        activeTab: 'guides',
+        selectedGuide: 'dynamic-path',
+
+        init() {
+          // First guide if dynamic-path is missing
+          if (!this.data.guides || !this.data.guides[this.selectedGuide]) {
+            const keys = Object.keys(this.data.guides || {});
+            if (keys.length) this.selectedGuide = keys[0];
+          }
+          // Ensure new content keys exist (back-compat for older content.js exports)
+          this.data.solutions = this.data.solutions || { label: '// 01 APPS', headline: 'Native apps.', headlineAccent: 'All free.', caption: 'SHIPPING · MORE IN PROGRESS' };
+          this.data.toolsMeta = this.data.toolsMeta || { label: '// 02 TOOLS', headline: 'Browser-based', headlineSuffix: 'utilities.', caption: '100% LOCAL · NO SIGN-UP' };
+          this.data.about = this.data.about || { title: 'About', text: ['',''], location: '', linkedIn: '' };
+          if (!this.data.about.location) this.data.about.location = 'BHANU VAKATI · TORONTO, CA';
+          if (!this.data.about.linkedIn) this.data.about.linkedIn = 'https://www.linkedin.com/in/bhanuprakashvakati/';
+          this.data.contact.label = this.data.contact.label || '// 04 CONTACT';
+          this.data.contact.headlineAccent = this.data.contact.headlineAccent || 'case.';
+          this.data.hero.tag = this.data.hero.tag || 'SALESFORCE PARTNER · STATUS: SHIPPING';
+          this.data.hero.titleAccent = this.data.hero.titleAccent || 'tools';
+          this.data.hero.titleSuffix = this.data.hero.titleSuffix || 'in the open.';
+          this.data.hero.ctaSecondary = this.data.hero.ctaSecondary || 'Contact';
+          this.data.hero.ctaSecondaryLink = this.data.hero.ctaSecondaryLink || '#contact';
+        },
+
+        login() {
+          if (this.passkey === 'tactforce@admin') {
+            this.authed = true;
+            this.$nextTick(() => lucide.createIcons());
+          } else {
+            alert('Invalid Passkey');
+          }
+        },
+
+        // Apps
+        addApp() {
+          const id = prompt("App ID (slug, e.g. 'new-app'):");
+          if (!id) return;
+          const slug = id.toLowerCase().replace(/\s+/g, '-');
+          this.data.products.push({
+            id: slug, num: String(this.data.products.length + 1).padStart(2,'0'),
+            name: 'New App', tagline: '', description: 'App description.',
+            features: ['Feature 1','Feature 2'],
+            image: 'images/placeholder.png',
+            appExchangeLink: '#', guideLink: 'guides.html?id=' + slug,
+            version: '1.0', released: '', installs: 'FREE',
+            featured: false, featuredName: 'New', featuredIcon: 'zap'
+          });
+          if (!this.data.guides[slug]) {
+            this.data.guides[slug] = { title: 'New App User Guide', versions: [], sections: [] };
+          }
+        },
+        removeApp(i) { if (confirm('Remove this app?')) this.data.products.splice(i,1); },
+        addFeature(pi) { this.data.products[pi].features.push('New Feature'); },
+        removeFeature(pi, fi) { this.data.products[pi].features.splice(fi,1); },
+
+        // Tools
+        addTool() {
+          const id = prompt("Tool ID (slug, e.g. 'json-formatter'):");
+          if (!id) return;
+          const slug = id.toLowerCase().replace(/\s+/g, '-');
+          this.data.tools.push({
+            id: slug, name: 'New Tool',
+            description: '',
+            tagline: '',
+            cmd: '$ tf ' + slug,
+            icon: 'wrench',
+            url: 'tools/' + slug + '/',
+            hidden: false
+          });
+        },
+        removeTool(i) { if (confirm('Remove this tool?')) this.data.tools.splice(i,1); },
+
+        // Features (principles)
+        addFeatureItem() { this.data.features.items.push({ icon:'zap', iconColor:'blue', title:'New Principle', description:'' }); },
+        removeFeatureItem(i) { this.data.features.items.splice(i,1); },
+
+        // Nav
+        addNav() { this.data.navigation.push({ label:'~/new', href:'#' }); },
+        removeNav(i) { this.data.navigation.splice(i,1); },
+
+        // Guides
+        addVersion() {
+          const g = this.data.guides[this.selectedGuide];
+          if (!g.versions) g.versions = [];
+          g.versions.unshift({ version:'1.0', date:new Date().toISOString().split('T')[0], description:'New release' });
+        },
+        removeVersion(i) { if (confirm('Delete?')) this.data.guides[this.selectedGuide].versions.splice(i,1); },
+        addSection() {
+          const id = prompt("Section ID (slug):");
+          if (!id) return;
+          this.data.guides[this.selectedGuide].sections.push({
+            id: id.toLowerCase().replace(/\s+/g,'-'),
+            title: 'New Section',
+            content: '<p>Content goes here…</p>'
+          });
+        },
+        removeSection(i) { if (confirm('Delete this section?')) this.data.guides[this.selectedGuide].sections.splice(i,1); },
+
+        initQuill(el, model, index, type) {
+          const q = new Quill(el, {
+            theme: 'snow',
+            modules: { toolbar: [
+              ['bold','italic','underline','strike'],
+              ['blockquote','code-block'],
+              [{ header:1 },{ header:2 }],
+              [{ list:'ordered' },{ list:'bullet' }],
+              [{ color:[] },{ background:[] }],
+              ['link'], ['clean']
+            ]}
+          });
+          q.root.innerHTML = model;
+          q.on('text-change', () => {
+            if (type === 'section') {
+              this.data.guides[this.selectedGuide].sections[index].content = q.root.innerHTML;
+            }
+          });
+        },
+
+        exportParams() { return this.exportConfig(); },
+        exportConfig() {
+          const fileContent = `window.siteContent = ${JSON.stringify(this.data, null, 4)};\n`;
+          const blob = new Blob([fileContent], { type: 'text/javascript' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'content.js'; a.click();
+          URL.revokeObjectURL(url);
+          alert('Configuration downloaded! Replace /js/content.js in your repo to apply changes.');
+        }
+      }));
+    });
+
+    document.addEventListener('alpine:initialized', () => {
+      setTimeout(() => lucide.createIcons(), 50);
+    });
+  </script>
 </body>
-
 </html>

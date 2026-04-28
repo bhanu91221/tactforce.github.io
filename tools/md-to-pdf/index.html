@@ -18,7 +18,10 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Site design system (used by injected nav/footer chrome) -->
+    <link rel="stylesheet" href="../../css/style.css">
 
     <!-- Tailwind (for site chrome) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -141,7 +144,7 @@
 <body x-data="toolsApp">
 
     <!-- Site header -->
-    <header id="main-header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-gradient-to-b from-black/30 to-transparent backdrop-blur-sm"
+    <header id="main-header"
             x-init="$el.innerHTML = window.renderHeader({ basePath: '../../' }); $nextTick(() => lucide.createIcons({ root: $el }))">
     </header>
 
