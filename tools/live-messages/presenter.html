@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Presenter · Live messages</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0c0a;
+      --bg-2: #161410;
+      --bg-card: #1c1a16;
+      --ink: #f5f1ea;
+      --ink-soft: #8a8278;
+      --ink-dim: #5a5249;
+      --accent: #ff6b3d;
+      --accent-soft: rgba(255, 107, 61, 0.15);
+      --border: #2a2620;
+      --radius: 14px;
+      --new-glow: 0 0 0 1px var(--accent), 0 0 24px rgba(255, 107, 61, 0.25);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(circle at 15% 0%, rgba(255, 107, 61, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 100%, rgba(255, 107, 61, 0.05), transparent 50%);
+    }
+
+    /* HEADER */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      background: rgba(13, 12, 10, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .brand {
+      font-family: 'Fraunces', serif;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+    }
+    .brand em { font-style: italic; color: var(--accent); font-weight: 400; }
+    .event-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 14px 6px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      font-size: 13px;
+    }
+    .event-pill .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .toolbar { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .stat {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-soft);
+      letter-spacing: 0.04em;
+      padding-right: 4px;
+    }
+    .stat strong { color: var(--ink); font-size: 15px; }
+    .btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      padding: 9px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--ink);
+    }
+    .btn:hover { border-color: var(--ink-soft); background: var(--bg-2); }
+    .btn.primary {
+      background: var(--accent);
+      color: #1a0f08;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .btn.primary:hover { background: #ff5520; border-color: #ff5520; }
+    .btn.danger:hover { border-color: #e84a4a; color: #ff8080; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* MAIN */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    /* EMPTY STATE */
+    .empty {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--ink-soft);
+    }
+    .empty h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: 28px;
+      font-style: italic;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+    .empty p { font-size: 15px; max-width: 420px; margin: 0 auto; line-height: 1.6; }
+    .empty .hint {
+      margin-top: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-dim);
+      letter-spacing: 0.1em;
+    }
+
+    /* MESSAGE GRID */
+    .messages {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+    .msg {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 18px 14px;
+      position: relative;
+      transition: border-color 0.2s ease;
+    }
+    .msg.new { animation: drop-in 0.5s ease, glow 2.5s ease; }
+    @keyframes drop-in {
+      from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes glow {
+      0%, 30% { box-shadow: var(--new-glow); }
+      100% { box-shadow: 0 0 0 1px var(--border); }
+    }
+    .msg-name {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 17px;
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+      color: var(--ink);
+    }
+    .msg-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-bottom: 12px;
+    }
+    .msg-body {
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--ink);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .msg-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--ink-soft);
+      font-family: inherit;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .icon-btn:hover { color: var(--accent); background: var(--accent-soft); }
+    .icon-btn.copied { color: var(--accent); }
+
+    /* MODAL */
+    .modal-bg {
+      position: fixed; inset: 0;
+      background: rgba(13, 12, 10, 0.92);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+    .modal h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 28px;
+      margin: 0 0 6px;
+      letter-spacing: -0.01em;
+    }
+    .modal h2 em { font-style: italic; color: var(--accent); font-weight: 400; }
+    .modal p { color: var(--ink-soft); margin: 0 0 22px; font-size: 14px; line-height: 1.5; }
+    .qr-wrap {
+      background: white;
+      padding: 16px;
+      border-radius: 14px;
+      display: inline-block;
+      margin: 0 auto 18px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
+    .qr-wrap canvas { display: block; width: 260px !important; height: 260px !important; }
+    .link-row {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      word-break: break-all;
+      text-align: left;
+      margin-bottom: 16px;
+    }
+    .link-row span { flex: 1; color: var(--ink-soft); }
+    .modal-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .close-x {
+      position: absolute;
+      top: 14px; right: 14px;
+      background: transparent;
+      border: none;
+      color: var(--ink-soft);
+      font-size: 22px;
+      cursor: pointer;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      line-height: 1;
+    }
+    .close-x:hover { background: var(--border); color: var(--ink); }
+
+    /* START SCREEN */
+    .prompt {
+      max-width: 520px;
+      margin: 80px auto;
+      text-align: center;
+      padding: 0 20px;
+    }
+    .prompt h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 800;
+      font-size: clamp(36px, 7vw, 52px);
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
+      line-height: 1.02;
+    }
+    .prompt h1 em { font-style: italic; color: var(--accent); font-weight: 400; }
+    .prompt > p {
+      color: var(--ink-soft);
+      font-size: 16px;
+      line-height: 1.55;
+      margin: 0 0 32px;
+    }
+    .prompt-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      text-align: left;
+    }
+    .prompt-card label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      display: block;
+      margin-bottom: 10px;
+    }
+    .prompt-card input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      letter-spacing: 0.06em;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .prompt-card input:focus { border-color: var(--accent); }
+    .prompt-card .btn { width: 100%; margin-top: 14px; padding: 14px; font-size: 14px; }
+    .prompt-card .hint {
+      font-size: 12px;
+      color: var(--ink-dim);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+    .config-warning {
+      background: rgba(255, 107, 61, 0.08);
+      border: 1px solid rgba(255, 107, 61, 0.3);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      text-align: left;
+      font-size: 13px;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .config-warning strong { color: var(--accent); }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--ink);
+      color: var(--bg);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 200;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 600px) {
+      header { padding: 12px 16px; gap: 12px; }
+      .brand { font-size: 18px; }
+      .container { padding: 20px 16px 60px; }
+      .toolbar { width: 100%; justify-content: flex-start; }
+      .prompt { margin: 40px auto; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="toast" class="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, onChildAdded, remove, off } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import QRCode from "https://esm.sh/qrcode@1.5.3";
+    import { firebaseConfig } from "./firebase-config.js";
+
+    const appEl = document.getElementById("app");
+    const toastEl = document.getElementById("toast");
+    let db = null;
+    let currentEventId = null;
+    let currentListenerRef = null;
+    let messageCount = 0;
+
+    // --- Init Firebase (or show config warning) ---
+    const isConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE";
+    if (isConfigured) {
+      try {
+        const app = initializeApp(firebaseConfig);
+        db = getDatabase(app);
+      } catch (e) {
+        console.error("Firebase init failed:", e);
+      }
+    }
+
+    // --- Routing: load event from URL or show prompt ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventFromUrl = urlParams.get("event");
+    if (eventFromUrl && db) {
+      startSession(eventFromUrl);
+    } else {
+      renderPrompt();
+    }
+
+    // ============================================================
+    //  START SCREEN
+    // ============================================================
+    function renderPrompt() {
+      const configWarning = !isConfigured ? `
+        <div class="config-warning">
+          <strong>Firebase not configured yet.</strong><br>
+          Edit <code style="font-family:'JetBrains Mono',monospace;">firebase-config.js</code> with your project credentials. See <code style="font-family:'JetBrains Mono',monospace;">README.md</code> for the 3-minute setup.
+        </div>` : "";
+
+      appEl.innerHTML = `
+        <div class="prompt">
+          <h1>Live <em>messages</em></h1>
+          <p>Type an event code to start collecting audience messages. Share the QR code with your audience.</p>
+          ${configWarning}
+          <div class="prompt-card">
+            <label for="eventInput">Event code</label>
+            <input id="eventInput" type="text" placeholder="e.g. demo-day-2026" autofocus autocomplete="off" spellcheck="false" />
+            <button id="startBtn" class="btn primary" ${!isConfigured ? "disabled" : ""}>Start session</button>
+            <div class="hint">Use any code you like — letters, numbers, hyphens. Audience link will be <code style="font-family:'JetBrains Mono',monospace;">${escapeHtml(audienceBaseUrl())}/?event=YOUR-CODE</code></div>
+          </div>
+        </div>`;
+
+      const input = document.getElementById("eventInput");
+      const btn = document.getElementById("startBtn");
+      const submit = () => {
+        const code = sanitizeCode(input.value);
+        if (!code) {
+          input.focus();
+          return;
+        }
+        const url = new URL(window.location.href);
+        url.searchParams.set("event", code);
+        window.history.replaceState({}, "", url);
+        startSession(code);
+      };
+      btn?.addEventListener("click", submit);
+      input?.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); });
+    }
+
+    // ============================================================
+    //  PRESENTER VIEW (live messages + QR)
+    // ============================================================
+    function startSession(eventId) {
+      currentEventId = eventId;
+      messageCount = 0;
+      appEl.innerHTML = `
+        <header>
+          <div class="brand">Live <em>messages</em></div>
+          <div class="event-pill"><div class="dot"></div>${escapeHtml(eventId)}</div>
+          <div class="toolbar">
+            <div class="stat"><strong id="countNum">0</strong> messages</div>
+            <button class="btn" id="qrBtn">Show QR / Download</button>
+            <button class="btn" id="changeBtn">Change event</button>
+            <button class="btn danger" id="clearBtn">Clear all</button>
+          </div>
+        </header>
+        <div class="container">
+          <div id="messages" class="messages"></div>
+          <div id="empty" class="empty">
+            <h2>Waiting for messages…</h2>
+            <p>Share the QR code with your audience. Their messages will stream in here live.</p>
+            <div class="hint">EVENT · ${escapeHtml(eventId)}</div>
+          </div>
+        </div>`;
+
+      document.getElementById("qrBtn").addEventListener("click", showQRModal);
+      document.getElementById("changeBtn").addEventListener("click", () => {
+        if (currentListenerRef) off(currentListenerRef);
+        currentEventId = null;
+        const url = new URL(window.location.href);
+        url.searchParams.delete("event");
+        window.history.replaceState({}, "", url);
+        renderPrompt();
+      });
+      document.getElementById("clearBtn").addEventListener("click", clearAll);
+
+      listenForMessages(eventId);
+    }
+
+    function listenForMessages(eventId) {
+      const listRef = ref(db, `events/${eventId}/messages`);
+      currentListenerRef = listRef;
+      onChildAdded(listRef, (snap) => {
+        const data = snap.val();
+        if (!data) return;
+        addMessageToGrid(data, snap.key);
+      });
+    }
+
+    function addMessageToGrid(data, key) {
+      const grid = document.getElementById("messages");
+      const empty = document.getElementById("empty");
+      if (!grid) return;
+      empty.style.display = "none";
+
+      const card = document.createElement("article");
+      card.className = "msg new";
+      card.dataset.key = key;
+      const time = data.ts ? new Date(data.ts) : new Date();
+      card.innerHTML = `
+        <div class="msg-name">${escapeHtml(data.name || "Anonymous")}</div>
+        <div class="msg-meta">${formatTime(time)}</div>
+        <div class="msg-body">${escapeHtml(data.message || "")}</div>
+        <div class="msg-actions">
+          <button class="icon-btn copy-msg" title="Copy message text">⧉ Copy message</button>
+          <button class="icon-btn copy-full" title="Copy name + message">⧉ Copy with name</button>
+        </div>`;
+      // newest on top
+      grid.insertBefore(card, grid.firstChild);
+
+      card.querySelector(".copy-msg").addEventListener("click", (e) => copyText(data.message || "", e.currentTarget));
+      card.querySelector(".copy-full").addEventListener("click", (e) => copyText(`${data.name || "Anonymous"}: ${data.message || ""}`, e.currentTarget));
+
+      messageCount++;
+      document.getElementById("countNum").textContent = messageCount;
+    }
+
+    function clearAll() {
+      if (!currentEventId) return;
+      if (!confirm(`Permanently delete all ${messageCount} message(s) for event "${currentEventId}"?`)) return;
+      remove(ref(db, `events/${currentEventId}/messages`)).then(() => {
+        document.getElementById("messages").innerHTML = "";
+        document.getElementById("empty").style.display = "";
+        messageCount = 0;
+        document.getElementById("countNum").textContent = "0";
+        toast("All messages cleared");
+      }).catch((e) => {
+        console.error(e);
+        toast("Couldn't clear — check your Firebase rules");
+      });
+    }
+
+    // ============================================================
+    //  QR MODAL  +  HIGH-RES PNG DOWNLOAD
+    // ============================================================
+    function showQRModal() {
+      const audienceUrl = `${audienceBaseUrl()}/?event=${encodeURIComponent(currentEventId)}`;
+      // Hidden high-res canvas for downloads (1024x1024)
+      // Visible canvas at 520px (rendered at 2x for crispness, scaled with CSS)
+      const modal = document.createElement("div");
+      modal.className = "modal-bg";
+      modal.innerHTML = `
+        <div class="modal">
+          <button class="close-x" id="closeQR" title="Close">×</button>
+          <h2>Scan to <em>join</em></h2>
+          <p>Show this on screen, or download a high-res PNG for your slide deck.</p>
+          <div class="qr-wrap"><canvas id="qrCanvas"></canvas></div>
+          <div class="link-row">
+            <span id="urlText">${escapeHtml(audienceUrl)}</span>
+            <button class="icon-btn" id="copyUrlBtn" title="Copy link">⧉ Copy</button>
+          </div>
+          <div class="modal-actions">
+            <button class="btn primary" id="downloadBtn">↓ Download PNG (1024×1024)</button>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+
+      // Render visible QR (520px logical, drawn at high density)
+      const canvas = modal.querySelector("#qrCanvas");
+      QRCode.toCanvas(canvas, audienceUrl, {
+        width: 520,
+        margin: 2,
+        color: { dark: "#0d0c0a", light: "#ffffff" },
+        errorCorrectionLevel: "M"
+      }).catch(console.error);
+
+      modal.querySelector("#copyUrlBtn").addEventListener("click", (e) => copyText(audienceUrl, e.currentTarget));
+      modal.querySelector("#downloadBtn").addEventListener("click", () => downloadQR(audienceUrl));
+
+      const close = () => modal.remove();
+      modal.querySelector("#closeQR").addEventListener("click", close);
+      modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+      // Esc to close
+      const onKey = (e) => { if (e.key === "Escape") { close(); document.removeEventListener("keydown", onKey); } };
+      document.addEventListener("keydown", onKey);
+    }
+
+    function downloadQR(url) {
+      // Render at 1024 for slide-deck quality
+      const offCanvas = document.createElement("canvas");
+      QRCode.toCanvas(offCanvas, url, {
+        width: 1024,
+        margin: 3,
+        color: { dark: "#0d0c0a", light: "#ffffff" },
+        errorCorrectionLevel: "M"
+      }).then(() => {
+        const link = document.createElement("a");
+        link.download = `qr-${currentEventId}.png`;
+        link.href = offCanvas.toDataURL("image/png");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        toast("QR downloaded");
+      }).catch((e) => {
+        console.error(e);
+        toast("Couldn't generate QR");
+      });
+    }
+
+    // ============================================================
+    //  HELPERS
+    // ============================================================
+    function audienceBaseUrl() {
+      // Strip presenter.html (if present) and any query string
+      const u = new URL(window.location.href);
+      let path = u.pathname.replace(/\/presenter\.html$/i, "/").replace(/\/[^\/]*$/, "/");
+      if (!path.endsWith("/")) path += "/";
+      return u.origin + path.replace(/\/+$/, "");
+    }
+
+    function sanitizeCode(s) {
+      return String(s || "").trim().toLowerCase().replace(/[^a-z0-9\-_]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+    }
+
+    function formatTime(date) {
+      try {
+        return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      } catch { return ""; }
+    }
+
+    async function copyText(text, btn) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        // Fallback for older browsers
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch {}
+        ta.remove();
+      }
+      if (btn) {
+        const original = btn.innerHTML;
+        btn.classList.add("copied");
+        btn.innerHTML = "✓ Copied";
+        setTimeout(() => {
+          btn.classList.remove("copied");
+          btn.innerHTML = original;
+        }, 1400);
+      } else {
+        toast("Copied");
+      }
+    }
+
+    let toastTimer;
+    function toast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1800);
+    }
+  </script>
+</body>
+</html>
