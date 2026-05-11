@@ -145,7 +145,10 @@
     .messages {
       display: grid;
       gap: 16px;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @media (max-width: 800px) {
+      .messages { grid-template-columns: 1fr; }
     }
     .msg {
       background: var(--bg-card);
