@@ -4,11 +4,27 @@ window.siteContent = {
         "description": "Building free Salesforce tools in the open. Native AppExchange apps and browser-based utilities by Bhanu Vakati, a registered Salesforce Partner."
     },
     "navigation": [
-        { "label": "~/home",    "href": "index.html" },
-        { "label": "~/apps",    "href": "#solutions", "dropdown": "products" },
-        { "label": "~/tools",   "href": "tools.html" },
-        { "label": "~/about",   "href": "#about" },
-        { "label": "~/contact", "href": "#contact" }
+        {
+            "label": "~/home",
+            "href": "index.html"
+        },
+        {
+            "label": "~/apps",
+            "href": "#solutions",
+            "dropdown": "products"
+        },
+        {
+            "label": "~/tools",
+            "href": "tools.html"
+        },
+        {
+            "label": "~/about",
+            "href": "#about"
+        },
+        {
+            "label": "~/contact",
+            "href": "#contact"
+        }
     ],
     "hero": {
         "tag": "SALESFORCE PARTNER · STATUS: ACTIVE",
@@ -32,7 +48,7 @@ window.siteContent = {
         ],
         "location": "BHANU VAKATI · TORONTO, CA",
         "linkedIn": "https://www.linkedin.com/in/bhanuprakashvakati/",
-		"trailhead": "https://www.salesforce.com/trailblazer/bvakati"
+        "trailhead": "https://www.salesforce.com/trailblazer/bvakati"
     },
     "solutions": {
         "label": "// 01 APPS",
@@ -204,17 +220,21 @@ window.siteContent = {
             "title": "Permissions Xplorer User Guide",
             "versions": [],
             "sections": [
-				{
-					"id": "introduction",
+                {
+                    "id": "introduction",
                     "title": "Application In-Development",
-					"content": "Updates Coming Soon."
-				
-				}
-			]
+                    "content": "Updates Coming Soon."
+                }
+            ]
         },
         "dynamic-path": {
             "title": "Dynamic Path User Guide",
             "versions": [
+                {
+                    "version": "1.5",
+                    "date": "2026-06-05",
+                    "description": "New Feature :Dependent Picklist aware"
+                },
                 {
                     "version": "1.4",
                     "date": "2026-01-12",
