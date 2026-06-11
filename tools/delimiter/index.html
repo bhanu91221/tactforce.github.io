@@ -122,8 +122,8 @@
         .action-icon:hover { color: var(--primary); }
         .action-icon.danger:hover { color: #ef4444; }
         .editor-content { flex: 1; display: flex; position: relative; height: 100%; }
-        .line-numbers { background: var(--bg-body); color: var(--text-light); padding: 1.5rem 0.5rem; text-align: right; border-right: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6; user-select: none; width: 45px; overflow: hidden; }
-        textarea { flex: 1; width: 100%; height: 100%; border: none; padding: 1.5rem; resize: none; background: transparent; color: var(--text-main); font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6; outline: none; white-space: pre; overflow-x: auto; }
+        .line-numbers { background: var(--bg-body); color: var(--text-light); padding: 1.5rem 0.5rem; text-align: right; border-right: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.78rem; line-height: 20px; user-select: none; width: 45px; overflow: hidden; box-sizing: border-box; }
+        .editor-content textarea { flex: 1; width: 100%; height: 100%; border: none; padding: 1.5rem 1.5rem 1.5rem 0.25rem; margin: 0; resize: none; background: transparent; color: var(--text-main); font-family: var(--font-mono); font-size: 0.78rem; line-height: 20px; outline: none; white-space: pre; overflow-x: auto; box-sizing: border-box; }
 
         .controls-middle { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 1rem; }
         .control-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main); width: 50px; height: 50px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-sm); font-size: 1.2rem; }
@@ -203,9 +203,9 @@
                         <option value=";">Semicolon (;)</option>
                         <option value="|">Pipe (|)</option>
                         <option value=" ">Space</option>
-                        <option value="\n">New Line</option>
                         <option value="custom">Custom...</option>
                     </select>
+                    <input type="text" id="customDelimInput" class="select-styled" placeholder="Type delimiter" style="display:none; margin-top:0.5rem; text-align:left;" />
                 </div>
                 <button class="control-btn primary" id="btnToRight" title="Convert to Delimited">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -279,10 +279,6 @@
                             <button class="btn-group-item" data-val="single">' '</button>
                         </div>
                     </div>
-                    <div class="setting-card" id="customDelimCard" style="display:none;">
-                        <div class="setting-label">Custom Delimiter</div>
-                        <input type="text" id="customDelimInput" class="input-styled" placeholder="e.g. | or :: ">
-                    </div>
                     <div class="setting-card">
                         <div class="setting-label">Wrap Tags</div>
                         <div class="setting-desc">Wrap each item in tags</div>
@@ -322,7 +318,6 @@
                 linesRight: document.getElementById('linesRight'),
                 delimSelect: document.getElementById('delimiterSelect'),
                 customDelim: document.getElementById('customDelimInput'),
-                customDelimCard: document.getElementById('customDelimCard'),
                 tagOpen: document.getElementById('tagOpen'),
                 tagClose: document.getElementById('tagClose'),
                 intervalNum: document.getElementById('intervalNum'),
@@ -358,10 +353,10 @@
                 });
                 this.dom.delimSelect.addEventListener('change', (e) => {
                     if (e.target.value === 'custom') {
-                        this.dom.customDelimCard.style.display = 'flex';
+                        this.dom.customDelim.style.display = 'block';
                         this.dom.customDelim.focus();
                     } else {
-                        this.dom.customDelimCard.style.display = 'none';
+                        this.dom.customDelim.style.display = 'none';
                     }
                 });
             },
