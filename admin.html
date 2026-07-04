@@ -306,13 +306,13 @@
               <h3 class="ad-card__title">Sections <small>// QUILL</small></h3>
               <button @click="addSection()" class="ad-pill-btn">+ add section</button>
             </div>
-            <template x-for="(sec, idx) in data.guides[selectedGuide]?.sections" :key="sec.id + idx">
+            <template x-for="(sec, idx) in data.guides[selectedGuide]?.sections" :key="selectedGuide + '::' + sec.id">
               <div class="ad-card" style="background: var(--bg-3); margin-bottom: 16px;">
                 <div class="ad-card__head" style="padding-bottom: 12px; margin-bottom: 14px;">
                   <input type="text" x-model="sec.title" class="ad-input" style="max-width: 60%;" placeholder="section title">
                   <button @click="removeSection(idx)" class="ad-pill-btn ad-pill-btn--danger">remove</button>
                 </div>
-                <div x-init="initQuill($el, sec.content, idx, 'section')" style="border: 1px solid var(--rule); border-radius: 8px; overflow: hidden;"></div>
+                <div x-init="initQuill($el, sec)" style="border: 1px solid var(--rule); border-radius: 8px; overflow: hidden;"></div>
               </div>
             </template>
             <div class="empty" x-show="!data.guides[selectedGuide]?.sections?.length">// no sections — click "add section"</div>
@@ -485,8 +485,6 @@
             </template>
             <div class="ad-row--2">
               <label><span class="ad-label">location</span><input type="text" x-model="data.about.location" class="ad-input"></label>
-              <label><span class="ad-label">linkedin url</span><input type="text" x-model="data.about.linkedIn" class="ad-input"></label>
-			        <label><span class="ad-label">Trailhead url</span><input type="text" x-model="data.about.trailhead" class="ad-input"></label>
             </div>
           </div>
 
@@ -573,7 +571,6 @@
             <div class="ad-card__head"><h3 class="ad-card__title">Footer <small>// FOOTER</small></h3></div>
             <div class="ad-row--2">
               <label><span class="ad-label">copyright</span><input type="text" x-model="data.footer.copyright" class="ad-input"></label>
-              <label><span class="ad-label">linkedin</span><input type="text" x-model="data.footer.linkedInLink" class="ad-input"></label>
             </div>
             <div class="ad-row--2">
               <label><span class="ad-label">buy me a coffee</span><input type="text" x-model="data.footer.buyMeCoffeeLink" class="ad-input"></label>
@@ -634,10 +631,8 @@
           // Ensure new content keys exist (back-compat for older content.js exports)
           this.data.solutions = this.data.solutions || { label: '// 01 APPS', headline: 'Native apps.', headlineAccent: 'All free.', caption: 'SHIPPING · MORE IN PROGRESS' };
           this.data.toolsMeta = this.data.toolsMeta || { label: '// 02 TOOLS', headline: 'Browser-based', headlineSuffix: 'utilities.', caption: '100% LOCAL · NO SIGN-UP' };
-          this.data.about = this.data.about || { title: 'About', text: ['',''], location: '', linkedIn: '' };
-          if (!this.data.about.location) this.data.about.location = 'BHANU VAKATI · TORONTO, CA';
-          if (!this.data.about.linkedIn) this.data.about.linkedIn = 'https://www.linkedin.com/in/bhanuprakashvakati/';
-		      if (!this.data.about.trailhead) this.data.about.trailhead = 'https://www.salesforce.com/trailblazer/bvakati';
+          this.data.about = this.data.about || { title: 'About Us', text: ['',''], location: '' };
+          if (!this.data.about.location) this.data.about.location = 'TACTFORCE · TORONTO, CA';
           this.data.contact.label = this.data.contact.label || '// 04 CONTACT';
           this.data.contact.headlineAccent = this.data.contact.headlineAccent || 'case.';
           this.data.hero.tag = this.data.hero.tag || 'SALESFORCE PARTNER · STATUS: SHIPPING';
@@ -721,7 +716,7 @@
         },
         removeSection(i) { if (confirm('Delete this section?')) this.data.guides[this.selectedGuide].sections.splice(i,1); },
 
-        initQuill(el, model, index, type) {
+        initQuill(el, sec) {
           const q = new Quill(el, {
             theme: 'snow',
             modules: { toolbar: [
@@ -733,12 +728,10 @@
               ['link'], ['clean']
             ]}
           });
-          q.root.innerHTML = model;
-          q.on('text-change', () => {
-            if (type === 'section') {
-              this.data.guides[this.selectedGuide].sections[index].content = q.root.innerHTML;
-            }
-          });
+          q.root.innerHTML = sec.content || '';
+          // Write straight to the section object by reference — stays correct
+          // regardless of index shifts or which guide is selected.
+          q.on('text-change', () => { sec.content = q.root.innerHTML; });
         },
 
         exportParams() { return this.exportConfig(); },

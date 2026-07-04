@@ -1,7 +1,7 @@
 window.siteContent = {
     "meta": {
         "title": "TactForce — Free Salesforce Apps & Tools",
-        "description": "Building free Salesforce tools in the open. Native AppExchange apps and browser-based utilities by Bhanu Vakati, a registered Salesforce Partner."
+        "description": "Building free Salesforce tools in the open. Native AppExchange apps and browser-based utilities from TactForce, a registered Salesforce Partner."
     },
     "navigation": [
         {
@@ -31,24 +31,22 @@ window.siteContent = {
         "title": "Building free",
         "titleAccent": "tools",
         "titleSuffix": "in the open.",
-        "subtitle": "A growing collection of free AppExchange apps and browser utilities — built by a Salesforce Architect, given back to the community.",
+        "subtitle": "A growing collection of free AppExchange apps and browser utilities — built by TactForce and given back to the community.",
         "cta": "Browse apps →",
         "ctaLink": "#solutions",
         "ctaSecondary": "Contact",
         "ctaSecondaryLink": "#contact"
     },
     "about": {
-        "title": "About",
-        "headline": "Built by an architect.",
-        "headlineAccent": "architect.",
+        "title": "About Us",
+        "headline": "Built for the platform.",
+        "headlineAccent": "platform.",
         "headlineSuffix": "Given to the community.",
         "text": [
-            "I'm a Salesforce Architect & Developer with a passion for building tools that make life easier for admins and developers.",
-            "TactForce is my way of giving back to the Salesforce community. Every app I publish on the AppExchange is free, built with care, and backed by my commitment as a registered Salesforce Partner."
+            "TactForce is a Salesforce ISV building tools that make life easier for admins and developers.",
+            "Giving back to the Salesforce community is at the core of what we do. Every app we publish on the AppExchange is free, built with care, and backed by our commitment as a registered Salesforce Partner."
         ],
-        "location": "BHANU VAKATI · TORONTO, CA",
-        "linkedIn": "https://www.linkedin.com/in/bhanuprakashvakati/",
-        "trailhead": "https://www.salesforce.com/trailblazer/bvakati"
+        "location": "TACTFORCE · TORONTO, CA"
     },
     "solutions": {
         "label": "// 01 APPS",
@@ -72,13 +70,13 @@ window.siteContent = {
                 "100% native — built on Apex + LWC, no external API calls"
             ],
             "image": "images/px.png",
-            "appExchangeLink": "#",
-            "guideLink": "guides.html?id=Permissions Xplorer",
-            "version": "0.9",
-            "released": "2026.Q2",
-            "installs": "IN-DEV",
-            "featured": true,
-            "featuredName": "In Development",
+            "appExchangeLink": "https://appexchange.salesforce.com/appxListingDetail?listingId=8ac6708b-e7e7-4b32-9598-a4b38d9a0076",
+            "guideLink": "guides.html?id=permissions-xplorer",
+            "version": "0.6",
+            "released": "2026.07.03",
+            "installs": "FREE",
+            "featured": false,
+            "featuredName": "New",
             "featuredIcon": "zap"
         },
         {
@@ -164,8 +162,7 @@ window.siteContent = {
     "footer": {
         "copyright": "© 2026 TACTFORCE",
         "buyMeCoffeeLink": "https://www.buymeacoffee.com/BhanuVakati",
-        "buyMeCoffeeImage": "https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png",
-        "linkedInLink": "https://www.linkedin.com/in/bhanuprakashvakati/"
+        "buyMeCoffeeImage": "https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
     },
     "toolsMeta": {
         "label": "// 02 TOOLS",
@@ -202,7 +199,7 @@ window.siteContent = {
             "cmd": "$ tf permdep",
             "icon": "shield",
             "url": "tools/permission-dependency-extractor/",
-            "hidden": true
+            "hidden": false
         },
         {
             "id": "scratch-org-def-gen",
@@ -216,14 +213,80 @@ window.siteContent = {
         }
     ],
     "guides": {
-        "Permissions Xplorer": {
+        "permissions-xplorer": {
             "title": "Permissions Xplorer User Guide",
-            "versions": [],
+            "versions": [
+                {
+                    "version": "0.6",
+                    "date": "2026-07-04",
+                    "description": "Fix: Custom Metadata Type Page Layout"
+                },
+                {
+                    "version": "0.5",
+                    "date": "2026-07-03",
+                    "description": "Initial Production Release — Summer '26"
+                }
+            ],
             "sections": [
                 {
                     "id": "introduction",
-                    "title": "Application In-Development",
-                    "content": "Updates Coming Soon."
+                    "title": "Introduction",
+                    "content": "<p>Permissions Xplorer is a 100% native Salesforce application that helps administrators <strong>audit, analyze, compare, and remediate</strong> user permissions across your entire org — all from a single console.</p><p>Everything runs inside your org. The app makes <strong>no external API calls</strong> and no data ever leaves Salesforce. It reads your permission model — Profiles, Permission Sets, Permission Set Groups, and user assignments — and presents it in one place so you can answer questions that native Setup makes hard, such as:</p><ul><li>Which users can access the&nbsp;<code>Opportunity.Amount</code>&nbsp;field, and through which Permission Set?</li><li>What does a user <em>effectively</em> have, once you combine their Profile with every assigned Permission Set and Group?</li><li>How do two Permission Sets or Profiles differ?</li><li>If I retire a Profile, what Permission Set reproduces the same access?</li><li>What permission changes were made last week, and by whom?</li></ul><p>To open the app, click the&nbsp;<strong>App Launcher</strong>&nbsp;(the grid icon at the top-left of Salesforce), search for&nbsp;<strong>Permissions Xplorer</strong>, and select it.</p>"
+                },
+                {
+                    "id": "installation-setup",
+                    "title": "Installation & Setup",
+                    "content": "<p>Getting started takes three quick steps.</p><h3>1. Install the package</h3><p>Install Permissions Xplorer from the AppExchange. When asked who should have access, choose&nbsp;<strong>Install for Admins Only</strong>&nbsp;— this is an administrator tool and shouldn't be exposed to all users.</p><h3>2. Assign the permission set</h3><p>The package ships a single permission set,&nbsp;<strong>Permissions Xplorer Admin</strong>&nbsp;— the only access an administrator needs. Assign it from&nbsp;<code>Setup &gt; Permission Sets &gt; Permissions Xplorer Admin &gt; Manage Assignments</code>.</p><blockquote><strong>Important:</strong>&nbsp;This permission set grants the system permissions&nbsp;<strong>View All Profiles</strong>&nbsp;and&nbsp;<strong>View All Users</strong>. The app needs them to read <em>every</em> Profile, Permission Set, and User — without them, results are limited to what the running user can already see. Assign it only to trusted administrators who already hold rights such as Manage Users or Modify All Data.</blockquote><h3>3. Launch the app</h3><p>Open the&nbsp;<strong>App Launcher</strong>, search for&nbsp;<strong>Permissions Xplorer</strong>, and click it. No API keys, connected apps, or external registration are required.</p>"
+                },
+                {
+                    "id": "navigating-the-console",
+                    "title": "Navigating the Console",
+                    "content": "<p>Permissions Xplorer opens as a single console with a navigation sidebar on the left, containing six tools:</p><ul><li><strong>Dashboard</strong>&nbsp;— an at-a-glance health check of your org's permission model.</li><li><strong>Permission Lookup</strong>&nbsp;— find who, and what, grants a specific permission.</li><li><strong>User Analysis</strong>&nbsp;— see one user's complete, effective access.</li><li><strong>PermSet / Profile Analysis</strong>&nbsp;— deep-dive a single Permission Set, Profile, or Permission Set Group.</li><li><strong>Permissions Set Comparison</strong>&nbsp;— compare two or three of them side by side.</li><li><strong>Profile Migration</strong>&nbsp;— convert a Profile into an equivalent Permission Set.</li></ul><p>Click any item to switch tools. Three are strictly read-only — Dashboard, User Analysis, and Set Comparison. The other three can make changes to your org, and every change they make is written to the built-in Audit Log.</p>"
+                },
+                {
+                    "id": "dashboard",
+                    "title": "Dashboard",
+                    "content": "<p>The Dashboard is your permission model at a glance. It opens by default and includes:</p><ul><li><strong>Org Health Score</strong>&nbsp;— a single 0–100 score with a plain-English summary, built from five factors: Permission Set hygiene, user coverage, profile cleanup, privilege risk, and license headroom.</li><li><strong>Key Metrics</strong>&nbsp;— clickable tiles counting Active Users, Profiles, Permission Sets, and Permission Set Groups.</li><li><strong>Action Items</strong>&nbsp;— a prioritized to-do list: orphaned permission sets, users on profile-only access, unassigned profiles, permission set groups that need recalculation, and license pools nearing their limit.</li><li><strong>Distribution charts</strong>&nbsp;— your most-used Profiles and Permission Sets.</li><li><strong>Recent Activity</strong>&nbsp;— the latest actions taken through the app, with status and timestamp.</li><li><strong>License Utilization</strong>&nbsp;— seats used versus available for each license type.</li></ul><p>Click any metric tile or action item to open a drill-in panel with a preview of the affected records, then jump straight to User Analysis or PermSet / Profile Analysis to investigate.</p>"
+                },
+                {
+                    "id": "permission-lookup",
+                    "title": "Permission Lookup",
+                    "content": "<p>Permission Lookup answers the question: <em>who — and what — grants this permission?</em> Type a permission into the search box using one of these patterns:</p><ul><li><code>Object: Account</code>&nbsp;— an object permission</li><li><code>Field: Account.Name</code>&nbsp;— field-level access</li><li><code>System: Modify All Data</code>&nbsp;— a user or system permission</li><li><code>Apex: ApexClass.MyClass</code>&nbsp;— Apex class access</li><li>Visualforce pages and custom permissions are supported too</li></ul><p>As you type, the app suggests matching permissions. Pick one and the results appear in three collapsible sections —&nbsp;<strong>Users</strong>,&nbsp;<strong>Permission Sets</strong>, and&nbsp;<strong>Profiles</strong>&nbsp;— each with a count. Use the filters to include or exclude Profiles and Permission Sets, limit to active users, or narrow by access type such as Read, Create, or Edit. Click&nbsp;<strong>Export CSV</strong>&nbsp;to download the on-screen results.</p><p><br></p>"
+                },
+                {
+                    "id": "user-analysis",
+                    "title": "User Analysis",
+                    "content": "<p>User Analysis shows a single user's&nbsp;<strong>effective permissions</strong>&nbsp;— everything they actually have once you combine their Profile with every assigned Permission Set and Permission Set Group.</p><p>Search for a user by name, username, or profile. The app shows where their access comes from, then a set of tabs covering&nbsp;<strong>Apps, System Permissions, Objects, Fields, Apex Classes, Custom Permissions, Visualforce Pages, Tab Access,</strong>&nbsp;and&nbsp;<strong>Connected Apps</strong>. Each row carries a&nbsp;<strong>Source</strong>&nbsp;badge showing whether the permission comes from the Profile or from a Permission Set — so you can see exactly what to change to grant or remove access. Click&nbsp;<strong>Export Analysis</strong>&nbsp;to download the results as CSV.</p>"
+                },
+                {
+                    "id": "permset-profile-analysis",
+                    "title": "PermSet / Profile Analysis",
+                    "content": "<p>This tool is a deep-dive into a single&nbsp;<strong>Permission Set, Profile, or Permission Set Group</strong>. Search for and select the item you want to inspect.</p><p>An info card shows its type, label, description, license, last-modified date, and how many users are assigned. Below it, tabs list every category of access it grants — Objects, Fields, System Permissions, Apps, Apex Classes, Visualforce Pages, Custom Permissions, Tabs, and Connected Apps — plus an&nbsp;<strong>Assigned Users</strong>&nbsp;tab. For a Permission Set Group, a Source column shows which member set grants each permission.</p><p><br></p><p>From the Assigned Users tab you can&nbsp;<strong>assign</strong>&nbsp;the item to more users or&nbsp;<strong>remove</strong>&nbsp;it from a user. For Profiles the user list is read-only — use Profile Migration to move users onto Permission Sets. Click&nbsp;<strong>Export Analysis</strong>&nbsp;for a CSV.</p>"
+                },
+                {
+                    "id": "set-comparison",
+                    "title": "Permissions Set Comparison",
+                    "content": "<p>Set Comparison puts two or three items side by side so you can see exactly how they differ. Choose&nbsp;<strong>Set 1</strong>,&nbsp;<strong>Set 2</strong>, and optionally&nbsp;<strong>Set 3</strong>&nbsp;— each can be a Permission Set or a Profile — then click&nbsp;<strong>Compare</strong>.</p><p>Results are organized by category: Object Permissions, Field-Level Permissions, System Permissions, App Access, Apex Classes, Visualforce Pages, Custom Permissions, Tabs, and Connected Apps — with each item in its own column. Turn on&nbsp;<strong>Show differences only</strong>&nbsp;to hide everything the items share and focus on what's different, which is ideal for consolidation planning. The comparison can be exported to CSV.</p>"
+                },
+                {
+                    "id": "profile-migration",
+                    "title": "Profile Migration",
+                    "content": "<p>As Salesforce winds down permissions on Profiles, Profile Migration helps you move to Permission Sets. It's a guided four-step wizard that turns a Profile into an equivalent Permission Set.</p><ol><li><strong>Select Profile</strong>&nbsp;— choose the Profile you want to migrate.</li><li><strong>Review Permissions</strong>&nbsp;— the app analyzes the Profile and summarizes everything it will carry over.</li><li><strong>Create &amp; Apply</strong>&nbsp;— give the new Permission Set a label, API name, and description, then create it. The app reports&nbsp;<strong>Applied</strong>,&nbsp;<strong>Skipped</strong>, and&nbsp;<strong>Failed</strong>&nbsp;counts. Skipped means a feature or tab isn't installed in this org; Failed means a feature isn't enabled or a dependency is missing — either way, the Permission Set is still created.</li><li><strong>Assign Users</strong>&nbsp;— every user on the source Profile is listed and pre-selected; adjust the selection and assign them to the new Permission Set, or skip and do it later.</li></ol><p>When it finishes, you'll see how many users were assigned, and a Success or Failure entry is written to the Audit Log.</p>"
+                },
+                {
+                    "id": "audit-log",
+                    "title": "Audit Log",
+                    "content": "<p>Every change made through Permissions Xplorer is recorded in a built-in audit trail. You can review it two ways: the&nbsp;<strong>Recent Activity</strong>&nbsp;feed on the Dashboard, or the dedicated&nbsp;<strong>Perm Xplorer Audit Log</strong>&nbsp;tab (open it from the App Launcher).</p><p>Each entry captures what was done, which feature did it, who performed it, when, how many records were affected or failed, and a short result summary. The log stores&nbsp;<strong>metadata only</strong>&nbsp;— record IDs, counts, and summaries — never the values of your business data. It's read-only inside the app, you can report on it like any Salesforce object, and you can turn logging off in settings if you prefer.</p>"
+                },
+                {
+                    "id": "settings",
+                    "title": "Settings (Custom Metadata)",
+                    "content": "<p>Permissions Xplorer works out of the box, but a few optional settings can be adjusted. Go to&nbsp;<code>Setup &gt; Custom Metadata Types &gt; Permissions Xplorer Config &gt; Manage Records</code>&nbsp;and open the&nbsp;<strong>Perm Xplorer Default</strong>&nbsp;record:</p><ul><li><strong>Default Query Limit</strong>&nbsp;(default&nbsp;<code>2000</code>) — the maximum number of records the app pulls in a single query. Tweak it in very large orgs if you run into query limits.</li><li><strong>Enabled Logging</strong>&nbsp;(default&nbsp;<code>true</code>) — uncheck to stop writing to the Audit Log.</li><li><strong>*Enable Add to Perm Profile</strong>&nbsp;(default&nbsp;<code>false</code>) — check to enable the&nbsp;<strong>Add to Profile</strong>&nbsp;action in Permission Lookup.</li><li><blockquote>*Note: Additional Setup Required for <strong>Enable Add to Perm Profile.</strong> Every Org is unique with respect to Permission Dependencies. Please use this tool: <a href=\'tools/permission-dependency-extractor/\'>Permission Dependency Extractor</a> and update the field <code>Static Resource Name: PermDepMap</code></blockquote></li></ul><p>Only one configuration record exists and the app maintains it — just edit the values you need.</p>"
+                },
+                {
+                    "id": "good-to-know",
+                    "title": "Good to Know",
+                    "content": "<p><strong>Required system permissions.</strong>&nbsp;The&nbsp;<strong>Permissions Xplorer Admin</strong>&nbsp;permission set includes&nbsp;<strong>View All Profiles</strong>&nbsp;and&nbsp;<strong>View All Users</strong>, which the app needs to read your whole permission model. Assign it only to trusted administrators.</p><p><strong>Very large orgs.</strong>&nbsp;Orgs with tens of thousands of Permission Sets may reach Salesforce query limits on the Dashboard. If that happens, tweak the&nbsp;<strong>Default Query Limit</strong>&nbsp;or narrow your scope.</p><p><strong>Profiles are read-only by design.</strong>&nbsp;In line with Salesforce's direction, the app doesn't edit Profiles directly — it helps you move access to Permission Sets through Profile Migration.</p><p><strong>Everything stays in your org.</strong>&nbsp;Every change made through the app is logged, and CSV exports are ordinary local downloads of on-screen metadata. Nothing is ever sent outside Salesforce.</p>"
                 }
             ]
         },
