@@ -116,8 +116,8 @@ window.siteContent = {
             "image": "images/rr.png",
             "appExchangeLink": "https://appexchange.salesforce.com/appxListingDetail?listingId=4f304763-c601-4a00-823f-2a3d697fdce6",
             "guideLink": "guides.html?id=rocket-reports",
-            "version": "2.0",
-            "released": "2026.01.23",
+            "version": "2.1",
+            "released": "2026.07.17",
             "installs": "FREE",
             "featured": false,
             "featuredName": "Popular Choice",
@@ -351,6 +351,11 @@ window.siteContent = {
             "title": "Rocket Reports User Guide",
             "versions": [
                 {
+                    "version": "2.1",
+                    "date": "2026-07-17",
+                    "description": "Detects Salesforce identity-verification (High Assurance / MFA) blocks on report export and logs them as an error instead of sending an invalid attachment"
+                },
+                {
                     "version": "2.0",
                     "date": "2026-01-23",
                     "description": "Supports Multiple Reports in a Scheduled; Improved error logging"
@@ -411,6 +416,11 @@ window.siteContent = {
                     "id": "good-to-know",
                     "title": "Good to Know",
                     "content": "<p><strong>Permissions:</strong>&nbsp;We highly recommend while Installing select \"Install for Admins Only\". Assign the permissions set \"Rocket Reports Admin\" for designated users responsible for managing report subscriptions if needed.</p><p><br></p><p><strong>Platform Limits:</strong>&nbsp;Rocket Reports utilizes Schedulable Apex classes. Standard Salesforce governor limits for Apex execution, email sending, and asynchronous processing apply. Please familiarize yourself with these limits.</p><p><br></p><p><strong>Custom Object:</strong>&nbsp;The subscription details are stored in a custom object named&nbsp;<code style=\"background-color: rgb(238, 244, 255);\">Rocket Report Subscription</code>&nbsp;(or similar - check package details). You can access this object directly via the App Launcher or Object Manager if needed.</p><p><br></p><p><strong>Joined Reports:</strong>&nbsp;Subscription to Joined Reports is supported but, make sure to select&nbsp;<code style=\"background-color: rgb(238, 244, 255);\">Formatted (XLSX)</code>&nbsp;as the report attachment type.</p>"
+                },
+                {
+                    "id": "report-export-mfa",
+                    "title": "Report Export Blocked by Identity Verification (MFA)",
+                    "content": "<p class=\"mb-4\">Salesforce can require a <strong>High Assurance session</strong> (step-up Multi-Factor Authentication) for the <strong>Export and Print Reports</strong> operation. When this org policy is active, the report export that Rocket Reports relies on is intercepted &mdash; Salesforce returns an identity-verification page instead of the report data, and a push notification is sent to the Salesforce Authenticator app.</p><p class=\"mb-4\"><strong>What v2.1 changes:</strong>&nbsp;Rocket Reports now detects this interception and records it as a clear error in the subscription's&nbsp;<code style=\"background-color: rgb(238, 244, 255);\">Last Run Status</code>&nbsp;field instead of emailing an invalid attachment. Affected runs are marked&nbsp;<strong>FAILED</strong>&nbsp;(or&nbsp;<strong>PARTIAL SUCCESS</strong>&nbsp;when other reports in the same subscription succeed), so recipients no longer receive a broken file.</p><p class=\"mb-4\"><strong>How to resolve:</strong>&nbsp;Ask your Salesforce administrator to review&nbsp;<code style=\"background-color: rgb(238, 244, 255);\">Setup &gt; Identity Verification &gt; Session Security Levels</code>&nbsp;and check whether&nbsp;<strong>Export and Print Reports</strong>&nbsp;requires High Assurance. Removing that requirement restores exports. We're also working on an update that runs reports through the Salesforce reporting engine to avoid this step-up entirely.</p>"
                 }
             ]
         }
