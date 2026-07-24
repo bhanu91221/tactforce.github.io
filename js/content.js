@@ -210,6 +210,16 @@ window.siteContent = {
             "icon": "file-code",
             "url": "tools/scratch-org-def-gen/",
             "hidden": false
+        },
+        {
+            "id": "latch-key",
+            "name": "Latchkey",
+            "description": "A Chrome extension that intercepts WebAuthn passkey requests on Salesforce logins and signs them locally with a PIN-encrypted seed — no hardware key, no daemon, nothing leaves your browser.",
+            "tagline": "Software passkey authenticator for Salesforce logins.",
+            "cmd": "$ tf latchkey",
+            "icon": "key",
+            "url": "tools/latch-key/",
+            "hidden": false
         }
     ],
     "guides": {
