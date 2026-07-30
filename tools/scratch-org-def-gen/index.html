@@ -54,7 +54,10 @@
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Pinned to Babel 7: in Babel 8 preset-react defaults to the automatic JSX
+         runtime, which emits `import ... from "react/jsx-runtime"` into a plain
+         (non-module) script and breaks the page. Do not float this to @latest. -->
+    <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
 
     <script src="./data/categories.js"></script>
     <script src="./data/features.js"></script>
