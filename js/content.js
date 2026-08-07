@@ -72,8 +72,8 @@ window.siteContent = {
             "image": "images/px.png",
             "appExchangeLink": "https://appexchange.salesforce.com/appxListingDetail?listingId=8ac6708b-e7e7-4b32-9598-a4b38d9a0076",
             "guideLink": "guides.html?id=permissions-xplorer",
-            "version": "0.6",
-            "released": "2026.07.03",
+            "version": "0.7",
+            "released": "2026.08.06",
             "installs": "FREE",
             "featured": false,
             "featuredName": "New",
@@ -226,6 +226,11 @@ window.siteContent = {
         "permissions-xplorer": {
             "title": "Permissions Xplorer User Guide",
             "versions": [
+                {
+                    "version": "0.7",
+                    "date": "2026-08-06",
+                    "description": "Fix: \"Inline query has too many rows\" error when loading Profiles and Permission Sets in large orgs"
+                },
                 {
                     "version": "0.6",
                     "date": "2026-07-04",
