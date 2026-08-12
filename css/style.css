@@ -940,6 +940,211 @@ body {
 .tf-form-field textarea { min-height: 140px; }
 
 /* ============================================================================
+   Contact confirmation — replaces the form card in place after Web-to-Case POST
+   ============================================================================ */
+.tf-confirm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 32px 44px;
+  animation: tf-confirm-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes tf-confirm-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.tf-confirm__mark-wrap {
+  position: relative;
+  margin-bottom: 28px;
+}
+/* Soft accent bloom behind the mark */
+.tf-confirm__mark-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  filter: blur(18px);
+  opacity: 0;
+  animation: tf-confirm-bloom 1.6s ease-out 0.55s forwards;
+  z-index: 0;
+}
+@keyframes tf-confirm-bloom {
+  0%   { opacity: 0; transform: scale(0.7); }
+  35%  { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0.55; transform: scale(1); }
+}
+
+.tf-confirm__mark {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 124px;
+  height: 124px;
+  color: var(--accent);
+  overflow: visible;
+}
+
+/* Console grid inside the disc */
+.tf-confirm__grid {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.5;
+  opacity: 0;
+  animation: tf-confirm-fade 0.6s ease-out 0.15s forwards;
+}
+@keyframes tf-confirm-fade { to { opacity: 0.22; } }
+
+/* Scanline sweeps top → bottom, twice */
+.tf-confirm__scan {
+  animation: tf-confirm-scan 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s 2;
+}
+@keyframes tf-confirm-scan {
+  from { transform: translateY(0); }
+  to   { transform: translateY(140px); }
+}
+
+/* Outer tick ring, slowly rotating */
+.tf-confirm__ticks {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-dasharray: 1.5 9;
+  stroke-linecap: round;
+  opacity: 0;
+  transform-box: view-box;
+  transform-origin: 60px 60px;
+  animation: tf-confirm-fade-ticks 0.6s ease-out 0.35s forwards,
+             tf-confirm-spin 24s linear infinite;
+}
+@keyframes tf-confirm-fade-ticks { to { opacity: 0.45; } }
+@keyframes tf-confirm-spin { to { transform: rotate(360deg); } }
+
+/* Main ring draws clockwise (circumference @ r=46 ≈ 289) */
+.tf-confirm__ring {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 289;
+  stroke-dashoffset: 289;
+  transform-box: view-box;
+  transform-origin: 60px 60px;
+  transform: rotate(-90deg);
+  animation: tf-confirm-ring 0.85s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards;
+}
+@keyframes tf-confirm-ring { to { stroke-dashoffset: 0; } }
+
+/* Checkmark strokes in once the ring closes */
+.tf-confirm__check {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: tf-confirm-check 0.4s cubic-bezier(0.65, 0, 0.35, 1) 0.85s forwards;
+}
+@keyframes tf-confirm-check { to { stroke-dashoffset: 0; } }
+
+.tf-confirm .tf-mono {
+  opacity: 0;
+  animation: tf-confirm-line 0.5s ease-out 1.05s forwards;
+}
+.tf-confirm__title {
+  margin: 14px 0 0;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  color: var(--fg);
+  opacity: 0;
+  animation: tf-confirm-line 0.5s ease-out 1.15s forwards;
+}
+.tf-confirm__body {
+  margin: 12px 0 0;
+  max-width: 42ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--dim-2);
+  opacity: 0;
+  animation: tf-confirm-line 0.5s ease-out 1.25s forwards;
+}
+.tf-confirm__email {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--fg);
+  word-break: break-all;
+}
+@keyframes tf-confirm-line {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.tf-confirm__status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 22px 0 26px;
+  padding: 7px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--bg-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+  opacity: 0;
+  animation: tf-confirm-line 0.5s ease-out 1.35s forwards;
+}
+.tf-confirm__cursor {
+  width: 7px;
+  height: 13px;
+  background: var(--accent);
+  animation: tf-confirm-blink 1.1s steps(1, end) infinite;
+}
+@keyframes tf-confirm-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+.tf-confirm .tf-btn {
+  opacity: 0;
+  animation: tf-confirm-line 0.5s ease-out 1.45s forwards;
+}
+
+@media (max-width: 700px) {
+  .tf-confirm { padding: 40px 24px 36px; }
+  .tf-confirm__mark { width: 104px; height: 104px; }
+  .tf-confirm__title { font-size: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tf-confirm,
+  .tf-confirm .tf-mono,
+  .tf-confirm__title,
+  .tf-confirm__body,
+  .tf-confirm__status,
+  .tf-confirm .tf-btn,
+  .tf-confirm__mark-wrap::after,
+  .tf-confirm__grid,
+  .tf-confirm__ticks,
+  .tf-confirm__ring,
+  .tf-confirm__check,
+  .tf-confirm__cursor {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .tf-confirm__grid { opacity: 0.22; }
+  .tf-confirm__ticks { opacity: 0.45; }
+  .tf-confirm__ring { stroke-dashoffset: 0; transform: rotate(-90deg); }
+  .tf-confirm__check { stroke-dashoffset: 0; }
+  .tf-confirm__scan { display: none; }
+}
+
+/* ============================================================================
    Footer
    ============================================================================ */
 .tf-footer {

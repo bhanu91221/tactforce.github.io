@@ -41,6 +41,23 @@ document.addEventListener("alpine:init", () => {
     ...siteStore,
     ...navMixin,
     contactSent: false,
+    contactEmail: "",
+
+    // Web-to-Case still POSTs natively (same action/orgid/field names) but into a
+    // hidden iframe, so the confirmation panel can take the form card's place
+    // instead of the browser following retURL.
+    submitContact(e) {
+      const email = e.target.elements.email;
+      this.contactEmail = email ? email.value.trim() : "";
+      this.contactSent = true;
+    },
+
+    resetContact() {
+      const form = document.getElementById("tf-case-form");
+      if (form) form.reset();
+      this.contactSent = false;
+      this.contactEmail = "";
+    },
   }));
 
   // Tools page

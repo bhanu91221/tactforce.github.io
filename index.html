@@ -313,48 +313,95 @@
           </div>
         </div>
 
-        <form :action="content.contact.formAction" method="POST" class="tf-grid-gutter" @submit="contactSent = true">
-          <input type="hidden" name="orgid" :value="content.contact.orgId">
-          <input type="hidden" name="retURL" :value="content.contact.retURL">
+        <div class="tf-grid-gutter">
           <div></div>
-          <div class="tf-form-card">
-            <div class="tf-form-row">
-              <label class="tf-form-field">
-                <span class="tf-form-field__label">contact_name *</span>
-                <input name="name" type="text" maxlength="80" required />
-              </label>
-              <label class="tf-form-field">
-                <span class="tf-form-field__label">company</span>
-                <input name="company" type="text" maxlength="80" />
-              </label>
+          <div>
+            <!-- Posts into the hidden iframe below so the page never navigates away;
+                 Salesforce's retURL response lands there and we swap in the panel. -->
+            <form id="tf-case-form" :action="content.contact.formAction" method="POST" target="tf-case-sink"
+                  x-show="!contactSent" @submit="submitContact($event)">
+              <input type="hidden" name="orgid" :value="content.contact.orgId">
+              <input type="hidden" name="retURL" :value="content.contact.retURL">
+              <div class="tf-form-card">
+                <div class="tf-form-row">
+                  <label class="tf-form-field">
+                    <span class="tf-form-field__label">contact_name *</span>
+                    <input name="name" type="text" maxlength="80" required />
+                  </label>
+                  <label class="tf-form-field">
+                    <span class="tf-form-field__label">company</span>
+                    <input name="company" type="text" maxlength="80" />
+                  </label>
+                </div>
+                <div class="tf-form-row">
+                  <label class="tf-form-field">
+                    <span class="tf-form-field__label">email *</span>
+                    <input name="email" type="email" maxlength="80" required />
+                  </label>
+                  <label class="tf-form-field">
+                    <span class="tf-form-field__label">phone</span>
+                    <input name="phone" type="tel" maxlength="40" />
+                  </label>
+                </div>
+                <div class="tf-form-row" style="grid-template-columns: 1fr;">
+                  <label class="tf-form-field">
+                    <span class="tf-form-field__label">subject *</span>
+                    <input name="subject" type="text" maxlength="80" required />
+                  </label>
+                </div>
+                <div class="tf-form-row" style="grid-template-columns: 1fr; margin-bottom: 28px;">
+                  <label class="tf-form-field">
+                    <span class="tf-form-field__label">description *</span>
+                    <textarea name="description" rows="5" required></textarea>
+                  </label>
+                </div>
+                <button type="submit" class="tf-btn tf-btn--primary">
+                  <span>submit →</span>
+                </button>
+              </div>
+            </form>
+
+            <!-- Confirmation — swaps into the exact footprint of the form card -->
+            <div class="tf-form-card tf-confirm" x-show="contactSent" x-cloak role="status" aria-live="polite">
+              <div class="tf-confirm__mark-wrap">
+                <svg class="tf-confirm__mark" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+                  <defs>
+                    <clipPath id="tfConfirmClip"><circle cx="60" cy="60" r="46"/></clipPath>
+                    <linearGradient id="tfConfirmScan" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%"   stop-color="currentColor" stop-opacity="0"/>
+                      <stop offset="50%"  stop-color="currentColor" stop-opacity="0.5"/>
+                      <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <g clip-path="url(#tfConfirmClip)">
+                    <path class="tf-confirm__grid"
+                          d="M12 30H108M12 45H108M12 60H108M12 75H108M12 90H108M30 12V108M45 12V108M60 12V108M75 12V108M90 12V108"/>
+                    <rect class="tf-confirm__scan" x="8" y="-20" width="104" height="20" fill="url(#tfConfirmScan)"/>
+                  </g>
+                  <circle class="tf-confirm__ticks" cx="60" cy="60" r="54"/>
+                  <circle class="tf-confirm__ring"  cx="60" cy="60" r="46"/>
+                  <path   class="tf-confirm__check" d="M40 61.5 L54 75 L81 47"/>
+                </svg>
+              </div>
+
+              <span class="tf-mono tf-mono--accent">// case_received</span>
+              <h3 class="tf-confirm__title">Transmission logged.</h3>
+              <p class="tf-confirm__body">
+                We'll reply to
+                <span class="tf-confirm__email" x-text="contactEmail || content.contact.supportEmail"></span>
+                within one business day.
+              </p>
+              <div class="tf-confirm__status">
+                <span>queued → salesforce</span><span class="tf-confirm__cursor" aria-hidden="true"></span>
+              </div>
+              <button type="button" class="tf-btn tf-btn--ghost" @click="resetContact()">open another case →</button>
             </div>
-            <div class="tf-form-row">
-              <label class="tf-form-field">
-                <span class="tf-form-field__label">email *</span>
-                <input name="email" type="email" maxlength="80" required />
-              </label>
-              <label class="tf-form-field">
-                <span class="tf-form-field__label">phone</span>
-                <input name="phone" type="tel" maxlength="40" />
-              </label>
-            </div>
-            <div class="tf-form-row" style="grid-template-columns: 1fr;">
-              <label class="tf-form-field">
-                <span class="tf-form-field__label">subject *</span>
-                <input name="subject" type="text" maxlength="80" required />
-              </label>
-            </div>
-            <div class="tf-form-row" style="grid-template-columns: 1fr; margin-bottom: 28px;">
-              <label class="tf-form-field">
-                <span class="tf-form-field__label">description *</span>
-                <textarea name="description" rows="5" required></textarea>
-              </label>
-            </div>
-            <button type="submit" class="tf-btn tf-btn--primary">
-              <span x-text="contactSent ? '✓ case opened' : 'submit →'">submit →</span>
-            </button>
+
+            <!-- Web-to-Case response sink: keeps the POST off the main document -->
+            <iframe name="tf-case-sink" title="Case submission target" tabindex="-1" aria-hidden="true"
+                    style="position:absolute; width:0; height:0; border:0; opacity:0; pointer-events:none;"></iframe>
           </div>
-        </form>
+        </div>
       </div>
     </section>
   </main>
